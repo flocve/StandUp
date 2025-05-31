@@ -1,10 +1,12 @@
 import { ParticipantId, ParticipantName } from './valueObjects';
 
 export class Participant {
+  private passageCount: number = 0;
+
   constructor(
     public readonly id: ParticipantId,
     public readonly name: ParticipantName,
-    private pityCounter: number = 0
+    private pityCounter: number = 1
   ) {}
 
   public getPityCounter(): number {
@@ -16,7 +18,19 @@ export class Participant {
   }
 
   public resetPityCounter(): void {
-    this.pityCounter = 0;
+    this.pityCounter = 1;
+  }
+
+  public getPassageCount(): number {
+    return this.passageCount;
+  }
+
+  public setPassageCount(count: number): void {
+    this.passageCount = count;
+  }
+
+  public incrementPassageCount(): void {
+    this.passageCount += 1;
   }
 }
 

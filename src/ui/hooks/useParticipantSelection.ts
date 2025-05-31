@@ -98,9 +98,10 @@ export const useParticipantSelection = ({
     }
   }, [type, dailyUseCases, loadParticipants]);
 
+  // Recharger les participants quand le type change
   useEffect(() => {
     loadParticipants();
-  }, [loadParticipants]);
+  }, [type, loadParticipants]);
 
   return {
     participants: state.participants,
@@ -108,6 +109,7 @@ export const useParticipantSelection = ({
     isLoading: state.isLoading,
     error: state.error,
     handleSelection,
-    resetParticipants
+    resetParticipants,
+    loadParticipants
   };
 }; 

@@ -98,7 +98,7 @@ const Wheel: React.FC<WheelProps> = ({ participants, onSpinEnd, type }) => {
     }, 100);
 
     spinTimeoutRef.current = window.setTimeout(() => {
-      clearInterval(interval);
+        clearInterval(interval);
       const winner = participants[Math.floor(Math.random() * participants.length)];
       setSelectedParticipant(winner);
       setIsSpinning(false);
@@ -130,8 +130,8 @@ const Wheel: React.FC<WheelProps> = ({ participants, onSpinEnd, type }) => {
       
       <div className="cards-container">
         {cards.map((participant) => (
-          <div
-            key={participant.id}
+            <div
+              key={participant.id}
             className={`card ${
               selectedParticipant
                 ? participant.id === selectedParticipant.id
@@ -139,19 +139,19 @@ const Wheel: React.FC<WheelProps> = ({ participants, onSpinEnd, type }) => {
                   : 'not-selected'
                 : ''
             }`}
-            style={{
+              style={{
               '--card-color': COLORS[Math.floor(Math.random() * COLORS.length)],
               '--card-color-rgb': '59, 130, 246'
-            } as React.CSSProperties}
-          >
-            <div className="card-content">
+              } as React.CSSProperties}
+            >
+              <div className="card-content">
               <div className="card-avatar">
                 {participant.name.charAt(0)}
-              </div>
-              <h3 className="card-name">{participant.name}</h3>
+                </div>
+                <h3 className="card-name">{participant.name}</h3>
               {'pityCounter' in participant && (
-                <div className="pity-counter">
-                  <span className="pity-star">⭐</span>
+                  <div className="pity-counter">
+                    <span className="pity-star">⭐</span>
                   <span className="pity-count">{participant.pityCounter}</span>
                 </div>
               )}

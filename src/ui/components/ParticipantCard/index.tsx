@@ -1,28 +1,51 @@
 import React from 'react';
-import { Participant } from '../../../domain/participant/entities';
-import type { DailyParticipant } from '../../../domain/participant/entities';
+import { Participant, DailyParticipant } from '../../../domain/participant/entities';
 import './styles.css';
 
 interface ParticipantCardProps {
   participant: Participant | DailyParticipant;
   isSelected: boolean;
   isAnimating: boolean;
+  showPityInfo?: boolean;
+  allParticipants?: Participant[];
 }
 
 const COLORS = [
-  '#3b82f6', // blue
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#f97316', // orange
-  '#10b981', // emerald
+  '#3B82F6', // blue
+  '#8B5CF6', // purple
+  '#EC4899', // pink
+  '#10B981', // green
+  '#F59E0B', // yellow
+  '#EF4444', // red
 ];
+
+const calculateChancePercentage = (participants: Participant[], currentParticipant: Participant): number => {
+  // Calculer le poids de chaque participant selon le système de diviseur
+  const weights = participants.map(p => {
+    const divider = Math.max(1, p.getPityCounter() || 1);
+    return Math.max(1, Math.floor(100 / divider));
+  });
+  
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  const currentDivider = Math.max(1, currentParticipant.getPityCounter() || 1);
+  const currentWeight = Math.max(1, Math.floor(100 / currentDivider));
+  
+  return Math.round((currentWeight / totalWeight) * 100);
+};
 
 export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   participant,
   isSelected,
   isAnimating,
+  showPityInfo = false,
+  allParticipants = []
 }) => {
   const cardColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+  const isWeeklyParticipant = participant instanceof Participant;
+  
+  // Calculer le pourcentage de chance basé sur le diviseur
+  const chancePercentage = allParticipants.length > 0 ? 
+    calculateChancePercentage(allParticipants, participant) : 0;
 
   return (
     <div
@@ -39,10 +62,24 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
           {participant.name.value.charAt(0)}
         </div>
         <h3 className="card-name">{participant.name.value}</h3>
-        {participant instanceof Participant && (
-          <div className="pity-counter">
-            <span className="pity-star">⭐</span>
-            <span className="pity-count">{participant.getPityCounter()}</span>
+        {isWeeklyParticipant && showPityInfo && (
+          <div className="pity-stats">
+            <div className="pity-counter">
+              <span className="pity-star">📉</span>
+              <span className="pity-count">{participant.getPityCounter() || 1}</span>
+            </div>
+            <div className="chance-percentage">
+              {chancePercentage}% de chance
+            </div>
+            <div className="chance-bar-container">
+              <div 
+                className="chance-bar" 
+                style={{
+                  width: `${Math.max(5, chancePercentage)}%`,
+                  backgroundColor: cardColor
+                }}
+              />
+            </div>
           </div>
         )}
       </div>

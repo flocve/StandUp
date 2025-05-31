@@ -19,27 +19,20 @@ export class WeeklySelectionUseCases {
     const result = SelectionService.selectParticipant(participants, 'weekly');
     const winner = result.winner;
     
-    // Mettre à jour les compteurs de pity
-    const updatedParticipants = participants.map(participant => {
-      if (participant.id.value === winner.id.value) {
-        participant.resetPityCounter();
-      } else {
-        participant.incrementPityCounter();
-      }
-      return participant;
-    });
-
-    // Sauvegarder les mises à jour
-    await Promise.all(
-      updatedParticipants.map(participant =>
-        this.participantRepository.updateParticipant(participant)
-      )
-    );
+    // Incrémenter SEULEMENT le diviseur du gagnant
+    winner.incrementPityCounter();
+    
+    // Sauvegarder seulement le gagnant
+    await this.participantRepository.updateParticipant(winner);
     
     return winner;
   }
 
   async getParticipantsPityStatus(): Promise<Participant[]> {
     return this.participantRepository.getAllWeeklyParticipants();
+  }
+
+  async addToHistory(participantId: string): Promise<void> {
+    await this.participantRepository.addToAnimatorHistory(participantId);
   }
 } 
