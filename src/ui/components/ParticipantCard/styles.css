@@ -14,7 +14,7 @@
   min-height: 180px;
   display: flex;
   flex-direction: column;
-  width: 180px;
+  width: 100%;
   margin: 0 auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

@@ -1,6 +1,6 @@
 .selection-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -74,11 +74,14 @@
 }
 
 .participants-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 180px);
-  gap: 2rem;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 1.5rem;
   justify-content: center;
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .current-speaker {
@@ -197,21 +200,18 @@
   }
 }
 
-@media (max-width: 1024px) {
-  .selection-content {
-    flex-direction: column;
-    margin-right: 0;
-  }
-
+/* Media queries seulement pour très petits écrans */
+@media (max-width: 500px) {
   .participants-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem;
   }
+}
 
-  .editor-section {
-    position: static;
-    width: 100%;
-    max-width: 500px;
-    margin: 2rem auto 0;
+@media (max-width: 350px) {
+  .participants-grid {
+    grid-template-columns: repeat(1, 1fr) !important;
+    gap: 1rem;
   }
 }
 

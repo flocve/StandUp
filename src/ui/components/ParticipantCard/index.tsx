@@ -7,7 +7,7 @@ interface ParticipantCardProps {
   isSelected: boolean;
   isAnimating: boolean;
   showPityInfo?: boolean;
-  allParticipants?: Participant[];
+  allParticipants?: (Participant | DailyParticipant)[];
 }
 
 // Palette de couleurs basée sur les chances (du froid au chaud)
@@ -48,6 +48,14 @@ const getColorByChance = (chancePercentage: number): string => {
   return CHANCE_COLORS[0]; // bleu - très faible chance
 };
 
+// Fonction pour obtenir une couleur cohérente basée sur l'ID du participant
+const getConsistentColor = (participantId: string): string => {
+  // Utiliser l'ID pour générer un index cohérent
+  const hash = participantId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const colorIndex = hash % CHANCE_COLORS.length;
+  return CHANCE_COLORS[colorIndex];
+};
+
 // Fonction pour convertir hex en rgb
 const hexToRgb = (hex: string) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -73,17 +81,22 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   const isWeeklyParticipant = participant instanceof Participant;
   
   // Calculer le pourcentage de chance basé sur le diviseur
-  const chancePercentage = allParticipants.length > 0 ? 
-    calculateChancePercentage(allParticipants, participant) : 0;
+  const chancePercentage = allParticipants.length > 0 && isWeeklyParticipant ? 
+    calculateChancePercentage(allParticipants as Participant[], participant) : 0;
 
   // Vérifier si c'est un participant avec la plus haute chance
-  const maxChance = getMaxChancePercentage(allParticipants);
+  const maxChance = isWeeklyParticipant ? getMaxChancePercentage(allParticipants as Participant[]) : 0;
   const isTopChance = showPityInfo && chancePercentage === maxChance && maxChance > 0;
 
-  // Choisir la couleur basée sur le pourcentage de chance
-  const cardColor = showPityInfo && allParticipants.length > 0 ? 
-    getColorByChance(chancePercentage) : 
-    CHANCE_COLORS[Math.floor(Math.random() * CHANCE_COLORS.length)];
+  // Choisir la couleur basée sur le mode
+  let cardColor: string;
+  if (showPityInfo && allParticipants.length > 0 && isWeeklyParticipant) {
+    // Mode Animateur : couleur basée sur les chances
+    cardColor = getColorByChance(chancePercentage);
+  } else {
+    // Mode Daily : couleur cohérente basée sur l'ID
+    cardColor = getConsistentColor(participant.id.value);
+  }
 
   const rgbColor = hexToRgb(cardColor);
 

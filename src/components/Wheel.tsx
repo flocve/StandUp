@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { WheelProps, Participant, DailyParticipant } from '../types/wheel';
-import Confetti from 'react-confetti';
 
 const COLORS = [
   '#3b82f6', // blue
@@ -42,15 +41,7 @@ const FullScreenConfetti = () => {
         zIndex: 1000
       }}
     >
-      <Confetti
-        width={dimensions.width}
-        height={dimensions.height}
-        recycle={false}
-        numberOfPieces={500}
-        gravity={0.3}
-        initialVelocityY={20}
-        tweenDuration={2000}
-      />
+      {/* Confetti component removed as per instructions */}
     </div>
   );
 };

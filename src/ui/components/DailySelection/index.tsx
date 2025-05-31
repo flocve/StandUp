@@ -29,10 +29,20 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     ? selectedParticipant
     : lastSpeaker;
 
+  // Fonction qui fait tout le processus de sélection
+  const handleDailySelection = async () => {
+    if (isSpinning) return;
+
+    handleSelection(async (winner) => {
+      // L'animation est finie, maintenant appeler onSelect
+      onSelect(winner as DailyParticipant);
+    });
+  };
+
   return (
     <div className="wheel-section">
       <button
-        onClick={() => handleSelection(onSelect)}
+        onClick={handleDailySelection}
         disabled={isSpinning}
         className="selection-button"
       >
@@ -58,6 +68,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
             isSelected={selectedParticipant?.id.value === participant.id.value}
             isAnimating={isSpinning}
             showPityInfo={false}
+            allParticipants={currentParticipants}
           />
         ))}
       </div>

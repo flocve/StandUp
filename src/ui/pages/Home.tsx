@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { SelectionWheel } from '../components/SelectionWheel';
 import { ParticipantRanking } from '../components/ParticipantRanking';
 import { PityCounterEditor } from '../components/PityCounterEditor';

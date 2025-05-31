@@ -1,13 +1,12 @@
 import React from 'react';
-import { Participant } from '../../../domain/participant/entities';
 import { ParticipantCard } from '../ParticipantCard';
-import { PityCounterEditor } from '../PityCounterEditor';
 import { AnimatorHistory } from '../AnimatorHistory';
+import { PityCounterEditor } from '../PityCounterEditor';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useAnimators } from '../../../hooks/useAnimators';
-import { Confetti } from '../Confetti';
+import { Participant } from '../../../domain/participant/entities';
 import type { WeeklySelectionUseCases } from '../../../application/weekly/useCases';
-import '../SelectionWheel/styles.css';
+import './styles.css';
 
 interface AnimatorSelectionProps {
   participants: Participant[];
@@ -40,41 +39,36 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
     addAnimator
   } = useAnimators(participants, repository);
 
-  const [showConfetti, setShowConfetti] = React.useState(false);
-
-  // Fonction qui fait tout le processus de sélection
   const handleAnimatorSelection = async () => {
     if (isSpinning) return;
 
-    // D'abord faire la vraie sélection avec les diviseurs
+    // Faire la vraie sélection avec les diviseurs
     const realWinner = await weeklyUseCases.selectWeeklyAnimator();
     
-    // Ensuite faire l'animation avec le vrai gagnant
-    handleSelection(async (animatedWinner) => {
+    // Utiliser le vrai gagnant pour l'animation
+    handleSelection(async () => {
       // L'animation est finie, mettre à jour l'historique avec le vrai gagnant
       await addAnimator(realWinner);
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 4000);
-      
-      // Recharger les données pour mettre à jour l'affichage
+      onSelect(realWinner);
+      // Recharger les données après sélection
       if (onReloadData) {
         onReloadData();
       }
-    }, realWinner); // Passer le vrai gagnant à l'animation
+    }, realWinner);
   };
 
   return (
-    <div className="selection-content">
-      {showConfetti && <Confetti />}
-      
-      <div className="wheel-section">
-        <button
-          onClick={handleAnimatorSelection}
-          disabled={isSpinning}
-          className="selection-button"
-        >
-          {isSpinning ? 'Sélection...' : 'Sélectionner'}
-        </button>
+    <div className="animator-selection">
+      <div className="selection-content">
+        <div className="selection-controls">
+          <button
+            onClick={handleAnimatorSelection}
+            disabled={isSpinning}
+            className="selection-button"
+          >
+            {isSpinning ? 'Sélection...' : 'Sélectionner l\'animateur'}
+          </button>
+        </div>
 
         {currentAnimator && !selectedParticipant && (
           <div className="current-speaker">
@@ -99,13 +93,16 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
             />
           ))}
         </div>
-      </div>
 
-      <AnimatorHistory history={animatorHistory} />
-      <PityCounterEditor
-        participants={participants}
-        onUpdatePityCounter={updatePityCounter}
-      />
+        <AnimatorHistory history={animatorHistory} />
+        
+        {participants.length > 0 && typeof (participants[0] as any)?.getChanceDivisor === 'function' && (
+          <PityCounterEditor
+            participants={participants}
+            onUpdatePityCounter={updatePityCounter}
+          />
+        )}
+      </div>
     </div>
   );
 }; 
