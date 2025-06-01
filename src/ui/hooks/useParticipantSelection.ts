@@ -6,8 +6,8 @@ import type { WeeklySelectionUseCases } from '../../application/weekly/useCases'
 
 interface UseParticipantSelectionProps {
   type: SelectionType;
-  dailyUseCases: DailySelectionUseCases;
-  weeklyUseCases: WeeklySelectionUseCases;
+  dailyUseCases?: DailySelectionUseCases;
+  weeklyUseCases?: WeeklySelectionUseCases;
 }
 
 interface ParticipantSelectionState {
@@ -30,6 +30,11 @@ export const useParticipantSelection = ({
   });
 
   const loadParticipants = useCallback(async () => {
+    if (!dailyUseCases || !weeklyUseCases) {
+      setState(prev => ({ ...prev, isLoading: true }));
+      return;
+    }
+
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
@@ -61,6 +66,8 @@ export const useParticipantSelection = ({
   }, [type, dailyUseCases, weeklyUseCases]);
 
   const handleSelection = useCallback(async () => {
+    if (!dailyUseCases || !weeklyUseCases) return;
+
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
@@ -81,6 +88,8 @@ export const useParticipantSelection = ({
   }, [type, dailyUseCases, weeklyUseCases, loadParticipants]);
 
   const resetParticipants = useCallback(async () => {
+    if (!dailyUseCases) return;
+
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
