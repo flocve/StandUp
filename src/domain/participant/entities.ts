@@ -6,11 +6,16 @@ export class Participant {
   constructor(
     public readonly id: ParticipantId,
     public readonly name: ParticipantName,
-    private chancePercentage: number = 1
+    private chancePercentage: number = 1,
+    public readonly photoUrl?: string
   ) {}
 
   public getChancePercentage(): number {
     return this.chancePercentage;
+  }
+
+  public getPhotoUrl(): string | undefined {
+    return this.photoUrl;
   }
 
   public incrementChancePercentage(): void {
@@ -39,9 +44,10 @@ export class DailyParticipant extends Participant {
     id: ParticipantId,
     name: ParticipantName,
     private hasSpokenFlag: boolean = false,
-    private lastParticipation?: Date
+    private lastParticipation?: Date,
+    photoUrl?: string
   ) {
-    super(id, name);
+    super(id, name, 1, photoUrl);
   }
 
   public hasSpoken(): boolean {

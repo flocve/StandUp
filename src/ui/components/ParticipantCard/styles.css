@@ -125,21 +125,30 @@
 }
 
 .card-avatar {
-  width: 4rem;
-  height: 4rem;
+  width: 4.5rem;
+  height: 4.5rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--card-color) 0%, rgba(var(--card-color-rgb), 0.9) 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.75rem;
+  font-size: 2.6rem;
   font-weight: 600;
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.2),
     0 0 0 4px rgba(var(--card-color-rgb), 0.5),
     0 0 20px rgba(var(--card-color-rgb), 0.4);
   border: 3px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .card.top-chance .card-avatar {
@@ -164,6 +173,14 @@
 }
 
 .pity-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.pity-stats-compact {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -394,4 +411,42 @@
 .card.fading-out .card-content::before {
   animation: none;
   opacity: 0;
+}
+
+/* Nouvelle ligne pour nom et compteur alignés */
+.name-counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.name-counter-row .card-name {
+  margin: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.name-counter-row .pity-counter {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Mode daily : nom centré */
+.card.daily-mode .name-counter-row {
+  justify-content: center;
+}
+
+.card.daily-mode .name-counter-row .card-name {
+  text-align: center;
+}
+
+/* Mode weekly : nom à gauche avec compteur à droite */
+.card.weekly-mode .name-counter-row {
+  justify-content: space-between;
+}
+
+.card.weekly-mode .name-counter-row .card-name {
+  text-align: left;
 } 

@@ -4,10 +4,19 @@ import { Participant, DailyParticipant as DomainDailyParticipant } from '../../.
 import { ParticipantId, ParticipantName } from '../../../domain/participant/valueObjects';
 import type { ParticipantRepository } from '../../../domain/participant/repository';
 import { INITIAL_PARTICIPANTS } from './migrationHelper';
+import { addPhotoUrlColumns } from './migrations/runMigration';
+import { generateCuteAnimalPhoto } from '../../../utils/animalPhotos';
 
 export class SupabaseParticipantRepository implements ParticipantRepository {
   
   async initialize(): Promise<void> {
+    // Exécuter les migrations nécessaires
+    try {
+      await addPhotoUrlColumns();
+    } catch (error) {
+      console.error('Erreur lors des migrations:', error);
+    }
+
     // Vérifier si des participants existent déjà
     const { data: existing, error } = await supabase
       .from('weekly_participants')
@@ -34,7 +43,8 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
         id: p.id.value,
         name: p.name.value,
         chance_percentage: p.getChancePercentage(),
-        passage_count: 0
+        passage_count: 0,
+        photo_url: generateCuteAnimalPhoto(p.name.value)
       }));
 
       const dailyData = INITIAL_PARTICIPANTS.map(p => ({
@@ -42,7 +52,8 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
         name: p.name.value,
         last_participation: null,
         has_spoken: false,
-        speaking_order: null
+        speaking_order: null,
+        photo_url: generateCuteAnimalPhoto(p.name.value)
       }));
 
       // Insérer les participants hebdomadaires
@@ -86,7 +97,8 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
       const participant = new Participant(
         new ParticipantId(row.id),
         new ParticipantName(row.name),
-        row.chance_percentage
+        row.chance_percentage,
+        row.photo_url
       );
       participant.setPassageCount(row.passage_count);
       return participant;
@@ -111,7 +123,8 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
         new ParticipantId(row.id),
         new ParticipantName(row.name),
         row.has_spoken,
-        row.last_participation ? new Date(row.last_participation) : undefined
+        row.last_participation ? new Date(row.last_participation) : undefined,
+        row.photo_url
       );
     });
   }
@@ -192,7 +205,8 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
     const participant = new Participant(
       new ParticipantId(data.id),
       new ParticipantName(data.name),
-      data.chance_percentage
+      data.chance_percentage,
+      data.photo_url
     );
     participant.setPassageCount(data.passage_count);
     return participant;

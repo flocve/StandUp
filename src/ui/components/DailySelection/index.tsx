@@ -3,6 +3,7 @@ import { DailyParticipant } from '../../../domain/participant/entities';
 import { ParticipantCard } from '../ParticipantCard';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useDailyParticipants } from '../../../hooks/useDailyParticipants';
+import { getParticipantPhotoUrl, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
 import type { DailySelectionUseCases } from '../../../application/daily/useCases';
 import '../SelectionWheel/styles.css';
 
@@ -66,6 +67,40 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
         <div className="current-speaker-label">
           À TOI DE PARLER
         </div>
+        
+        {/* Photo du participant */}
+        {currentSpeaker && (
+          <div className="current-speaker-avatar">
+            <img 
+              src={getParticipantPhotoUrl(
+                currentSpeaker.name.value,
+                currentSpeaker.getPhotoUrl()
+              )}
+              alt={currentSpeaker.name.value}
+              className="current-speaker-image"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                const fallbackUrl = generateFallbackAnimalPhoto(currentSpeaker.name.value);
+                if (target.src !== fallbackUrl) {
+                  target.src = fallbackUrl;
+                } else {
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = currentSpeaker.name.value.charAt(0);
+                    parent.style.display = 'flex';
+                    parent.style.alignItems = 'center';
+                    parent.style.justifyContent = 'center';
+                    parent.style.fontSize = '3rem';
+                    parent.style.fontWeight = '700';
+                    parent.style.color = 'white';
+                  }
+                }
+              }}
+            />
+          </div>
+        )}
+        
         <div className="name-update">
           {currentSpeaker ? (
             currentSpeaker.name.value

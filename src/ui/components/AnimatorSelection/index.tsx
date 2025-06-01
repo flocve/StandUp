@@ -5,6 +5,7 @@ import { ChancePercentageEditor } from '../ChancePercentageEditor';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useAnimators } from '../../../hooks/useAnimators';
 import { Participant } from '../../../domain/participant/entities';
+import { getParticipantPhotoUrl, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
 import type { WeeklySelectionUseCases } from '../../../application/weekly/useCases';
 import './styles.css';
 
@@ -82,6 +83,40 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
               <span>.</span><span>.</span><span>.</span>
             </span>}
           </div>
+          
+          {/* Photo du participant */}
+          <div className="current-speaker-avatar">
+            {(selectedParticipant || currentAnimator) && (
+              <img 
+                src={getParticipantPhotoUrl(
+                  (isSpinning ? selectedParticipant : currentAnimator)?.name.value || '',
+                  (isSpinning ? selectedParticipant : currentAnimator)?.getPhotoUrl()
+                )}
+                alt={(isSpinning ? selectedParticipant : currentAnimator)?.name.value}
+                className="current-speaker-image"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  const fallbackUrl = generateFallbackAnimalPhoto((isSpinning ? selectedParticipant : currentAnimator)?.name.value || '');
+                  if (target.src !== fallbackUrl) {
+                    target.src = fallbackUrl;
+                  } else {
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = (isSpinning ? selectedParticipant : currentAnimator)?.name.value.charAt(0) || '';
+                      parent.style.display = 'flex';
+                      parent.style.alignItems = 'center';
+                      parent.style.justifyContent = 'center';
+                      parent.style.fontSize = '3rem';
+                      parent.style.fontWeight = '700';
+                      parent.style.color = 'white';
+                    }
+                  }
+                }}
+              />
+            )}
+          </div>
+          
           <div className="name-update">
             {isSpinning ? (
               selectedParticipant ? selectedParticipant.name.value : '...'

@@ -228,24 +228,7 @@ body {
   color: white;
 }
 
-.card-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
-  background: linear-gradient(135deg, var(--card-color), rgba(var(--card-color-rgb), 0.8));
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
+
 
 .winner .card-avatar {
   transform: scale(1.2);

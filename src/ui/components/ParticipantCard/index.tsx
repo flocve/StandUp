@@ -1,5 +1,6 @@
 import React from 'react';
 import { Participant, DailyParticipant } from '../../../domain/participant/entities';
+import { getParticipantPhotoUrl, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
 import './styles.css';
 
 interface ParticipantCardProps {
@@ -108,7 +109,7 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
     <div
       className={`card ${
         isSelected ? 'selected' : isAnimating ? 'not-selected' : ''
-      } ${isTopChance ? 'top-chance' : ''} ${isWinner ? 'winner' : ''} ${isFadingOut ? 'fading-out' : ''}`}
+      } ${isTopChance ? 'top-chance' : ''} ${isWinner ? 'winner' : ''} ${isFadingOut ? 'fading-out' : ''} ${showPityInfo ? 'weekly-mode' : 'daily-mode'}`}
       style={{
         '--card-color': cardColor,
         '--card-color-rgb': `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
@@ -116,14 +117,45 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
     >
       <div className="card-content">
         <div className="card-avatar">
-          {participant.name.value.charAt(0)}
+          {(() => {
+            const photoUrl = getParticipantPhotoUrl(participant.name.value, participant.getPhotoUrl());
+            return (
+              <img 
+                src={photoUrl} 
+                alt={participant.name.value}
+                className="avatar-image"
+                onError={(e) => {
+                  // Premier fallback: essayer un avatar DiceBear mignon
+                  const target = e.target as HTMLImageElement;
+                  const fallbackUrl = generateFallbackAnimalPhoto(participant.name.value);
+                  if (target.src !== fallbackUrl) {
+                    target.src = fallbackUrl;
+                  } else {
+                    // Dernier fallback: afficher l'initiale
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = participant.name.value.charAt(0);
+                    }
+                  }
+                }}
+              />
+            );
+          })()}
         </div>
-        <h3 className="card-name">{participant.name.value}</h3>
-        {isWeeklyParticipant && showPityInfo && (
-          <div className="pity-stats">
+        
+        {/* Nom et compteur sur la même ligne */}
+        <div className="name-counter-row">
+          <h3 className="card-name">{participant.name.value}</h3>
+          {isWeeklyParticipant && showPityInfo && (
             <div className="pity-counter">
               <span className="pity-count">{participant.getChancePercentage() || 1}</span>
             </div>
+          )}
+        </div>
+        
+        {isWeeklyParticipant && showPityInfo && (
+          <div className="pity-stats-compact">
             <div className="chance-percentage">
               {chancePercentage}% de chance
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
 import { SupabaseUtils } from '../../infrastructure/persistence/supabase/utils';
-import { DATABASE_CONFIG } from '../../config/database';
+import { PhotoManager } from '../components/PhotoManager';
 import './Configuration.css';
 
 interface DbData {
@@ -10,8 +11,9 @@ interface DbData {
 }
 
 export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState<'data' | 'tools' | 'stats'>('data');
+  const [activeTab, setActiveTab] = useState<'data' | 'tools' | 'photos' | 'stats'>('data');
   const [dbData, setDbData] = useState<DbData>({ weeklyParticipants: [], dailyParticipants: [], animatorHistory: [] });
+  const [participants, setParticipants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string>('');
   const [newParticipantName, setNewParticipantName] = useState('');
@@ -24,6 +26,20 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
     try {
       const data = await SupabaseUtils.getFormattedData();
       setDbData(data);
+      
+      // Charger les participants pour le PhotoManager
+      const { data: weeklyData } = await supabase
+        .from('weekly_participants')
+        .select('id, name, photo_url')
+        .order('name');
+      
+      if (weeklyData) {
+        setParticipants(weeklyData.map(p => ({
+          id: { value: p.id },
+          name: { value: p.name },
+          getPhotoUrl: () => p.photo_url
+        })));
+      }
     } catch (error) {
       console.error('Erreur chargement données:', error);
       setMessage('❌ Erreur lors du chargement des données Supabase');
@@ -99,6 +115,10 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
     }
   };
 
+  const handleUpdatePhoto = async (participantId: string, photoUrl: string) => {
+    // Implementation of handleUpdatePhoto function
+  };
+
   return (
     <div className="config-overlay">
       <div className="config-modal">
@@ -123,6 +143,12 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
             onClick={() => setActiveTab('tools')}
           >
             🔧 Outils
+          </button>
+          <button 
+            className={`tab ${activeTab === 'photos' ? 'active' : ''}`}
+            onClick={() => setActiveTab('photos')}
+          >
+            📸 Photos
           </button>
           <button 
             className={`tab ${activeTab === 'stats' ? 'active' : ''}`}
@@ -273,6 +299,15 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'photos' && (
+            <div className="photos-tab">
+              <PhotoManager
+                participants={participants}
+                onUpdatePhoto={handleUpdatePhoto}
+              />
             </div>
           )}
 
