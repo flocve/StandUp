@@ -12,12 +12,14 @@ export const useParticipants = (
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | DailyParticipant | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [isWinnerRevealed, setIsWinnerRevealed] = useState(false); // Pour l'animation finale
+  const [isCurrentSelected, setIsCurrentSelected] = useState(false); // Pour l'état stable final
   const [fadingOutParticipants, setFadingOutParticipants] = useState<Set<string>>(new Set()); // Pour le fade-out
 
   useEffect(() => {
     setParticipants(initialParticipants);
     setSelectedParticipant(null);
     setIsWinnerRevealed(false);
+    setIsCurrentSelected(false);
     setFadingOutParticipants(new Set());
   }, [initialParticipants, type]);
 
@@ -28,19 +30,19 @@ export const useParticipants = (
     let currentIndex = 0;
     
     if (useExtendedAnimation) {
-      // Animation longue pour les animateurs - ordre aléatoire
+      // Animation longue et impressionnante pour les animateurs - ordre aléatoire
       const interval = setInterval(() => {
         // Choisir un index aléatoire
         const randomIndex = Math.floor(Math.random() * participants.length);
         setSelectedParticipant(participants[randomIndex]);
-      }, 80); // Vitesse constante et fluide
+      }, 60); // Vitesse encore plus fluide pour plus d'immersion
 
-      // Phase rapide : 3 secondes
+      // Phase rapide étendue : 5 secondes au lieu de 3
       setTimeout(() => {
         clearInterval(interval);
         
-        // Phase de ralentissement progressif avec ordre aléatoire
-        let delays = [150, 200, 300, 450, 650]; // Ralentissement progressif
+        // Phase de ralentissement progressif avec ordre aléatoire - plus d'étapes
+        let delays = [120, 180, 280, 420, 600, 850, 1200]; // Plus d'étapes pour un ralentissement plus dramatique
         let delayIndex = 0;
         
         const slowDown = () => {
@@ -51,7 +53,7 @@ export const useParticipants = (
             delayIndex++;
             setTimeout(slowDown, delays[delayIndex - 1]);
           } else {
-            // Révélation finale avec animation
+            // Révélation finale avec animation étendue
             const winner = predeterminedWinner || participants[Math.floor(Math.random() * participants.length)];
             setSelectedParticipant(winner);
             setIsSpinning(false);
@@ -63,20 +65,33 @@ export const useParticipants = (
               );
             }
             
-            // Retarder l'appel onSelect jusqu'à la fin de l'animation
+            // Retarder l'appel onSelect pour profiter de l'animation finale
             setTimeout(() => {
               onSelect(winner);
-            }, 1800); // Appeler onSelect juste avant la fin de l'animation
+            }, 2500); // Plus long pour voir l'animation finale
 
             setTimeout(() => {
-              setSelectedParticipant(null);
+              // Pour le Daily Stand-up, on laisse le parent gérer la suppression via onSelect
+              // On fait juste le fade-out visuel mais on ne modifie pas la liste locale
+              if (type === 'daily') {
+                setFadingOutParticipants(new Set([winner.id.value]));
+                
+                // Nettoyer le fade-out après l'animation, mais sans supprimer le participant
+                setTimeout(() => {
+                  setFadingOutParticipants(new Set());
+                }, 800); // Durée du fade-out
+              }
+              // On garde le participant sélectionné visible mais on arrête juste l'animation winner-revealed
               setIsWinnerRevealed(false);
-            }, 2000); // Plus long pour voir l'animation finale
+              setIsCurrentSelected(true); // Passer à l'état stable final pour Daily aussi
+              // Ne pas remettre selectedParticipant à null pour qu'il reste visible 
+              // setSelectedParticipant(null); // ← Commenté pour garder le participant visible
+            }, 3000); // Animation finale encore plus longue pour l'impression
           }
         };
         
         slowDown();
-      }, 3000);
+      }, 5000); // Phase rapide allongée à 5 secondes
     } else {
       // Animation Daily Stand-up - maintenant aussi en ordre aléatoire !
       const interval = setInterval(() => {
@@ -122,8 +137,11 @@ export const useParticipants = (
                   setFadingOutParticipants(new Set());
                 }, 800); // Durée du fade-out
               }
-              setSelectedParticipant(null);
+              // On garde le participant sélectionné visible mais on arrête juste l'animation winner-revealed
               setIsWinnerRevealed(false);
+              setIsCurrentSelected(true); // Passer à l'état stable final pour Daily aussi
+              // Ne pas remettre selectedParticipant à null pour qu'il reste visible 
+              // setSelectedParticipant(null); // ← Commenté pour garder le participant visible
             }, 1500); // Animation finale pour Daily aussi
           }
         };
@@ -144,6 +162,7 @@ export const useParticipants = (
     selectedParticipant,
     isSpinning,
     isWinnerRevealed,
+    isCurrentSelected,
     fadingOutParticipants,
     handleSelection,
     updateChancePercentage

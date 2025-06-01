@@ -11,6 +11,7 @@ interface ParticipantCardProps {
   isFadingOut?: boolean;
   showPityInfo?: boolean;
   allParticipants?: (Participant | DailyParticipant)[];
+  isWaitingTurn?: boolean;
 }
 
 // Palette de couleurs basée sur les chances (du froid au chaud)
@@ -81,7 +82,8 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   isWinner = false,
   isFadingOut = false,
   showPityInfo = false,
-  allParticipants = []
+  allParticipants = [],
+  isWaitingTurn = false
 }) => {
   const isWeeklyParticipant = participant instanceof Participant;
   
@@ -109,7 +111,7 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
     <div
       className={`card ${
         isSelected ? 'selected' : isAnimating ? 'not-selected' : ''
-      } ${isTopChance ? 'top-chance' : ''} ${isWinner ? 'winner' : ''} ${isFadingOut ? 'fading-out' : ''} ${showPityInfo ? 'weekly-mode' : 'daily-mode'}`}
+      } ${isTopChance ? 'top-chance' : ''} ${isWinner ? 'winner' : ''} ${isFadingOut ? 'fading-out' : ''} ${showPityInfo ? 'weekly-mode' : 'daily-mode'} ${isWaitingTurn ? 'waiting-turn' : ''}`}
       style={{
         '--card-color': cardColor,
         '--card-color-rgb': `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`

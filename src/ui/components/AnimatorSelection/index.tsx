@@ -29,6 +29,7 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
     selectedParticipant,
     isSpinning,
     isWinnerRevealed,
+    isCurrentSelected,
     fadingOutParticipants,
     handleSelection,
     updateChancePercentage
@@ -62,23 +63,23 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
           <button
             onClick={handleAnimatorSelection}
             disabled={isSpinning}
-            className="selection-button"
+            className={`selection-button ${isSpinning ? 'selecting' : ''}`}
           >
-            {isSpinning ? (
-              <span className="button-content">
-                <span className="spinner"></span>
-                Sélection en cours...
-              </span>
-            ) : (
-              'Sélectionner l\'animateur'
-            )}
+            <div className="button-content">
+              {isSpinning ? 'Sélection en cours...' : 'Sélectionner l\'animateur'}
+            </div>
           </button>
         </div>
 
         {/* Bloc animateur actuel - toujours affiché */}
-        <div className={`current-speaker ${isSpinning ? 'selecting' : ''}`}>
+        <div className={`current-speaker ${
+          isSpinning ? 'selecting' : 
+          isWinnerRevealed ? 'winner-revealed' : 
+          isCurrentSelected ? 'current-animator' :
+          selectedParticipant ? 'current-animator' : ''
+        }`}>
           <div className="current-speaker-label">
-            {isSpinning ? 'SÉLECTION EN COURS...' : 'ANIMATEUR ACTUEL'}
+            {isSpinning ? 'SÉLECTION EN COURS...' : isWinnerRevealed ? '🎉 FÉLICITATIONS ! 🎉' : 'ANIMATEUR ACTUEL'}
             {isSpinning && <span className="dots">
               <span>.</span><span>.</span><span>.</span>
             </span>}
@@ -89,21 +90,21 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
             {(selectedParticipant || currentAnimator) && (
               <img 
                 src={getParticipantPhotoUrl(
-                  (isSpinning ? selectedParticipant : currentAnimator)?.name.value || '',
-                  (isSpinning ? selectedParticipant : currentAnimator)?.getPhotoUrl()
+                  (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value || '',
+                  (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.getPhotoUrl()
                 )}
-                alt={(isSpinning ? selectedParticipant : currentAnimator)?.name.value}
+                alt={(isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value}
                 className="current-speaker-image"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  const fallbackUrl = generateFallbackAnimalPhoto((isSpinning ? selectedParticipant : currentAnimator)?.name.value || '');
+                  const fallbackUrl = generateFallbackAnimalPhoto((isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value || '');
                   if (target.src !== fallbackUrl) {
                     target.src = fallbackUrl;
                   } else {
                     target.style.display = 'none';
                     const parent = target.parentElement;
                     if (parent) {
-                      parent.innerHTML = (isSpinning ? selectedParticipant : currentAnimator)?.name.value.charAt(0) || '';
+                      parent.innerHTML = (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value.charAt(0) || '';
                       parent.style.display = 'flex';
                       parent.style.alignItems = 'center';
                       parent.style.justifyContent = 'center';
@@ -121,6 +122,7 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
             {isSpinning ? (
               selectedParticipant ? selectedParticipant.name.value : '...'
             ) : (
+              selectedParticipant ? selectedParticipant.name.value : 
               currentAnimator ? currentAnimator.name.value : 'Aucun animateur sélectionné'
             )}
           </div>
@@ -144,6 +146,7 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
               isFadingOut={false}
               showPityInfo={true}
               allParticipants={participants}
+              isWaitingTurn={isSpinning && selectedParticipant?.id.value !== participant.id.value}
             />
           ))}
         </div>

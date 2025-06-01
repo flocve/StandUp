@@ -25,6 +25,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     selectedParticipant,
     isSpinning,
     isWinnerRevealed,
+    isCurrentSelected,
     fadingOutParticipants,
     handleSelection
   } = useParticipants(participants, 'daily');
@@ -58,36 +59,46 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
       <button
         onClick={handleDailySelection}
         disabled={isSpinning}
-        className="selection-button"
+        className={`selection-button ${isSpinning ? 'selecting' : ''}`}
       >
-        {isSpinning ? 'Sélection...' : 'Sélectionner'}
+        <div className="button-content">
+          {isSpinning ? 'Sélection en cours...' : 'Sélectionner'}
+        </div>
       </button>
 
-      <div className="current-speaker">
+      <div className={`current-speaker ${
+        isSpinning ? 'selecting' : 
+        isWinnerRevealed ? 'winner-revealed' : 
+        isCurrentSelected ? 'current-speaker-selected' :
+        currentSpeaker ? 'current-speaker-selected' : ''
+      }`}>
         <div className="current-speaker-label">
-          À TOI DE PARLER
+          {isSpinning ? 'SÉLECTION EN COURS...' : isWinnerRevealed ? '🎯 C\'EST À TOI ! 🎯' : 'À TOI DE PARLER'}
+          {isSpinning && <span className="dots">
+            <span>.</span><span>.</span><span>.</span>
+          </span>}
         </div>
         
         {/* Photo du participant */}
-        {currentSpeaker && (
+        {(selectedParticipant || currentSpeaker) && (
           <div className="current-speaker-avatar">
             <img 
               src={getParticipantPhotoUrl(
-                currentSpeaker.name.value,
-                currentSpeaker.getPhotoUrl()
+                (isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.name.value || '',
+                (isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.getPhotoUrl()
               )}
-              alt={currentSpeaker.name.value}
+              alt={(isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.name.value}
               className="current-speaker-image"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                const fallbackUrl = generateFallbackAnimalPhoto(currentSpeaker.name.value);
+                const fallbackUrl = generateFallbackAnimalPhoto((isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.name.value || '');
                 if (target.src !== fallbackUrl) {
                   target.src = fallbackUrl;
                 } else {
                   target.style.display = 'none';
                   const parent = target.parentElement;
                   if (parent) {
-                    parent.innerHTML = currentSpeaker.name.value.charAt(0);
+                    parent.innerHTML = (isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.name.value.charAt(0) || '';
                     parent.style.display = 'flex';
                     parent.style.alignItems = 'center';
                     parent.style.justifyContent = 'center';
@@ -102,13 +113,15 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
         )}
         
         <div className="name-update">
-          {currentSpeaker ? (
-            currentSpeaker.name.value
+          {isSpinning ? (
+            selectedParticipant ? selectedParticipant.name.value : '...'
           ) : (
-            <div className="invitation-message">
-              🎯 Qui va commencer le stand-up d'aujourd'hui ?<br />
-              <span className="invitation-subtitle">Appuyez sur "Sélectionner" pour découvrir !</span>
-            </div>
+            (selectedParticipant || currentSpeaker) ? (selectedParticipant || currentSpeaker)?.name.value : (
+              <div className="invitation-message">
+                🎯 Qui va commencer le stand-up d'aujourd'hui ?<br />
+                <span className="invitation-subtitle">Appuyez sur "Sélectionner" pour découvrir !</span>
+              </div>
+            )
           )}
         </div>
       </div>
@@ -124,6 +137,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
             isFadingOut={fadingOutParticipants.has(participant.id.value)}
             showPityInfo={false}
             allParticipants={currentParticipants}
+            isWaitingTurn={isSpinning && selectedParticipant?.id.value !== participant.id.value}
           />
         ))}
       </div>
