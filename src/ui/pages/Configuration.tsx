@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { DatabaseUtils } from '../../infrastructure/persistence/sqlite/utils';
-import SQLiteDatabase from '../../infrastructure/persistence/sqlite/database';
+import { SupabaseUtils } from '../../infrastructure/persistence/supabase/utils';
+import { DATABASE_CONFIG } from '../../config/database';
 import './Configuration.css';
 
 interface DbData {
@@ -16,52 +16,34 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   const [message, setMessage] = useState<string>('');
   const [newParticipantName, setNewParticipantName] = useState('');
   const [removeParticipantName, setRemoveParticipantName] = useState('');
+  const [stats, setStats] = useState<{ [key: string]: number }>({});
 
-  // Charger les données de la DB
+  // Charger les données de la DB (Supabase)
   const loadDbData = async () => {
     setIsLoading(true);
     try {
-      const db = SQLiteDatabase.getInstance();
-      await db.initialize();
-      const database = db.getDatabase();
-
-      // Charger les participants hebdomadaires
-      const weeklyResult = database.exec(`
-        SELECT id, name, chance_percentage, passage_count 
-        FROM weekly_participants 
-        ORDER BY name
-      `);
-      
-      // Charger les participants quotidiens
-      const dailyResult = database.exec(`
-        SELECT id, name, last_participation, has_spoken, speaking_order 
-        FROM daily_participants 
-        ORDER BY name
-      `);
-
-      // Charger l'historique
-      const historyResult = database.exec(`
-        SELECT ah.id, p.name, ah.date 
-        FROM animator_history ah
-        JOIN weekly_participants p ON ah.participant_id = p.id
-        ORDER BY ah.date DESC
-        LIMIT 20
-      `);
-
-      setDbData({
-        weeklyParticipants: weeklyResult[0]?.values || [],
-        dailyParticipants: dailyResult[0]?.values || [],
-        animatorHistory: historyResult[0]?.values || []
-      });
+      const data = await SupabaseUtils.getFormattedData();
+      setDbData(data);
     } catch (error) {
       console.error('Erreur chargement données:', error);
-      setMessage('❌ Erreur lors du chargement des données');
+      setMessage('❌ Erreur lors du chargement des données Supabase');
     }
     setIsLoading(false);
   };
 
+  // Charger les statistiques
+  const loadStats = async () => {
+    try {
+      const statsData = await SupabaseUtils.showStats();
+      setStats(statsData);
+    } catch (error) {
+      console.error('Erreur chargement stats:', error);
+    }
+  };
+
   useEffect(() => {
     loadDbData();
+    loadStats();
   }, []);
 
   // Utilitaires
@@ -70,65 +52,50 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
     
     setIsLoading(true);
     try {
-      await DatabaseUtils.addParticipant(newParticipantName.trim());
-      setMessage(`✅ Participant "${newParticipantName}" ajouté !`);
+      await SupabaseUtils.addParticipant(newParticipantName.trim());
+      setMessage(`✅ Participant "${newParticipantName}" ajouté dans Supabase !`);
       setNewParticipantName('');
       await loadDbData();
+      await loadStats();
     } catch (error) {
-      setMessage('❌ Erreur lors de l\'ajout');
+      setMessage('❌ Erreur lors de l\'ajout dans Supabase');
     }
     setIsLoading(false);
   };
 
   const handleRemoveParticipant = async () => {
     if (!removeParticipantName.trim()) return;
+    if (!confirm(`⚠️ Supprimer le participant "${removeParticipantName}" ?`)) return;
     
     setIsLoading(true);
     try {
-      await DatabaseUtils.removeParticipant(removeParticipantName.trim());
+      await SupabaseUtils.removeParticipant(removeParticipantName);
       setMessage(`✅ Participant "${removeParticipantName}" supprimé !`);
       setRemoveParticipantName('');
       await loadDbData();
+      await loadStats();
     } catch (error) {
-      setMessage('❌ Erreur lors de la suppression');
-    }
-    setIsLoading(false);
-  };
-
-  const handleResetToDefaults = async () => {
-    if (!confirm('⚠️ Êtes-vous sûr de vouloir réinitialiser toutes les données ?')) return;
-    
-    setIsLoading(true);
-    try {
-      await DatabaseUtils.resetToDefaults();
-      setMessage('✅ Base de données réinitialisée !');
-      await loadDbData();
-    } catch (error) {
-      setMessage('❌ Erreur lors de la réinitialisation');
-    }
-    setIsLoading(false);
-  };
-
-  const handleClearAllData = async () => {
-    if (!confirm('🚨 ATTENTION: Supprimer TOUTES les données ? (irréversible)')) return;
-    
-    setIsLoading(true);
-    try {
-      await DatabaseUtils.clearAllData();
-      setMessage('🧹 Toutes les données supprimées !');
-      await loadDbData();
-    } catch (error) {
-      setMessage('❌ Erreur lors de la suppression');
+      setMessage(`❌ Erreur lors de la suppression du participant`);
     }
     setIsLoading(false);
   };
 
   const handleShowStats = async () => {
     try {
-      await DatabaseUtils.showStats();
-      setMessage('📊 Statistiques affichées dans la console');
+      await SupabaseUtils.showStats();
+      setMessage('📊 Statistiques Supabase affichées dans la console');
+      await loadStats();
     } catch (error) {
-      setMessage('❌ Erreur lors de l\'affichage des stats');
+      setMessage('❌ Erreur lors de l\'affichage des stats Supabase');
+    }
+  };
+
+  const handleDiagnostic = async () => {
+    try {
+      await SupabaseUtils.diagnosticComplete();
+      setMessage('🔍 Diagnostic Supabase complet dans la console');
+    } catch (error) {
+      setMessage('❌ Erreur lors du diagnostic Supabase');
     }
   };
 
@@ -136,8 +103,12 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
     <div className="config-overlay">
       <div className="config-modal">
         <div className="config-header">
-          <h2>⚙️ Configuration & Base de Données</h2>
+          <h2>⚙️ Configuration Supabase</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', margin: '0 1rem', borderRadius: '8px', fontSize: '0.9rem' }}>
+          🌐 <strong>Mode Supabase</strong> - Base de données partagée en temps réel
         </div>
 
         <div className="config-tabs">
@@ -286,22 +257,19 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               </div>
 
               <div className="tool-section">
-                <h3>🔄 Réinitialisation</h3>
+                <h3>🔄 Actualisation</h3>
                 <div className="form-group">
-                  <button onClick={handleResetToDefaults} disabled={isLoading} className="warning">
-                    🔄 Réinitialiser aux valeurs par défaut
-                  </button>
-                  <button onClick={handleClearAllData} disabled={isLoading} className="danger">
-                    🗑️ Supprimer toutes les données
+                  <button onClick={loadDbData} disabled={isLoading}>
+                    🔄 Recharger les données
                   </button>
                 </div>
               </div>
 
               <div className="tool-section">
-                <h3>🔄 Actualisation</h3>
+                <h3>🔍 Diagnostic Supabase</h3>
                 <div className="form-group">
-                  <button onClick={loadDbData} disabled={isLoading}>
-                    🔄 Recharger les données
+                  <button onClick={handleDiagnostic} disabled={isLoading}>
+                    🔍 Diagnostic complet (console)
                   </button>
                 </div>
               </div>
@@ -313,21 +281,31 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               <div className="stats-grid">
                 <div className="stat-card">
                   <h3>👥 Participants Hebdomadaires</h3>
-                  <div className="stat-value">{dbData.weeklyParticipants.length}</div>
+                  <div className="stat-value">{stats.weeklyParticipants || dbData.weeklyParticipants.length}</div>
                 </div>
                 <div className="stat-card">
                   <h3>📅 Participants Quotidiens</h3>
-                  <div className="stat-value">{dbData.dailyParticipants.length}</div>
+                  <div className="stat-value">{stats.dailyParticipants || dbData.dailyParticipants.length}</div>
                 </div>
                 <div className="stat-card">
                   <h3>🎬 Animations Totales</h3>
-                  <div className="stat-value">{dbData.animatorHistory.length}</div>
+                  <div className="stat-value">{stats.animatorHistory || dbData.animatorHistory.length}</div>
                 </div>
                 <div className="stat-card">
-                  <h3>✅ Participants Actifs</h3>
+                  <h3>✅ Participants Actifs Aujourd'hui</h3>
                   <div className="stat-value">
                     {dbData.dailyParticipants.filter(p => p[3]).length}
                   </div>
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '1.5rem', borderRadius: '12px', marginTop: '2rem' }}>
+                <h3 style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }}>🌐 Informations Supabase</h3>
+                <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.9rem' }}>
+                  <div>📊 <strong>Base partagée</strong> : Toutes les modifications sont synchronisées en temps réel</div>
+                  <div>🔄 <strong>Temps réel actif</strong> : Les changements apparaissent instantanément</div>
+                  <div>💾 <strong>Persistance cloud</strong> : Données sauvées automatiquement</div>
+                  <div>👥 <strong>Multi-utilisateurs</strong> : Plusieurs personnes peuvent utiliser simultanément</div>
                 </div>
               </div>
 
@@ -336,6 +314,9 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                 <div className="form-group">
                   <button onClick={handleShowStats}>
                     📊 Afficher stats détaillées (console)
+                  </button>
+                  <button onClick={handleDiagnostic}>
+                    🔍 Diagnostic complet (console)
                   </button>
                 </div>
               </div>
