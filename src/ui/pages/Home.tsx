@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { SelectionWheel } from '../components/SelectionWheel';
 import { ParticipantRanking } from '../components/ParticipantRanking';
-import { PityCounterEditor } from '../components/PityCounterEditor';
+import { ChancePercentageEditor } from '../components/ChancePercentageEditor';
 import { useParticipantSelection } from '../hooks/useParticipantSelection';
 import { LocalStorageParticipantRepository } from '../../infrastructure/persistence/localStorage/participantRepository';
 import { DailySelectionUseCases } from '../../application/daily/useCases';
@@ -32,8 +32,8 @@ export const Home: React.FC = () => {
     weeklyUseCases,
   });
 
-  const handlePityCounterUpdate = async (participantId: string, newValue: number) => {
-    await participantRepository.updatePityCounter(participantId, newValue);
+  const handleChancePercentageUpdate = async (participantId: string, newValue: number) => {
+    await participantRepository.updateChancePercentage(participantId, newValue);
     // Recharger les participants pour mettre à jour l'affichage
     await loadParticipants();
   };
@@ -76,7 +76,7 @@ export const Home: React.FC = () => {
             participants={participants}
             onSelect={handleSelection}
             type={selectionType}
-            onUpdatePityCounter={selectionType === 'weekly' ? handlePityCounterUpdate : undefined}
+            onUpdateChancePercentage={selectionType === 'weekly' ? handleChancePercentageUpdate : undefined}
             allParticipants={allParticipants as DailyParticipant[] | undefined}
             repository={participantRepository}
             weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
@@ -90,9 +90,9 @@ export const Home: React.FC = () => {
           )}
           {selectionType === 'weekly' && (
             <>
-              <PityCounterEditor
+              <ChancePercentageEditor
                 participants={participants}
-                onUpdatePityCounter={handlePityCounterUpdate}
+                onUpdateChancePercentage={handleChancePercentageUpdate}
               />
             </>
           )}

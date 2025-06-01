@@ -11,7 +11,7 @@ const ANIMATOR_HISTORY_KEY = 'animator_history';
 interface SerializedParticipant {
   id: string;
   name: string;
-  pityCounter: number;
+  chancePercentage: number;
   passageCount: number;
 }
 
@@ -38,7 +38,7 @@ export class LocalStorageParticipantRepository implements ParticipantRepository 
       const serializedParticipants = INITIAL_PARTICIPANTS.map(p => ({
         id: p.id.value,
         name: p.name.value,
-        pityCounter: 1,
+        chancePercentage: 1,
         passageCount: 0
       }));
       localStorage.setItem(
@@ -48,11 +48,11 @@ export class LocalStorageParticipantRepository implements ParticipantRepository 
     }
 
     if (!localStorage.getItem(PITY_COUNTERS_KEY)) {
-      const initialPityCounters = INITIAL_PARTICIPANTS.reduce((acc, p) => {
+      const initialChancePercentages = INITIAL_PARTICIPANTS.reduce((acc, p) => {
         acc[p.id.value] = 1;
         return acc;
       }, {} as Record<string, number>);
-      localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(initialPityCounters));
+      localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(initialChancePercentages));
     }
 
     if (!localStorage.getItem(DAILY_PARTICIPANTS_KEY)) {
@@ -100,7 +100,7 @@ export class LocalStorageParticipantRepository implements ParticipantRepository 
       const initialParticipants = INITIAL_PARTICIPANTS.map(p => ({
         id: p.id.value,
         name: p.name.value,
-        pityCounter: 1,
+        chancePercentage: 1,
         passageCount: 0
       }));
       localStorage.setItem(
@@ -116,17 +116,17 @@ export class LocalStorageParticipantRepository implements ParticipantRepository 
       localStorage.getItem(WEEKLY_PARTICIPANTS_KEY) || '[]'
     ) as SerializedParticipant[];
 
-    let pityCounters = JSON.parse(
+    let chancePercentages = JSON.parse(
       localStorage.getItem(PITY_COUNTERS_KEY) || '{}'
     ) as Record<string, number>;
 
     // Si les compteurs de pitié sont vides, les réinitialiser
-    if (Object.keys(pityCounters).length === 0) {
-      pityCounters = INITIAL_PARTICIPANTS.reduce((acc, p) => {
+    if (Object.keys(chancePercentages).length === 0) {
+      chancePercentages = INITIAL_PARTICIPANTS.reduce((acc, p) => {
         acc[p.id.value] = 1;
         return acc;
       }, {} as Record<string, number>);
-      localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(pityCounters));
+      localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(chancePercentages));
     }
 
     return serializedParticipants.map(
@@ -134,7 +134,7 @@ export class LocalStorageParticipantRepository implements ParticipantRepository 
         const participant = new Participant(
           new ParticipantId(p.id),
           new ParticipantName(p.name),
-          pityCounters[p.id] || 1
+          chancePercentages[p.id] || 1
         );
         participant.setPassageCount(p.passageCount);
         return participant;
@@ -179,12 +179,12 @@ export class LocalStorageParticipantRepository implements ParticipantRepository 
   }
 
   async updateParticipant(participant: Participant): Promise<void> {
-    const pityCounters = JSON.parse(
+    const chancePercentages = JSON.parse(
       localStorage.getItem(PITY_COUNTERS_KEY) || '{}'
     ) as Record<string, number>;
 
-    pityCounters[participant.id.value] = participant.getPityCounter();
-    localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(pityCounters));
+    chancePercentages[participant.id.value] = participant.getChancePercentage();
+    localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(chancePercentages));
   }
 
   async updateDailyParticipant(participant: DailyParticipant): Promise<void> {
@@ -240,13 +240,13 @@ export class LocalStorageParticipantRepository implements ParticipantRepository 
     return participants.find((p) => p.id.value === id.value) || null;
   }
 
-  async updatePityCounter(participantId: string, newValue: number): Promise<void> {
-    const pityCounters = JSON.parse(
+  async updateChancePercentage(participantId: string, newValue: number): Promise<void> {
+    const chancePercentages = JSON.parse(
       localStorage.getItem(PITY_COUNTERS_KEY) || '{}'
     ) as Record<string, number>;
 
-    pityCounters[participantId] = newValue;
-    localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(pityCounters));
+    chancePercentages[participantId] = newValue;
+    localStorage.setItem(PITY_COUNTERS_KEY, JSON.stringify(chancePercentages));
   }
 
   async getAnimatorHistory(): Promise<AnimatorHistoryEntry[]> {

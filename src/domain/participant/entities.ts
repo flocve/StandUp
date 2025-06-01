@@ -6,19 +6,19 @@ export class Participant {
   constructor(
     public readonly id: ParticipantId,
     public readonly name: ParticipantName,
-    private pityCounter: number = 1
+    private chancePercentage: number = 1
   ) {}
 
-  public getPityCounter(): number {
-    return this.pityCounter;
+  public getChancePercentage(): number {
+    return this.chancePercentage;
   }
 
-  public incrementPityCounter(): void {
-    this.pityCounter += 1;
+  public incrementChancePercentage(): void {
+    this.chancePercentage += 1;
   }
 
-  public resetPityCounter(): void {
-    this.pityCounter = 1;
+  public resetChancePercentage(): void {
+    this.chancePercentage = 1;
   }
 
   public getPassageCount(): number {

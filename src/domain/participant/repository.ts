@@ -8,6 +8,6 @@ export interface ParticipantRepository {
   updateDailyParticipant(participant: DailyParticipant): Promise<void>;
   resetDailyParticipants(): Promise<void>;
   getParticipantById(id: ParticipantId): Promise<Participant | null>;
-  updatePityCounter(participantId: string, newValue: number): Promise<void>;
+  updateChancePercentage(participantId: string, newValue: number): Promise<void>;
   addToAnimatorHistory(participantId: string): Promise<void>;
 } 

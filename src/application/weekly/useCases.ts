@@ -20,7 +20,7 @@ export class WeeklySelectionUseCases {
     const winner = result.winner;
     
     // Incrémenter SEULEMENT le diviseur du gagnant
-    winner.incrementPityCounter();
+    winner.incrementChancePercentage();
     
     // Sauvegarder seulement le gagnant
     await this.participantRepository.updateParticipant(winner);

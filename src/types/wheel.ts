@@ -1,7 +1,7 @@
 export interface Participant {
   id: string;
   name: string;
-  pityCounter: number;
+  chancePercentage: number;
 }
 
 export interface DailyParticipant extends Participant {

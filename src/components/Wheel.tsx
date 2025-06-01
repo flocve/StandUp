@@ -140,10 +140,10 @@ const Wheel: React.FC<WheelProps> = ({ participants, onSpinEnd, type }) => {
                 {participant.name.charAt(0)}
                 </div>
                 <h3 className="card-name">{participant.name}</h3>
-              {'pityCounter' in participant && (
+              {'chancePercentage' in participant && (
                   <div className="pity-counter">
                     <span className="pity-star">⭐</span>
-                  <span className="pity-count">{participant.pityCounter}</span>
+                  <span className="pity-count">{participant.chancePercentage}</span>
                 </div>
               )}
             </div>

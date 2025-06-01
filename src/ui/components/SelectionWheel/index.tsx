@@ -10,7 +10,7 @@ interface SelectionWheelProps {
   participants: (Participant | DailyParticipant)[];
   onSelect: (winner: Participant | DailyParticipant) => void;
   type: SelectionType;
-  onUpdatePityCounter?: (participantId: string, newValue: number) => void;
+  onUpdateChancePercentage?: (participantId: string, newValue: number) => void;
   allParticipants?: DailyParticipant[];
   repository?: any;
   weeklyUseCases?: WeeklySelectionUseCases;
@@ -21,7 +21,7 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
   participants,
   onSelect,
   type,
-  onUpdatePityCounter,
+  onUpdateChancePercentage,
   allParticipants,
   repository,
   weeklyUseCases,
@@ -54,11 +54,11 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
             allParticipants={allParticipants}
           />
         ) : (
-          repository && onUpdatePityCounter && weeklyUseCases && (
+          repository && onUpdateChancePercentage && weeklyUseCases && (
             <AnimatorSelection
               participants={participants as Participant[]}
               onSelect={onSelect as (winner: Participant) => void}
-              onUpdatePityCounter={onUpdatePityCounter}
+              onUpdateChancePercentage={onUpdateChancePercentage}
               repository={repository}
               weeklyUseCases={weeklyUseCases}
               onReloadData={onReloadData}

@@ -25,12 +25,12 @@ const CHANCE_COLORS = [
 const calculateChancePercentage = (participants: Participant[], currentParticipant: Participant): number => {
   // Calculer le poids de chaque participant selon le système de diviseur
   const weights = participants.map(p => {
-    const divider = Math.max(1, p.getPityCounter() || 1);
+    const divider = Math.max(1, p.getChancePercentage() || 1);
     return Math.max(1, Math.floor(100 / divider));
   });
   
   const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-  const currentDivider = Math.max(1, currentParticipant.getPityCounter() || 1);
+  const currentDivider = Math.max(1, currentParticipant.getChancePercentage() || 1);
   const currentWeight = Math.max(1, Math.floor(100 / currentDivider));
   
   return Math.round((currentWeight / totalWeight) * 100);
@@ -118,7 +118,7 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
         {isWeeklyParticipant && showPityInfo && (
           <div className="pity-stats">
             <div className="pity-counter">
-              <span className="pity-count">{participant.getPityCounter() || 1}</span>
+              <span className="pity-count">{participant.getChancePercentage() || 1}</span>
             </div>
             <div className="chance-percentage">
               {chancePercentage}% de chance

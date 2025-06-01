@@ -5,7 +5,7 @@ import type { SelectionType } from '../domain/selection/service';
 export const useParticipants = (
   initialParticipants: (Participant | DailyParticipant)[],
   type: SelectionType,
-  onUpdatePityCounter?: (participantId: string, newValue: number) => void
+  onUpdateChancePercentage?: (participantId: string, newValue: number) => void
 ) => {
   const [participants, setParticipants] = useState(initialParticipants);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | DailyParticipant | null>(null);
@@ -48,9 +48,9 @@ export const useParticipants = (
     }, spinDuration);
   };
 
-  const updatePityCounter = (participantId: string, newValue: number) => {
-    if (onUpdatePityCounter) {
-      onUpdatePityCounter(participantId, newValue);
+  const updateChancePercentage = (participantId: string, newValue: number) => {
+    if (onUpdateChancePercentage) {
+      onUpdateChancePercentage(participantId, newValue);
     }
   };
 
@@ -59,6 +59,6 @@ export const useParticipants = (
     selectedParticipant,
     isSpinning,
     handleSelection,
-    updatePityCounter
+    updateChancePercentage
   };
 }; 

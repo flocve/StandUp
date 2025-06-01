@@ -22,7 +22,7 @@ export class SelectionService {
       // Pour la sélection hebdomadaire, on utilise le système de diviseur de chance
       // Plus le chiffre est élevé, moins on a de chances d'être sélectionné
       const weightedParticipants = participants.flatMap(participant => {
-        const divider = Math.max(1, participant.getPityCounter() || 1); // Éviter la division par 0
+        const divider = Math.max(1, participant.getChancePercentage() || 1); // Éviter la division par 0
         const weight = Math.max(1, Math.floor(100 / divider)); // Plus le diviseur est grand, moins on a de poids
         return Array(weight).fill(participant);
       });

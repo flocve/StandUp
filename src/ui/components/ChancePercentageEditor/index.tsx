@@ -2,9 +2,9 @@ import React from 'react';
 import { Participant } from '../../../domain/participant/entities';
 import './styles.css';
 
-interface PityCounterEditorProps {
+interface ChancePercentageEditorProps {
   participants: Participant[];
-  onUpdatePityCounter: (participantId: string, newValue: number) => void;
+  onUpdateChancePercentage: (participantId: string, newValue: number) => void;
 }
 
 // Palette de couleurs basée sur les chances (du froid au chaud)
@@ -22,12 +22,12 @@ const CHANCE_COLORS = [
 const calculateChancePercentage = (participants: Participant[], currentParticipant: Participant): number => {
   // Calculer le poids de chaque participant selon le système de diviseur
   const weights = participants.map(p => {
-    const divider = Math.max(1, p.getPityCounter() || 1);
+    const divider = Math.max(1, p.getChancePercentage() || 1);
     return Math.max(1, Math.floor(100 / divider));
   });
   
   const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-  const currentDivider = Math.max(1, currentParticipant.getPityCounter() || 1);
+  const currentDivider = Math.max(1, currentParticipant.getChancePercentage() || 1);
   const currentWeight = Math.max(1, Math.floor(100 / currentDivider));
   
   return Math.round((currentWeight / totalWeight) * 100);
@@ -60,9 +60,9 @@ const getMaxChancePercentage = (participants: Participant[]): number => {
   return Math.max(...participants.map(p => calculateChancePercentage(participants, p)));
 };
 
-export const PityCounterEditor: React.FC<PityCounterEditorProps> = ({
+export const ChancePercentageEditor: React.FC<ChancePercentageEditorProps> = ({
   participants,
-  onUpdatePityCounter,
+  onUpdateChancePercentage,
 }) => {
   return (
     <div className="pity-editor">
@@ -87,7 +87,7 @@ export const PityCounterEditor: React.FC<PityCounterEditorProps> = ({
               <div className="participant-info">
                 <span className="participant-name">{participant.name.value}</span>
                 <span className="current-pity">
-                  {participant.getPityCounter() || 1}
+                  {participant.getChancePercentage() || 1}
                 </span>
                 <span className="chance-percentage">
                   {chancePercentage}%
@@ -97,27 +97,27 @@ export const PityCounterEditor: React.FC<PityCounterEditorProps> = ({
                 <button
                   className="pity-button decrease"
                   onClick={() => {
-                    const newValue = Math.max(1, participant.getPityCounter() - 1);
-                    onUpdatePityCounter(participant.id.value, newValue);
+                    const newValue = Math.max(1, participant.getChancePercentage() - 1);
+                    onUpdateChancePercentage(participant.id.value, newValue);
                   }}
-                  disabled={participant.getPityCounter() <= 1}
+                  disabled={participant.getChancePercentage() <= 1}
                 >
                   -
                 </button>
                 <input
                   type="number"
                   min="1"
-                  value={participant.getPityCounter() || 1}
+                  value={participant.getChancePercentage() || 1}
                   onChange={(e) => {
                     const newValue = Math.max(1, parseInt(e.target.value) || 1);
-                    onUpdatePityCounter(participant.id.value, newValue);
+                    onUpdateChancePercentage(participant.id.value, newValue);
                   }}
                   className="pity-input"
                 />
                 <button
                   className="pity-button increase"
                   onClick={() => {
-                    onUpdatePityCounter(participant.id.value, (participant.getPityCounter() || 1) + 1);
+                    onUpdateChancePercentage(participant.id.value, (participant.getChancePercentage() || 1) + 1);
                   }}
                 >
                   +

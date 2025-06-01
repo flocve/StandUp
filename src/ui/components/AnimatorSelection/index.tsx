@@ -1,7 +1,7 @@
 import React from 'react';
 import { ParticipantCard } from '../ParticipantCard';
 import { AnimatorHistory } from '../AnimatorHistory';
-import { PityCounterEditor } from '../PityCounterEditor';
+import { ChancePercentageEditor } from '../ChancePercentageEditor';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useAnimators } from '../../../hooks/useAnimators';
 import { Participant } from '../../../domain/participant/entities';
@@ -11,7 +11,7 @@ import './styles.css';
 interface AnimatorSelectionProps {
   participants: Participant[];
   onSelect: (winner: Participant) => void;
-  onUpdatePityCounter: (participantId: string, newValue: number) => void;
+  onUpdateChancePercentage: (participantId: string, newValue: number) => void;
   repository: any;
   weeklyUseCases: WeeklySelectionUseCases;
   onReloadData?: () => void;
@@ -20,7 +20,7 @@ interface AnimatorSelectionProps {
 export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
   participants,
   onSelect,
-  onUpdatePityCounter,
+  onUpdateChancePercentage,
   repository,
   weeklyUseCases,
   onReloadData
@@ -30,8 +30,8 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
     selectedParticipant,
     isSpinning,
     handleSelection,
-    updatePityCounter
-  } = useParticipants(participants, 'weekly', onUpdatePityCounter);
+    updateChancePercentage
+  } = useParticipants(participants, 'weekly', onUpdateChancePercentage);
 
   const {
     animatorHistory,
@@ -97,9 +97,9 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
         <AnimatorHistory history={animatorHistory} />
         
         {participants.length > 0 && typeof (participants[0] as any)?.getChanceDivisor === 'function' && (
-          <PityCounterEditor
+          <ChancePercentageEditor
             participants={participants}
-            onUpdatePityCounter={updatePityCounter}
+            onUpdateChancePercentage={updateChancePercentage}
           />
         )}
       </div>
