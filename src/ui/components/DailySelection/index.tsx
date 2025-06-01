@@ -49,16 +49,21 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
         {isSpinning ? 'Sélection...' : 'Sélectionner'}
       </button>
 
-      {currentSpeaker && (
-        <div className="current-speaker">
-          <div className="current-speaker-label">
-            À TOI DE PARLER
-          </div>
-          <div className="name-update">
-            {currentSpeaker.name.value}
-          </div>
+      <div className="current-speaker">
+        <div className="current-speaker-label">
+          À TOI DE PARLER
         </div>
-      )}
+        <div className="name-update">
+          {currentSpeaker ? (
+            currentSpeaker.name.value
+          ) : (
+            <div className="invitation-message">
+              🎯 Qui va commencer le stand-up d'aujourd'hui ?<br />
+              <span className="invitation-subtitle">Appuyez sur "Sélectionner" pour découvrir !</span>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="participants-grid">
         {currentParticipants.map((participant, index) => (
