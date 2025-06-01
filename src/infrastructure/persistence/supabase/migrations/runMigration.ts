@@ -2,38 +2,48 @@ import { supabase } from '../../../../lib/supabase';
 import { generateCuteAnimalPhoto } from '../../../../utils/animalPhotos';
 
 export async function addPhotoUrlColumns(): Promise<void> {
-  console.log('🔄 Ajout des colonnes photo_url...');
+  console.log('🔄 Vérification des colonnes photo_url...');
 
   try {
-    // Vérifier si les colonnes existent déjà
-    const { data: weeklyColumns } = await supabase
+    // Essayer de sélectionner les colonnes photo_url pour vérifier qu'elles existent
+    const { data: weeklyData, error: weeklyError } = await supabase
       .from('weekly_participants')
       .select('photo_url')
       .limit(1);
 
-    const { data: dailyColumns } = await supabase
+    const { data: dailyData, error: dailyError } = await supabase
       .from('daily_participants')
       .select('photo_url')
       .limit(1);
 
-    // Si les colonnes n'existent pas, les ajouter
-    if (!weeklyColumns || !dailyColumns) {
-      console.log('📋 Exécution des commandes SQL...');
+    // Si il y a des erreurs, cela signifie que les colonnes n'existent pas
+    if (weeklyError || dailyError) {
+      console.log('❌ Les colonnes photo_url n\'existent pas encore');
+      console.log('📝 Pour ajouter les colonnes photo_url, exécutez ce SQL dans Supabase:');
+      console.log('   ALTER TABLE weekly_participants ADD COLUMN photo_url TEXT;');
+      console.log('   ALTER TABLE daily_participants ADD COLUMN photo_url TEXT;');
+      console.log('ℹ️ L\'application continuera de fonctionner sans les photos');
       
-      // Ajouter photo_url à weekly_participants
-      await supabase.rpc('add_photo_url_columns');
-      
-      console.log('✅ Colonnes photo_url ajoutées avec succès');
-    } else {
-      console.log('ℹ️ Les colonnes photo_url existent déjà');
+      if (weeklyError) {
+        console.log('   Erreur weekly_participants:', weeklyError.message);
+      }
+      if (dailyError) {
+        console.log('   Erreur daily_participants:', dailyError.message);
+      }
+      return;
     }
+
+    console.log('✅ Les colonnes photo_url existent déjà');
 
     // Mettre à jour les URLs par défaut si elles sont nulles
     await updateDefaultPhotoUrls();
 
   } catch (error) {
-    console.error('❌ Erreur lors de l\'ajout des colonnes photo_url:', error);
-    throw error;
+    console.log('❌ Erreur lors de la vérification des colonnes photo_url:', error);
+    console.log('📝 Pour ajouter les colonnes photo_url, exécutez ce SQL dans Supabase:');
+    console.log('   ALTER TABLE weekly_participants ADD COLUMN photo_url TEXT;');
+    console.log('   ALTER TABLE daily_participants ADD COLUMN photo_url TEXT;');
+    console.log('ℹ️ L\'application continuera de fonctionner sans les photos');
   }
 }
 

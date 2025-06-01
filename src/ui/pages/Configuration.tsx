@@ -28,17 +28,37 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       setDbData(data);
       
       // Charger les participants pour le PhotoManager
-      const { data: weeklyData } = await supabase
-        .from('weekly_participants')
-        .select('id, name, photo_url')
-        .order('name');
-      
-      if (weeklyData) {
-        setParticipants(weeklyData.map(p => ({
-          id: { value: p.id },
-          name: { value: p.name },
-          getPhotoUrl: () => p.photo_url
-        })));
+      try {
+        const { data: weeklyData, error } = await supabase
+          .from('weekly_participants')
+          .select('id, name, photo_url')
+          .order('name');
+        
+        if (error) {
+          console.warn('Erreur chargement photos (colonnes peut-être manquantes):', error);
+          // Fallback sans photo_url si les colonnes n'existent pas
+          const { data: fallbackData } = await supabase
+            .from('weekly_participants')
+            .select('id, name')
+            .order('name');
+          
+          if (fallbackData) {
+            setParticipants(fallbackData.map(p => ({
+              id: { value: p.id },
+              name: { value: p.name },
+              getPhotoUrl: () => null
+            })));
+          }
+        } else if (weeklyData) {
+          setParticipants(weeklyData.map(p => ({
+            id: { value: p.id },
+            name: { value: p.name },
+            getPhotoUrl: () => p.photo_url
+          })));
+        }
+      } catch (photoError) {
+        console.warn('Erreur lors du chargement des photos:', photoError);
+        setMessage('⚠️ Photos non disponibles (colonnes manquantes en base)');
       }
     } catch (error) {
       console.error('Erreur chargement données:', error);
@@ -116,7 +136,39 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   };
 
   const handleUpdatePhoto = async (participantId: string, photoUrl: string) => {
-    // Implementation of handleUpdatePhoto function
+    setIsLoading(true);
+    try {
+      // Mettre à jour dans weekly_participants
+      const { error: weeklyError } = await supabase
+        .from('weekly_participants')
+        .update({ photo_url: photoUrl })
+        .eq('id', participantId);
+
+      // Mettre à jour dans daily_participants
+      const { error: dailyError } = await supabase
+        .from('daily_participants')
+        .update({ photo_url: photoUrl })
+        .eq('id', participantId);
+
+      if (weeklyError || dailyError) {
+        // Vérifier si l'erreur est due aux colonnes manquantes
+        const errorMessage = weeklyError?.message || dailyError?.message || '';
+        if (errorMessage.includes('column') || errorMessage.includes('photo_url')) {
+          setMessage('❌ Les colonnes photo_url n\'existent pas encore. Exécutez la migration SQL d\'abord.');
+        } else {
+          throw new Error(`Erreur mise à jour: ${errorMessage}`);
+        }
+      } else {
+        setMessage('✅ Photo mise à jour avec succès !');
+        // Recharger les données pour refléter les changements
+        await loadDbData();
+      }
+      
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la photo:', error);
+      setMessage('❌ Erreur lors de la mise à jour de la photo');
+    }
+    setIsLoading(false);
   };
 
   return (
