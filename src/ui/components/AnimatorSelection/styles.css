@@ -57,6 +57,197 @@
   margin-bottom: 2rem;
 }
 
+/* Animations pour le bouton */
+.button-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Styles pour le bloc animateur actuel */
+.current-speaker {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  color: white;
+  margin: 1rem 0;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.current-speaker.selecting {
+  animation: selectingPulse 2s ease-in-out infinite;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff6b6b 100%);
+  background-size: 200% 200%;
+  animation: selectingPulse 2s ease-in-out infinite, gradientShift 3s ease-in-out infinite;
+}
+
+.current-speaker-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.name-update {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);
+  margin: 0.5rem 0;
+}
+
+.selecting .name-update {
+  color: #ffffff;
+  text-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(0, 0, 0, 0.8),
+    2px 2px 0px rgba(0, 0, 0, 0.7),
+    -2px -2px 0px rgba(0, 0, 0, 0.7),
+    2px -2px 0px rgba(0, 0, 0, 0.7),
+    -2px 2px 0px rgba(0, 0, 0, 0.7);
+  animation: nameFlicker 0.5s ease-in-out infinite alternate;
+}
+
+/* Animation des points */
+.dots {
+  display: inline-block;
+}
+
+.dots span {
+  animation: dotBlink 1.5s ease-in-out infinite;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: 1s;
+}
+
+/* Effets de sélection */
+.selection-effects {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: pulsate 2s ease-out infinite;
+}
+
+.pulse-ring.delay-1 {
+  animation-delay: 0.7s;
+  width: 120px;
+  height: 120px;
+  margin-left: -10px;
+  margin-top: -10px;
+}
+
+.pulse-ring.delay-2 {
+  animation-delay: 1.4s;
+  width: 140px;
+  height: 140px;
+  margin-left: -20px;
+  margin-top: -20px;
+}
+
+/* Animations keyframes */
+@keyframes selectingPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 12px 40px rgba(255, 107, 107, 0.5);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes nameFlicker {
+  0% {
+    opacity: 1;
+    color: #ffffff;
+    text-shadow: 
+      0 4px 8px rgba(0, 0, 0, 0.9),
+      0 0 30px rgba(0, 0, 0, 0.8),
+      2px 2px 0px rgba(0, 0, 0, 0.7),
+      -2px -2px 0px rgba(0, 0, 0, 0.7),
+      2px -2px 0px rgba(0, 0, 0, 0.7),
+      -2px 2px 0px rgba(0, 0, 0, 0.7);
+  }
+  100% {
+    opacity: 0.9;
+    color: #f8f9fa;
+    text-shadow: 
+      0 4px 12px rgba(0, 0, 0, 1),
+      0 0 40px rgba(0, 0, 0, 0.9),
+      0 0 60px rgba(255, 255, 255, 0.3),
+      3px 3px 0px rgba(0, 0, 0, 0.8),
+      -3px -3px 0px rgba(0, 0, 0, 0.8),
+      3px -3px 0px rgba(0, 0, 0, 0.8),
+      -3px 3px 0px rgba(0, 0, 0, 0.8);
+  }
+}
+
+@keyframes dotBlink {
+  0%, 20% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  80%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulsate {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .animator-selection {
@@ -71,5 +262,32 @@
   .selection-button {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
+  }
+  
+  .current-speaker {
+    padding: 1.5rem;
+  }
+  
+  .name-update {
+    font-size: 2rem;
+  }
+  
+  .pulse-ring {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .pulse-ring.delay-1 {
+    width: 100px;
+    height: 100px;
+    margin-left: -10px;
+    margin-top: -10px;
+  }
+  
+  .pulse-ring.delay-2 {
+    width: 120px;
+    height: 120px;
+    margin-left: -20px;
+    margin-top: -20px;
   }
 } 

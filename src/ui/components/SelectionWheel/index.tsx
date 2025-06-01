@@ -4,6 +4,7 @@ import { DailySelection } from '../DailySelection';
 import { AnimatorSelection } from '../AnimatorSelection';
 import type { SelectionType } from '../../../domain/selection/service';
 import type { WeeklySelectionUseCases } from '../../../application/weekly/useCases';
+import type { DailySelectionUseCases } from '../../../application/daily/useCases';
 import './styles.css';
 
 interface SelectionWheelProps {
@@ -14,7 +15,7 @@ interface SelectionWheelProps {
   allParticipants?: DailyParticipant[];
   repository?: any;
   weeklyUseCases?: WeeklySelectionUseCases;
-  onReloadData?: () => void;
+  dailyUseCases?: DailySelectionUseCases;
 }
 
 export const SelectionWheel: React.FC<SelectionWheelProps> = ({
@@ -25,7 +26,7 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
   allParticipants,
   repository,
   weeklyUseCases,
-  onReloadData
+  dailyUseCases
 }) => {
   if (participants.length === 0) {
     return (
@@ -52,6 +53,7 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
             participants={participants as DailyParticipant[]}
             onSelect={onSelect as (winner: DailyParticipant) => void}
             allParticipants={allParticipants}
+            dailyUseCases={dailyUseCases}
           />
         ) : (
           repository && onUpdateChancePercentage && weeklyUseCases && (
@@ -61,7 +63,6 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
               onUpdateChancePercentage={onUpdateChancePercentage}
               repository={repository}
               weeklyUseCases={weeklyUseCases}
-              onReloadData={onReloadData}
             />
           )
         )}

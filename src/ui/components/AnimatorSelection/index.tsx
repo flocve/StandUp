@@ -14,7 +14,6 @@ interface AnimatorSelectionProps {
   onUpdateChancePercentage: (participantId: string, newValue: number) => void;
   repository: any;
   weeklyUseCases: WeeklySelectionUseCases;
-  onReloadData?: () => void;
 }
 
 export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
@@ -22,16 +21,17 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
   onSelect,
   onUpdateChancePercentage,
   repository,
-  weeklyUseCases,
-  onReloadData
+  weeklyUseCases
 }) => {
   const {
     participants: currentParticipants,
     selectedParticipant,
     isSpinning,
+    isWinnerRevealed,
+    fadingOutParticipants,
     handleSelection,
     updateChancePercentage
-  } = useParticipants(participants, 'weekly', onUpdateChancePercentage);
+  } = useParticipants(participants, 'weekly', onUpdateChancePercentage, true);
 
   const {
     animatorHistory,
@@ -46,14 +46,11 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
     const realWinner = await weeklyUseCases.selectWeeklyAnimator();
     
     // Utiliser le vrai gagnant pour l'animation
-    handleSelection(async () => {
-      // L'animation est finie, mettre à jour l'historique avec le vrai gagnant
-      await addAnimator(realWinner);
-      onSelect(realWinner);
-      // Recharger les données après sélection
-      if (onReloadData) {
-        onReloadData();
-      }
+    // L'animation gère maintenant elle-même le timing des appels
+    handleSelection(async (winner) => {
+      // L'animation est terminée, maintenant on peut mettre à jour l'historique
+      await addAnimator(winner as Participant);
+      onSelect(winner as Participant);
     }, realWinner);
   };
 
@@ -66,20 +63,40 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
             disabled={isSpinning}
             className="selection-button"
           >
-            {isSpinning ? 'Sélection...' : 'Sélectionner l\'animateur'}
+            {isSpinning ? (
+              <span className="button-content">
+                <span className="spinner"></span>
+                Sélection en cours...
+              </span>
+            ) : (
+              'Sélectionner l\'animateur'
+            )}
           </button>
         </div>
 
-        {currentAnimator && !selectedParticipant && (
-          <div className="current-speaker">
-            <div className="current-speaker-label">
-              ANIMATEUR ACTUEL
-            </div>
-            <div className="name-update">
-              {currentAnimator.name.value}
-            </div>
+        {/* Bloc animateur actuel - toujours affiché */}
+        <div className={`current-speaker ${isSpinning ? 'selecting' : ''}`}>
+          <div className="current-speaker-label">
+            {isSpinning ? 'SÉLECTION EN COURS...' : 'ANIMATEUR ACTUEL'}
+            {isSpinning && <span className="dots">
+              <span>.</span><span>.</span><span>.</span>
+            </span>}
           </div>
-        )}
+          <div className="name-update">
+            {isSpinning ? (
+              selectedParticipant ? selectedParticipant.name.value : '...'
+            ) : (
+              currentAnimator ? currentAnimator.name.value : 'Aucun animateur sélectionné'
+            )}
+          </div>
+          {isSpinning && (
+            <div className="selection-effects">
+              <div className="pulse-ring"></div>
+              <div className="pulse-ring delay-1"></div>
+              <div className="pulse-ring delay-2"></div>
+            </div>
+          )}
+        </div>
 
         <div className="participants-grid">
           {currentParticipants.map((participant, index) => (
@@ -88,6 +105,8 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
               participant={participant}
               isSelected={selectedParticipant?.id.value === participant.id.value}
               isAnimating={isSpinning}
+              isWinner={isWinnerRevealed && selectedParticipant?.id.value === participant.id.value}
+              isFadingOut={false}
               showPityInfo={true}
               allParticipants={participants}
             />

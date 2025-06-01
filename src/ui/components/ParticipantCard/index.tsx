@@ -6,6 +6,8 @@ interface ParticipantCardProps {
   participant: Participant | DailyParticipant;
   isSelected: boolean;
   isAnimating: boolean;
+  isWinner?: boolean;
+  isFadingOut?: boolean;
   showPityInfo?: boolean;
   allParticipants?: (Participant | DailyParticipant)[];
 }
@@ -75,6 +77,8 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   participant,
   isSelected,
   isAnimating,
+  isWinner = false,
+  isFadingOut = false,
   showPityInfo = false,
   allParticipants = []
 }) => {
@@ -104,7 +108,7 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
     <div
       className={`card ${
         isSelected ? 'selected' : isAnimating ? 'not-selected' : ''
-      } ${isTopChance ? 'top-chance' : ''}`}
+      } ${isTopChance ? 'top-chance' : ''} ${isWinner ? 'winner' : ''} ${isFadingOut ? 'fading-out' : ''}`}
       style={{
         '--card-color': cardColor,
         '--card-color-rgb': `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`

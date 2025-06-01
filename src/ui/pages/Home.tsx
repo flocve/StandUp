@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { SelectionWheel } from '../components/SelectionWheel';
 import { ParticipantRanking } from '../components/ParticipantRanking';
 import { ChancePercentageEditor } from '../components/ChancePercentageEditor';
@@ -27,26 +27,67 @@ export const Home: React.FC = () => {
   const [initError, setInitError] = useState<string | null>(null);
   const [showConfiguration, setShowConfiguration] = useState(false);
 
-  // Fonction pour forcer le rechargement des données
-  const forceRefresh = useCallback(async () => {
-    console.log('🔄 Rechargement forcé des données depuis synchronisation temps réel');
-    // La fonction loadParticipants sera définie après l'appel du hook useParticipantSelection
+  // Mises à jour granulaires via la synchronisation temps réel
+  const handleWeeklyParticipantChange = useCallback((payload?: any) => {
+    console.log('📊 Changement participants hebdomadaires détecté:', payload);
+    
+    if (payload?.new && payload?.eventType !== 'DELETE') {
+      // Mise à jour granulaire d'un participant spécifique
+      updateSpecificParticipant(payload.new.id, {
+        chance_percentage: payload.new.chance_percentage,
+        passage_count: payload.new.passage_count
+      });
+    } else {
+      // Fallback : rechargement complet seulement en cas de suppression ou données manquantes
+      loadParticipants();
+    }
   }, []);
+
+  const handleDailyParticipantChange = useCallback((payload?: any) => {
+    console.log('📅 Changement participants quotidiens détecté:', payload);
+    
+    if (payload?.new && payload?.eventType !== 'DELETE') {
+      // Mise à jour granulaire d'un participant spécifique
+      updateSpecificParticipant(payload.new.id, {
+        has_spoken: payload.new.has_spoken,
+        last_participation: payload.new.last_participation
+      });
+    } else {
+      // Fallback : rechargement complet
+      loadParticipants();
+    }
+  }, []);
+
+  const handleAnimatorHistoryChange = useCallback((payload?: any) => {
+    console.log('📜 Changement historique animateurs détecté:', payload);
+    
+    // Pour l'historique, on peut se contenter d'un log ou d'une notification
+    // Le changement important (increment des compteurs) sera géré par handleWeeklyParticipantChange
+    if (payload?.new) {
+      console.log(`✅ Nouvel animateur ajouté à l'historique: ${payload.new.participant_id}`);
+    }
+  }, []);
+
+  const {
+    participants,
+    allParticipants,
+    isLoading,
+    error,
+    handleSelection,
+    resetParticipants,
+    loadParticipants,
+    updateSpecificParticipant
+  } = useParticipantSelection({
+    type: selectionType,
+    dailyUseCases: isInitialized ? dailyUseCases : undefined,
+    weeklyUseCases: isInitialized ? weeklyUseCases : undefined,
+  });
 
   // Synchronisation temps réel (Supabase uniquement)
   const { isRealtimeEnabled, forceSync } = useRealtimeSync({
-    onWeeklyParticipantsChange: () => {
-      console.log('📊 Changement participants hebdomadaires détecté');
-      forceRefresh();
-    },
-    onDailyParticipantsChange: () => {
-      console.log('📅 Changement participants quotidiens détecté');
-      forceRefresh();
-    },
-    onAnimatorHistoryChange: () => {
-      console.log('📜 Changement historique animateurs détecté');
-      forceRefresh();
-    },
+    onWeeklyParticipantsChange: handleWeeklyParticipantChange,
+    onDailyParticipantsChange: handleDailyParticipantChange,
+    onAnimatorHistoryChange: handleAnimatorHistoryChange,
     enabled: isInitialized
   });
 
@@ -84,39 +125,12 @@ export const Home: React.FC = () => {
     };
   }, []);
 
-  const {
-    participants,
-    allParticipants,
-    isLoading,
-    error,
-    handleSelection,
-    resetParticipants,
-    loadParticipants,
-  } = useParticipantSelection({
-    type: selectionType,
-    dailyUseCases: isInitialized ? dailyUseCases : undefined,
-    weeklyUseCases: isInitialized ? weeklyUseCases : undefined,
-  });
-
-  // Connecter la synchronisation temps réel avec le rechargement des données
-  useEffect(() => {
-    const realtimeRefresh = async () => {
-      if (loadParticipants) {
-        await loadParticipants();
-      }
-    };
-    
-    // Remplacer la fonction forceRefresh pour utiliser loadParticipants
-    Object.defineProperty(forceRefresh, 'name', { value: 'realtimeRefresh' });
-    Object.assign(forceRefresh, realtimeRefresh);
-  }, [loadParticipants]);
-
   const handleChancePercentageUpdate = async (participantId: string, newValue: number) => {
     if (!isInitialized) return;
     
     await participantRepository.updateChancePercentage(participantId, newValue);
-    // Recharger les participants pour mettre à jour l'affichage
-    await loadParticipants();
+    // Recharger en arrière-plan sans écran de chargement
+    await loadParticipants(false);
   };
 
   const handleTabChange = async (type: SelectionType) => {
@@ -215,7 +229,7 @@ export const Home: React.FC = () => {
             allParticipants={allParticipants as DailyParticipant[] | undefined}
             repository={participantRepository}
             weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
-            onReloadData={selectionType === 'weekly' ? loadParticipants : undefined}
+            dailyUseCases={selectionType === 'daily' ? dailyUseCases : undefined}
           />
           {selectionType === 'daily' && allParticipants && (
             <ParticipantRanking

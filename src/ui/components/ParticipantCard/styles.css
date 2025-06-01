@@ -250,4 +250,148 @@
     0 2px 4px rgba(0, 0, 0, 0.1),
     inset 0 1px 2px rgba(255, 255, 255, 0.3),
     0 0 10px rgba(var(--card-color-rgb), 0.4);
+}
+
+/* Animation pour la carte gagnante */
+.card.winner {
+  animation: winnerCelebration 2s ease-in-out;
+  transform: scale(1.1);
+  box-shadow: 
+    0 0 30px rgba(var(--card-color-rgb), 0.8),
+    0 0 60px rgba(var(--card-color-rgb), 0.6),
+    0 0 90px rgba(var(--card-color-rgb), 0.4);
+  border: 3px solid rgba(var(--card-color-rgb), 1);
+  z-index: 10;
+  position: relative;
+}
+
+.card.winner::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(var(--card-color-rgb), 0.8),
+    rgba(255, 255, 255, 0.4),
+    rgba(var(--card-color-rgb), 0.8),
+    rgba(255, 255, 255, 0.4),
+    rgba(var(--card-color-rgb), 0.8)
+  );
+  border-radius: inherit;
+  z-index: -1;
+  animation: rotateGlow 2s linear infinite;
+}
+
+.card.winner::after {
+  content: '🎉';
+  position: absolute;
+  top: -20px;
+  right: -10px;
+  font-size: 2rem;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+/* Animations keyframes */
+@keyframes winnerCelebration {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.15) rotate(2deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(-1deg);
+  }
+  75% {
+    transform: scale(1.12) rotate(1deg);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes rotateGlow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Particules de célébration */
+.card.winner .card-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at 20% 30%,
+    rgba(255, 255, 255, 0.3) 2px,
+    transparent 2px
+  ),
+  radial-gradient(
+    circle at 80% 70%,
+    rgba(255, 255, 255, 0.3) 1px,
+    transparent 1px
+  ),
+  radial-gradient(
+    circle at 40% 80%,
+    rgba(255, 255, 255, 0.3) 1px,
+    transparent 1px
+  );
+  animation: sparkle 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Animation de fade-out lisse pour les participants qui partent */
+.card.fading-out {
+  animation: fadeOutSlide 0.8s ease-in-out forwards;
+  pointer-events: none; /* Empêcher les interactions pendant le fade */
+}
+
+@keyframes fadeOutSlide {
+  0% {
+    opacity: 1;
+    transform: scale(1.1) translateY(0); /* Part du state winner */
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.95) translateY(-20px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-40px);
+  }
+}
+
+/* S'assurer que les particules et effets disparaissent aussi */
+.card.fading-out::before,
+.card.fading-out::after,
+.card.fading-out .card-content::before {
+  animation: none;
+  opacity: 0;
 } 

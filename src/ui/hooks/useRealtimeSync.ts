@@ -1,11 +1,11 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { DATABASE_CONFIG } from '../../config/database';
 
 interface UseRealtimeSyncProps {
-  onWeeklyParticipantsChange?: () => void;
-  onDailyParticipantsChange?: () => void;
-  onAnimatorHistoryChange?: () => void;
+  onWeeklyParticipantsChange?: (payload?: any) => void;
+  onDailyParticipantsChange?: (payload?: any) => void;
+  onAnimatorHistoryChange?: (payload?: any) => void;
   enabled?: boolean;
 }
 
@@ -16,19 +16,46 @@ export const useRealtimeSync = ({
   enabled = true
 }: UseRealtimeSyncProps) => {
   
+  // Refs pour debounce
+  const weeklyTimeoutRef = useRef<NodeJS.Timeout>();
+  const dailyTimeoutRef = useRef<NodeJS.Timeout>();
+  const historyTimeoutRef = useRef<NodeJS.Timeout>();
+
   const handleWeeklyChange = useCallback((payload: any) => {
     console.log('🔄 Changement participants hebdomadaires:', payload);
-    onWeeklyParticipantsChange?.();
+    
+    // Debounce pour éviter les mises à jour trop fréquentes
+    if (weeklyTimeoutRef.current) {
+      clearTimeout(weeklyTimeoutRef.current);
+    }
+    
+    weeklyTimeoutRef.current = setTimeout(() => {
+      onWeeklyParticipantsChange?.(payload);
+    }, 800); // Délai plus long pour laisser le temps aux animations
   }, [onWeeklyParticipantsChange]);
 
   const handleDailyChange = useCallback((payload: any) => {
     console.log('🔄 Changement participants quotidiens:', payload);
-    onDailyParticipantsChange?.();
+    
+    if (dailyTimeoutRef.current) {
+      clearTimeout(dailyTimeoutRef.current);
+    }
+    
+    dailyTimeoutRef.current = setTimeout(() => {
+      onDailyParticipantsChange?.(payload);
+    }, 800);
   }, [onDailyParticipantsChange]);
 
   const handleHistoryChange = useCallback((payload: any) => {
     console.log('🔄 Changement historique animateurs:', payload);
-    onAnimatorHistoryChange?.();
+    
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current);
+    }
+    
+    historyTimeoutRef.current = setTimeout(() => {
+      onAnimatorHistoryChange?.(payload);
+    }, 800);
   }, [onAnimatorHistoryChange]);
 
   useEffect(() => {
@@ -69,6 +96,19 @@ export const useRealtimeSync = ({
     // Nettoyage lors du démontage
     return () => {
       console.log('🔌 Déconnexion de la synchronisation temps réel');
+      
+      // Nettoyer les timeouts
+      if (weeklyTimeoutRef.current) {
+        clearTimeout(weeklyTimeoutRef.current);
+      }
+      if (dailyTimeoutRef.current) {
+        clearTimeout(dailyTimeoutRef.current);
+      }
+      if (historyTimeoutRef.current) {
+        clearTimeout(historyTimeoutRef.current);
+      }
+      
+      // Déconnecter les channels
       weeklyChannel.unsubscribe();
       dailyChannel.unsubscribe();
       historyChannel.unsubscribe();

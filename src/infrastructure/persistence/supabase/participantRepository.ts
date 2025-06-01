@@ -226,10 +226,10 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
       throw error;
     }
 
-    // Mettre à jour le compteur de passages
+    // Mettre à jour chance_percentage ET passage_count en une seule requête
     const { data: participant } = await supabase
       .from('weekly_participants')
-      .select('passage_count')
+      .select('chance_percentage, passage_count')
       .eq('id', participantId)
       .single();
 
@@ -237,7 +237,8 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
       await supabase
         .from('weekly_participants')
         .update({
-          passage_count: participant.passage_count + 1,
+          chance_percentage: participant.chance_percentage + 1,  // Incrémenter le diviseur
+          passage_count: participant.passage_count + 1,        // Incrémenter les passages
           updated_at: new Date().toISOString()
         })
         .eq('id', participantId);

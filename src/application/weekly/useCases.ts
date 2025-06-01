@@ -19,11 +19,12 @@ export class WeeklySelectionUseCases {
     const result = SelectionService.selectParticipant(participants, 'weekly');
     const winner = result.winner;
     
-    // Incrémenter SEULEMENT le diviseur du gagnant
+    // Incrémenter localement pour le retour, 
+    // mais la base sera mise à jour par addToAnimatorHistory
     winner.incrementChancePercentage();
     
-    // Sauvegarder seulement le gagnant
-    await this.participantRepository.updateParticipant(winner);
+    // Ne pas sauvegarder ici, addToAnimatorHistory va faire la mise à jour complète
+    // await this.participantRepository.updateParticipant(winner);
     
     return winner;
   }

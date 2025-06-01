@@ -3,23 +3,28 @@ import { DailyParticipant } from '../../../domain/participant/entities';
 import { ParticipantCard } from '../ParticipantCard';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useDailyParticipants } from '../../../hooks/useDailyParticipants';
+import type { DailySelectionUseCases } from '../../../application/daily/useCases';
 import '../SelectionWheel/styles.css';
 
 interface DailySelectionProps {
   participants: DailyParticipant[];
   onSelect: (winner: DailyParticipant) => void;
   allParticipants?: DailyParticipant[];
+  dailyUseCases?: DailySelectionUseCases;
 }
 
 export const DailySelection: React.FC<DailySelectionProps> = ({
   participants,
   onSelect,
-  allParticipants
+  allParticipants,
+  dailyUseCases
 }) => {
   const {
     participants: currentParticipants,
     selectedParticipant,
     isSpinning,
+    isWinnerRevealed,
+    fadingOutParticipants,
     handleSelection
   } = useParticipants(participants, 'daily');
 
@@ -31,12 +36,20 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
 
   // Fonction qui fait tout le processus de sélection
   const handleDailySelection = async () => {
-    if (isSpinning) return;
+    if (isSpinning || !dailyUseCases) return;
 
-    handleSelection(async (winner) => {
-      // L'animation est finie, maintenant appeler onSelect
-      onSelect(winner as DailyParticipant);
-    });
+    try {
+      // Faire la vraie sélection avec la logique métier
+      const realWinner = await dailyUseCases.selectNextParticipant();
+      
+      // Utiliser le vrai gagnant pour l'animation
+      handleSelection(async (winner) => {
+        // L'animation est terminée, appeler onSelect pour mettre à jour l'UI
+        onSelect(winner as DailyParticipant);
+      }, realWinner);
+    } catch (error) {
+      console.error('Erreur lors de la sélection:', error);
+    }
   };
 
   return (
@@ -72,6 +85,8 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
             participant={participant}
             isSelected={selectedParticipant?.id.value === participant.id.value}
             isAnimating={isSpinning}
+            isWinner={isWinnerRevealed && selectedParticipant?.id.value === participant.id.value}
+            isFadingOut={fadingOutParticipants.has(participant.id.value)}
             showPityInfo={false}
             allParticipants={currentParticipants}
           />
