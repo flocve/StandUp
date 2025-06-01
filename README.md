@@ -1,54 +1,43 @@
-# React + TypeScript + Vite
+# 🎲 StandUp Picker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Une application simple et ludique pour fluidifier les stand-ups d'équipe !
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🧪 Concept du projet
 
-## Expanding the ESLint configuration
+> **Ce projet est une expérimentation complète sur le développement par intelligence artificielle.**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+L’objectif est de démontrer **ce qu’il est possible de réaliser à 100% via une IA**, sans intervention humaine.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- 📐 **Idée, conception, structure, code, design, README** : tout a été généré par **Claude 4 Sonnet**, via l’éditeur **Cursor**.
+- 🎯 L'humain s’est contenté de formuler les intentions générales — l’IA a tout produit seule.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Ce projet est donc autant une application fonctionnelle qu'une **preuve de concept**.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 🚀 Fonctionnalités
+
+- **🎯 Sélection aléatoire d'un participant** pour intervenir durant le stand-up quotidien.
+- **📅 Désignation hebdomadaire de l'animateur**, avec un système de pondération :
+  - Moins tu as animé récemment, plus tu as de chances d’être choisi.
+  - Une équité dynamique est maintenue au fil des semaines.
+
+---
+
+## ⚙️ Stack technique
+
+- **Frontend** : [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Styles** : Tailwind CSS 
+- **Stockage** : LocalStorage
+
+---
+
+## 🛠️ Installation
+
+```bash
+git clone https://github.com/flocve/StandUp.git
+cd StandUp
+npm install
+npm run dev
