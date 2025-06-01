@@ -33,7 +33,6 @@ export class SupabaseUtils {
 
       if (dailyError) throw dailyError;
 
-      console.log(`✅ Participant "${name}" ajouté avec succès`);
     } catch (error) {
       console.error('❌ Erreur lors de l\'ajout du participant:', error);
       throw error;
@@ -76,7 +75,6 @@ export class SupabaseUtils {
 
       if (weeklyError) throw weeklyError;
 
-      console.log(`✅ Participant "${name}" supprimé avec succès`);
     } catch (error) {
       console.error('❌ Erreur lors de la suppression du participant:', error);
       throw error;
@@ -105,50 +103,37 @@ export class SupabaseUtils {
   // Afficher les statistiques
   static async showStats(): Promise<{ [key: string]: number }> {
     try {
-      const stats = {
-        weeklyParticipants: 0,
-        dailyParticipants: 0,
-        animatorHistory: 0
-      };
-
-      // Compter weekly_participants
-      const { count: weeklyCount, error: weeklyError } = await supabase
+      // Compter participants hebdomadaires
+      const { count: weeklyCount } = await supabase
         .from('weekly_participants')
         .select('*', { count: 'exact', head: true });
 
-      if (!weeklyError) stats.weeklyParticipants = weeklyCount || 0;
-
-      // Compter daily_participants
-      const { count: dailyCount, error: dailyError } = await supabase
+      // Compter participants quotidiens
+      const { count: dailyCount } = await supabase
         .from('daily_participants')
         .select('*', { count: 'exact', head: true });
 
-      if (!dailyError) stats.dailyParticipants = dailyCount || 0;
-
-      // Compter animator_history
-      const { count: historyCount, error: historyError } = await supabase
+      // Compter historique animateurs
+      const { count: historyCount } = await supabase
         .from('animator_history')
         .select('*', { count: 'exact', head: true });
 
-      if (!historyError) stats.animatorHistory = historyCount || 0;
-
-      console.log('📊 Statistiques Supabase:');
-      console.log(`  - Participants hebdomadaires: ${stats.weeklyParticipants}`);
-      console.log(`  - Participants quotidiens: ${stats.dailyParticipants}`);
-      console.log(`  - Historique animateurs: ${stats.animatorHistory}`);
+      const stats = {
+        weeklyParticipants: weeklyCount || 0,
+        dailyParticipants: dailyCount || 0,
+        animatorHistory: historyCount || 0
+      };
 
       return stats;
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des statistiques:', error);
-      return { weeklyParticipants: 0, dailyParticipants: 0, animatorHistory: 0 };
+      return {};
     }
   }
 
   // Réinitialiser avec les données par défaut
   static async resetToDefaults(): Promise<void> {
     try {
-      console.log('🔄 Réinitialisation avec données par défaut...');
-
       // Supprimer toutes les données
       await this.clearAllData();
 
@@ -182,27 +167,21 @@ export class SupabaseUtils {
 
       if (dailyError) throw dailyError;
 
-      console.log('✅ Base réinitialisée avec les données par défaut');
     } catch (error) {
       console.error('❌ Erreur lors de la réinitialisation:', error);
-      throw error;
     }
   }
 
   // Supprimer toutes les données
   static async clearAllData(): Promise<void> {
     try {
-      console.log('🧹 Suppression de toutes les données...');
-
       // Supprimer dans l'ordre (à cause des foreign keys)
       await supabase.from('animator_history').delete().neq('id', 0);
       await supabase.from('daily_participants').delete().neq('id', '');
       await supabase.from('weekly_participants').delete().neq('id', '');
 
-      console.log('✅ Toutes les données supprimées');
     } catch (error) {
       console.error('❌ Erreur lors de la suppression:', error);
-      throw error;
     }
   }
 
@@ -256,8 +235,6 @@ export class SupabaseUtils {
 
   // Diagnostic complet
   static async diagnosticComplete(): Promise<void> {
-    console.log('🔍 === DIAGNOSTIC SUPABASE ===');
-    
     try {
       // Test connexion
       const { data, error } = await supabase
@@ -266,12 +243,9 @@ export class SupabaseUtils {
         .limit(1);
 
       if (error) {
-        console.log('❌ Connexion Supabase: ÉCHEC');
         console.error(error);
         return;
       }
-
-      console.log('✅ Connexion Supabase: OK');
 
       // Statistiques
       await this.showStats();
@@ -283,15 +257,11 @@ export class SupabaseUtils {
           .from(table)
           .select('*')
           .limit(1);
-
-        console.log(`${tableError ? '❌' : '✅'} Table ${table}: ${tableError ? 'ERREUR' : 'OK'}`);
       }
 
     } catch (error) {
       console.error('❌ Erreur diagnostic:', error);
     }
-
-    console.log('🔍 === FIN DIAGNOSTIC ===');
   }
 }
 

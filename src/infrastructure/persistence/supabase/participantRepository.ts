@@ -35,8 +35,6 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
   }
 
   private async initializeWithDefaults(): Promise<void> {
-    console.log('🔄 Initialisation Supabase avec données par défaut...');
-    
     try {
       // Préparer les données pour l'insertion
       const weeklyData = INITIAL_PARTICIPANTS.map(p => ({
@@ -74,7 +72,6 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
         console.error('Erreur insertion daily_participants:', dailyError);
       }
 
-      console.log('✅ Données par défaut initialisées dans Supabase');
     } catch (error) {
       console.error('❌ Erreur lors de l\'initialisation:', error);
     }

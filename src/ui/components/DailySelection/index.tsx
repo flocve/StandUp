@@ -41,7 +41,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     if (isSpinning || !dailyUseCases) return;
 
     try {
-      // 1. D'abord obtenir la liste des participants disponibles
+      // Obtenir la liste des participants disponibles
       const availableParticipants = await dailyUseCases.getAvailableParticipants();
       
       if (availableParticipants.length === 0) {
@@ -49,18 +49,17 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
         return;
       }
 
-      // 2. Faire la sélection locale immédiatement (calcul rapide)
+      // Faire la sélection locale immédiatement (calcul rapide)
       const randomIndex = Math.floor(Math.random() * availableParticipants.length);
       const selectedWinner = availableParticipants[randomIndex];
       
-      // 3. Démarrer l'animation immédiatement avec le gagnant sélectionné
+      // Démarrer l'animation immédiatement avec le gagnant sélectionné
       handleSelection(async (winner) => {
         // L'animation est terminée, appeler onSelect pour mettre à jour l'UI
         onSelect(winner as DailyParticipant);
       }, selectedWinner);
 
-      // 4. Pendant que l'animation se déroule, mettre à jour la base de données en arrière-plan
-      // Cette opération prend du temps mais n'impacte plus l'UX
+      // Pendant que l'animation se déroule, mettre à jour la base de données en arrière-plan
       selectedWinner.markAsSpoken();
       await dailyUseCases.updateParticipant(selectedWinner);
       

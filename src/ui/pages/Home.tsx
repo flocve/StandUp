@@ -29,8 +29,6 @@ export const Home: React.FC = () => {
 
   // Mises à jour granulaires via la synchronisation temps réel
   const handleWeeklyParticipantChange = useCallback((payload?: any) => {
-    console.log('📊 Changement participants hebdomadaires détecté:', payload);
-    
     if (payload?.new && payload?.eventType !== 'DELETE') {
       // Mise à jour granulaire d'un participant spécifique
       updateSpecificParticipant(payload.new.id, {
@@ -44,8 +42,6 @@ export const Home: React.FC = () => {
   }, []);
 
   const handleDailyParticipantChange = useCallback((payload?: any) => {
-    console.log('📅 Changement participants quotidiens détecté:', payload);
-    
     if (payload?.new && payload?.eventType !== 'DELETE') {
       // Mise à jour granulaire d'un participant spécifique
       updateSpecificParticipant(payload.new.id, {
@@ -59,12 +55,9 @@ export const Home: React.FC = () => {
   }, []);
 
   const handleAnimatorHistoryChange = useCallback((payload?: any) => {
-    console.log('📜 Changement historique animateurs détecté:', payload);
-    
     // Pour l'historique, on peut se contenter d'un log ou d'une notification
     // Le changement important (increment des compteurs) sera géré par handleWeeklyParticipantChange
     if (payload?.new) {
-      console.log(`✅ Nouvel animateur ajouté à l'historique: ${payload.new.participant_id}`);
     }
   }, []);
 
@@ -95,7 +88,6 @@ export const Home: React.FC = () => {
   useEffect(() => {
     const initializeRepository = async () => {
       try {
-        console.log('🌐 Utilisation de Supabase (base partagée)');
         participantRepository = new SupabaseParticipantRepository();
 
         // Initialiser si la méthode existe
@@ -107,7 +99,6 @@ export const Home: React.FC = () => {
         weeklyUseCases = new WeeklySelectionUseCases(participantRepository);
 
         setIsInitialized(true);
-        console.log('✅ Supabase initialisé avec succès');
         
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation Supabase:', error);

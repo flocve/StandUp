@@ -22,8 +22,6 @@ export const useRealtimeSync = ({
   const historyTimeoutRef = useRef<NodeJS.Timeout>();
 
   const handleWeeklyChange = useCallback((payload: any) => {
-    console.log('🔄 Changement participants hebdomadaires:', payload);
-    
     // Debounce pour éviter les mises à jour trop fréquentes
     if (weeklyTimeoutRef.current) {
       clearTimeout(weeklyTimeoutRef.current);
@@ -35,8 +33,6 @@ export const useRealtimeSync = ({
   }, [onWeeklyParticipantsChange]);
 
   const handleDailyChange = useCallback((payload: any) => {
-    console.log('🔄 Changement participants quotidiens:', payload);
-    
     if (dailyTimeoutRef.current) {
       clearTimeout(dailyTimeoutRef.current);
     }
@@ -47,8 +43,6 @@ export const useRealtimeSync = ({
   }, [onDailyParticipantsChange]);
 
   const handleHistoryChange = useCallback((payload: any) => {
-    console.log('🔄 Changement historique animateurs:', payload);
-    
     if (historyTimeoutRef.current) {
       clearTimeout(historyTimeoutRef.current);
     }
@@ -64,39 +58,32 @@ export const useRealtimeSync = ({
       return;
     }
 
-    console.log('🌐 Activation de la synchronisation temps réel Supabase');
-
     // Channel pour les participants hebdomadaires
     const weeklyChannel = supabase
-      .channel('weekly_participants_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'weekly_participants' },
-        handleWeeklyChange
-      )
+      .channel('weekly-participants-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_participants' }, (payload) => {
+        onWeeklyParticipantsChange?.(payload);
+      })
       .subscribe();
 
     // Channel pour les participants quotidiens
     const dailyChannel = supabase
-      .channel('daily_participants_changes')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'daily_participants' },
-        handleDailyChange
-      )
+      .channel('daily-participants-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_participants' }, (payload) => {
+        onDailyParticipantsChange?.(payload);
+      })
       .subscribe();
 
     // Channel pour l'historique des animateurs
-    const historyChannel = supabase
-      .channel('animator_history_changes')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'animator_history' },
-        handleHistoryChange
-      )
+    const animatorChannel = supabase
+      .channel('animator-history-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'animator_history' }, (payload) => {
+        onAnimatorHistoryChange?.(payload);
+      })
       .subscribe();
 
     // Nettoyage lors du démontage
     return () => {
-      console.log('🔌 Déconnexion de la synchronisation temps réel');
-      
       // Nettoyer les timeouts
       if (weeklyTimeoutRef.current) {
         clearTimeout(weeklyTimeoutRef.current);
@@ -111,13 +98,12 @@ export const useRealtimeSync = ({
       // Déconnecter les channels
       weeklyChannel.unsubscribe();
       dailyChannel.unsubscribe();
-      historyChannel.unsubscribe();
+      animatorChannel.unsubscribe();
     };
   }, [enabled, handleWeeklyChange, handleDailyChange, handleHistoryChange]);
 
   // Fonction pour forcer la synchronisation
   const forceSync = useCallback(() => {
-    console.log('🔄 Force sync demandée');
     onWeeklyParticipantsChange?.();
     onDailyParticipantsChange?.();
     onAnimatorHistoryChange?.();
