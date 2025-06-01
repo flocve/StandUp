@@ -192,75 +192,73 @@ export const Home: React.FC = () => {
 
   return (
     <div className="home">
-      <header className="header">
-        <h1>Stand-up Meeting Assistant</h1>
-        <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
-          <span>🌐 Supabase (Base partagée)</span>
-          {isRealtimeEnabled && (
-            <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <span style={{ animation: 'pulse 2s infinite' }}>🔄</span>
-              Temps réel actif
-            </span>
-          )}
-        </div>
-        <div className="tab-container">
-          <button
-            className={`tab ${selectionType === 'daily' ? 'active' : ''}`}
-            onClick={() => handleTabChange('daily')}
-          >
-            Daily Stand-up
-          </button>
-          <button
-            className={`tab ${selectionType === 'weekly' ? 'active' : ''}`}
-            onClick={() => handleTabChange('weekly')}
-          >
-            Sélection Animateur
-          </button>
-        </div>
-      </header>
+      <div className="content-wrapper">
+        <header className="header">
+          <h1>Stand-up Meeting Assistant</h1>
+          <div className="tab-container">
+            <button
+              className={`tab ${selectionType === 'daily' ? 'active' : ''}`}
+              onClick={() => handleTabChange('daily')}
+            >
+              Daily Stand-up
+            </button>
+            <button
+              className={`tab ${selectionType === 'weekly' ? 'active' : ''}`}
+              onClick={() => handleTabChange('weekly')}
+            >
+              Sélection Animateur
+            </button>
+          </div>
+        </header>
 
-      <main className="main">
-        <div className="content">
-          <SelectionWheel
-            participants={participants}
-            onSelect={handleSelection}
-            type={selectionType}
-            onUpdateChancePercentage={selectionType === 'weekly' ? handleChancePercentageUpdate : undefined}
-            allParticipants={allParticipants as DailyParticipant[] | undefined}
-            repository={participantRepository}
-            weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
-            dailyUseCases={selectionType === 'daily' ? dailyUseCases : undefined}
-          />
-          {selectionType === 'daily' && allParticipants && (
-            <ParticipantRanking
-              participants={allParticipants as DailyParticipant[]}
-              onReset={resetParticipants}
+        <main className="main">
+          <div className="content">
+            <SelectionWheel
+              participants={participants}
+              onSelect={handleSelection}
+              type={selectionType}
+              onUpdateChancePercentage={selectionType === 'weekly' ? handleChancePercentageUpdate : undefined}
+              allParticipants={allParticipants as DailyParticipant[] | undefined}
+              repository={participantRepository}
+              weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
+              dailyUseCases={selectionType === 'daily' ? dailyUseCases : undefined}
             />
-          )}
-          {selectionType === 'weekly' && (
-            <>
-              <ChancePercentageEditor
-                participants={participants}
-                onUpdateChancePercentage={handleChancePercentageUpdate}
+            {selectionType === 'daily' && allParticipants && (
+              <ParticipantRanking
+                participants={allParticipants as DailyParticipant[]}
+                onReset={resetParticipants}
               />
-            </>
-          )}
-        </div>
-      </main>
+            )}
+            {selectionType === 'weekly' && (
+              <>
+                <ChancePercentageEditor
+                  participants={participants}
+                  onUpdateChancePercentage={handleChancePercentageUpdate}
+                />
+              </>
+            )}
+          </div>
+        </main>
 
-      {/* Bouton de configuration flottant */}
-      <button 
-        className="config-btn" 
-        onClick={() => setShowConfiguration(true)}
-        title="Configuration & Base de données"
-      >
-        ⚙️
-      </button>
+        {/* Bouton de configuration flottant */}
+        <button 
+          className="config-btn" 
+          onClick={() => setShowConfiguration(true)}
+          title="Configuration & Base de données"
+        >
+          ⚙️
+        </button>
 
-      {/* Modal de configuration */}
-      {showConfiguration && (
-        <Configuration onClose={() => setShowConfiguration(false)} />
-      )}
+        {/* Modal de configuration */}
+        {showConfiguration && (
+          <Configuration onClose={() => setShowConfiguration(false)} />
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="footer">
+        <p>&copy; {new Date().getFullYear()} Développé par Florian Chauviere</p>
+      </footer>
     </div>
   );
 }; 
