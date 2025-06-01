@@ -41,14 +41,29 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     if (isSpinning || !dailyUseCases) return;
 
     try {
-      // Faire la vraie sélection avec la logique métier
-      const realWinner = await dailyUseCases.selectNextParticipant();
+      // 1. D'abord obtenir la liste des participants disponibles
+      const availableParticipants = await dailyUseCases.getAvailableParticipants();
       
-      // Utiliser le vrai gagnant pour l'animation
+      if (availableParticipants.length === 0) {
+        console.error('Aucun participant disponible');
+        return;
+      }
+
+      // 2. Faire la sélection locale immédiatement (calcul rapide)
+      const randomIndex = Math.floor(Math.random() * availableParticipants.length);
+      const selectedWinner = availableParticipants[randomIndex];
+      
+      // 3. Démarrer l'animation immédiatement avec le gagnant sélectionné
       handleSelection(async (winner) => {
         // L'animation est terminée, appeler onSelect pour mettre à jour l'UI
         onSelect(winner as DailyParticipant);
-      }, realWinner);
+      }, selectedWinner);
+
+      // 4. Pendant que l'animation se déroule, mettre à jour la base de données en arrière-plan
+      // Cette opération prend du temps mais n'impacte plus l'UX
+      selectedWinner.markAsSpoken();
+      await dailyUseCases.updateParticipant(selectedWinner);
+      
     } catch (error) {
       console.error('Erreur lors de la sélection:', error);
     }

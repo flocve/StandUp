@@ -30,6 +30,10 @@ export class DailySelectionUseCases {
     await this.participantRepository.resetDailyParticipants();
   }
 
+  async updateParticipant(participant: DailyParticipant): Promise<void> {
+    await this.participantRepository.updateDailyParticipant(participant);
+  }
+
   async getParticipantsStatus(): Promise<DailyParticipant[]> {
     return this.participantRepository.getAllDailyParticipants();
   }
