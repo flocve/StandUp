@@ -413,7 +413,7 @@ export const Configuration: React.FC<{ onClose: () => void }> = ({ onClose }) =>
 
         {isLoading && (
           <div className="loading-overlay">
-            <div className="spinner">🔄</div>
+            <div className="spinner"></div>
             Chargement...
           </div>
         )}

@@ -88,30 +88,27 @@
   z-index: 2;
 }
 
-/* Nouveau spinner épique */
+/* Spinner moderne et fluide */
 .spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid transparent;
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-top: 2px solid white;
-  border-right: 2px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
-  animation: 
-    epicSpin 1s linear infinite,
-    spinnerGlow 2s ease-in-out infinite;
+  animation: smoothSpin 0.8s linear infinite;
   position: relative;
 }
 
 .spinner::before {
   content: '';
   position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  animation: epicSpinReverse 1.5s linear infinite;
+  animation: subtleGlow 2s ease-in-out infinite;
 }
 
 /* Effet subtil de transition au lieu de l'animation de brillance */
@@ -154,7 +151,7 @@
   }
 }
 
-@keyframes epicSpin {
+@keyframes smoothSpin {
   0% { 
     transform: rotate(0deg);
   }
@@ -163,21 +160,12 @@
   }
 }
 
-@keyframes epicSpinReverse {
-  0% { 
-    transform: rotate(360deg);
-  }
-  100% { 
-    transform: rotate(0deg);
-  }
-}
-
-@keyframes spinnerGlow {
+@keyframes subtleGlow {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    opacity: 0.3;
   }
   50% {
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+    opacity: 0.7;
   }
 }
 
