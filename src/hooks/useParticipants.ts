@@ -100,7 +100,7 @@ export const useParticipants = (
         setSelectedParticipant(participants[randomIndex]);
       }, 100);
 
-      const spinDuration = Math.random() * 2000 + 2000;
+      const spinDuration = Math.random() * 2000;
       setTimeout(() => {
         clearInterval(interval);
         
