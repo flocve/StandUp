@@ -1,0 +1,107 @@
+.current-animator-widget {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: linear-gradient(135deg, #10B981 0%, #059669 50%, #10B981 100%);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 
+    0 4px 20px rgba(16, 185, 129, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  min-width: 180px;
+  transition: all 0.3s ease;
+}
+
+.current-animator-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 25px rgba(16, 185, 129, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.animator-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.animator-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar-container {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.animator-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+}
+
+.animator-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .current-animator-widget {
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 160px;
+  }
+  
+  .avatar-container,
+  .avatar-placeholder {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .avatar-placeholder {
+    font-size: 1rem;
+  }
+  
+  .animator-name {
+    font-size: 0.8rem;
+  }
+  
+  .animator-label {
+    font-size: 0.7rem;
+    margin-bottom: 0.35rem;
+  }
+} 

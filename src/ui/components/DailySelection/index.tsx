@@ -1,5 +1,5 @@
 import React from 'react';
-import { DailyParticipant } from '../../../domain/participant/entities';
+import { DailyParticipant, Participant } from '../../../domain/participant/entities';
 import { ParticipantCard } from '../ParticipantCard';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useDailyParticipants } from '../../../hooks/useDailyParticipants';
@@ -12,13 +12,15 @@ interface DailySelectionProps {
   onSelect: (winner: DailyParticipant) => void;
   allParticipants?: DailyParticipant[];
   dailyUseCases?: DailySelectionUseCases;
+  currentAnimator?: Participant | null;
 }
 
 export const DailySelection: React.FC<DailySelectionProps> = ({
   participants,
   onSelect,
   allParticipants,
-  dailyUseCases
+  dailyUseCases,
+  currentAnimator
 }) => {
   const {
     participants: currentParticipants,
@@ -152,6 +154,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
             showPityInfo={false}
             allParticipants={currentParticipants}
             isWaitingTurn={isSpinning && selectedParticipant?.id.value !== participant.id.value}
+            isCurrentAnimator={currentAnimator ? participant.name.value === currentAnimator.name.value : false}
           />
         ))}
       </div>

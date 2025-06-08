@@ -16,6 +16,7 @@ interface SelectionWheelProps {
   repository?: any;
   weeklyUseCases?: WeeklySelectionUseCases;
   dailyUseCases?: DailySelectionUseCases;
+  currentAnimator?: Participant | null;
 }
 
 export const SelectionWheel: React.FC<SelectionWheelProps> = ({
@@ -26,7 +27,8 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
   allParticipants,
   repository,
   weeklyUseCases,
-  dailyUseCases
+  dailyUseCases,
+  currentAnimator
 }) => {
   if (participants.length === 0) {
     return (
@@ -54,6 +56,7 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
             onSelect={onSelect as (winner: DailyParticipant) => void}
             allParticipants={allParticipants}
             dailyUseCases={dailyUseCases}
+            currentAnimator={currentAnimator}
           />
         ) : (
           repository && onUpdateChancePercentage && weeklyUseCases && (

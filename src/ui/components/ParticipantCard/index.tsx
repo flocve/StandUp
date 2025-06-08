@@ -12,6 +12,7 @@ interface ParticipantCardProps {
   showPityInfo?: boolean;
   allParticipants?: (Participant | DailyParticipant)[];
   isWaitingTurn?: boolean;
+  isCurrentAnimator?: boolean;
 }
 
 // Palette de couleurs basée sur les chances (du froid au chaud)
@@ -83,7 +84,8 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   isFadingOut = false,
   showPityInfo = false,
   allParticipants = [],
-  isWaitingTurn = false
+  isWaitingTurn = false,
+  isCurrentAnimator = false
 }) => {
   const isWeeklyParticipant = participant instanceof Participant;
   
@@ -111,13 +113,20 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
     <div
       className={`card ${
         isSelected ? 'selected' : isAnimating ? 'not-selected' : ''
-      } ${isTopChance ? 'top-chance' : ''} ${isWinner ? 'winner' : ''} ${isFadingOut ? 'fading-out' : ''} ${showPityInfo ? 'weekly-mode' : 'daily-mode'} ${isWaitingTurn ? 'waiting-turn' : ''}`}
+      } ${isTopChance ? 'top-chance' : ''} ${isWinner ? 'winner' : ''} ${isFadingOut ? 'fading-out' : ''} ${showPityInfo ? 'weekly-mode' : 'daily-mode'} ${isWaitingTurn ? 'waiting-turn' : ''} ${isCurrentAnimator ? 'current-animator' : ''}`}
       style={{
         '--card-color': cardColor,
         '--card-color-rgb': `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
       } as React.CSSProperties}
     >
       <div className="card-content">
+        {/* Étoile pour l'animateur courant */}
+        {isCurrentAnimator && (
+          <div className="animator-star">
+            ⭐
+          </div>
+        )}
+        
         <div className="card-avatar">
           {(() => {
             const photoUrl = getParticipantPhotoUrl(participant.name.value, participant.getPhotoUrl());

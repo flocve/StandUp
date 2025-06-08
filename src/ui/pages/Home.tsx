@@ -2,9 +2,11 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { SelectionWheel } from '../components/SelectionWheel';
 import { ParticipantRanking } from '../components/ParticipantRanking';
 import { ChancePercentageEditor } from '../components/ChancePercentageEditor';
+import { CurrentAnimator } from '../components/CurrentAnimator';
 import { Configuration } from './Configuration';
 import { useParticipantSelection } from '../hooks/useParticipantSelection';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
+import { useAnimators } from '../../hooks/useAnimators';
 import { SupabaseParticipantRepository } from '../../infrastructure/persistence/supabase/participantRepository';
 import { DailySelectionUseCases } from '../../application/daily/useCases';
 import { WeeklySelectionUseCases } from '../../application/weekly/useCases';
@@ -26,6 +28,7 @@ export const Home: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
   const [showConfiguration, setShowConfiguration] = useState(false);
+  const [allWeeklyParticipants, setAllWeeklyParticipants] = useState<any[]>([]);
 
   // Mises à jour granulaires via la synchronisation temps réel
   const handleWeeklyParticipantChange = useCallback((payload?: any) => {
@@ -84,6 +87,13 @@ export const Home: React.FC = () => {
     enabled: isInitialized
   });
 
+  // Hook pour gérer l'animateur courant (seulement si initialisé)
+  // On utilise tous les participants weekly qui ne changent pas selon l'onglet
+  const { currentAnimator } = useAnimators(
+    allWeeklyParticipants, 
+    isInitialized ? participantRepository as any : { getAnimatorHistory: async () => [], addToAnimatorHistory: async () => {} }
+  );
+
   // Initialiser la base de données
   useEffect(() => {
     const initializeRepository = async () => {
@@ -97,6 +107,10 @@ export const Home: React.FC = () => {
         
         dailyUseCases = new DailySelectionUseCases(participantRepository);
         weeklyUseCases = new WeeklySelectionUseCases(participantRepository);
+
+        // Charger tous les participants weekly pour l'historique des animateurs
+        const weeklyParticipants = await participantRepository.getAllWeeklyParticipants();
+        setAllWeeklyParticipants(weeklyParticipants);
 
         setIsInitialized(true);
         
@@ -183,6 +197,9 @@ export const Home: React.FC = () => {
 
   return (
     <div className="home">
+      {/* Affichage de l'animateur courant en haut à gauche - seulement dans l'onglet Daily */}
+      {selectionType === 'daily' && <CurrentAnimator currentAnimator={currentAnimator} />}
+      
       <div className="content-wrapper">
         <header className="header">
           <h1>Stand-up Meeting Assistant</h1>
@@ -213,6 +230,7 @@ export const Home: React.FC = () => {
               repository={participantRepository}
               weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
               dailyUseCases={selectionType === 'daily' ? dailyUseCases : undefined}
+              currentAnimator={currentAnimator}
             />
             {selectionType === 'daily' && allParticipants && (
               <ParticipantRanking

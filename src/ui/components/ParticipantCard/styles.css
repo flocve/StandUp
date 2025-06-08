@@ -508,4 +508,58 @@
   50% {
     opacity: 0.85;
   }
+}
+
+/* Étoile pour l'animateur courant */
+.animator-star {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  z-index: 10;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 2px 8px rgba(255, 215, 0, 0.6),
+    0 0 15px rgba(255, 215, 0, 0.4),
+    0 0 0 3px rgba(255, 255, 255, 0.3);
+  animation: animatorStarGlow 2s ease-in-out infinite;
+}
+
+.card.current-animator {
+  border: 3px solid rgba(16, 185, 129, 0.8);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 0 0 3px rgba(16, 185, 129, 0.6),
+    0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.card.current-animator:hover {
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(16, 185, 129, 0.8),
+    0 0 25px rgba(16, 185, 129, 0.5);
+}
+
+@keyframes animatorStarGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 2px 8px rgba(255, 215, 0, 0.6),
+      0 0 15px rgba(255, 215, 0, 0.4),
+      0 0 0 3px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 
+      0 3px 12px rgba(255, 215, 0, 0.8),
+      0 0 20px rgba(255, 215, 0, 0.6),
+      0 0 0 4px rgba(255, 255, 255, 0.5);
+  }
 } 
