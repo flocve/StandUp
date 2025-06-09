@@ -12,8 +12,8 @@ interface AnimatorHistoryProps {
 export const AnimatorHistory: React.FC<AnimatorHistoryProps> = ({ history }) => {
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
+      day: 'numeric',
+      month: 'short',
       year: 'numeric'
     }).format(date);
   };
