@@ -204,17 +204,20 @@ export const Home: React.FC = () => {
       <div className="content-wrapper">
         <header className="header">
           <h1>Stand-up Meeting Assistant</h1>
+          <p className="subtitle">Organisez vos réunions quotidiennes et sélectionnez vos animateurs</p>
           <div className="tab-container">
             <button
               className={`tab ${selectionType === 'daily' ? 'active' : ''}`}
               onClick={() => handleTabChange('daily')}
             >
+              <span className="tab-icon">📅</span>
               Daily Stand-up
             </button>
             <button
               className={`tab ${selectionType === 'weekly' ? 'active' : ''}`}
               onClick={() => handleTabChange('weekly')}
             >
+              <span className="tab-icon">👑</span>
               Sélection Animateur
             </button>
           </div>
