@@ -95,7 +95,7 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   
   // Détermine si ce participant a les plus hautes chances
   const isTopChance = showPityInfo && allParticipants.length > 0 && 
-    chancePercentage === Math.max(...allParticipants.map(p => 
+    chancePercentage === Math.min(...allParticipants.map(p => 
       'getChancePercentage' in p ? p.getChancePercentage() : 1
     ));
 
@@ -105,9 +105,9 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
       return '#3B82F6'; // Bleu par défaut pour daily
     }
     
-    if (chancePercentage >= 3) return '#EF4444'; // Rouge pour hautes chances
-    if (chancePercentage >= 2) return '#F59E0B'; // Orange pour chances moyennes
-    return '#3B82F6'; // Bleu pour chances normales
+    if (chancePercentage <= 1) return '#EF4444'; // Rouge pour hautes chances (diviseur 1)
+    if (chancePercentage <= 2) return '#F59E0B'; // Orange pour chances moyennes (diviseur 2)
+    return '#3B82F6'; // Bleu pour chances normales (diviseur 3+)
   };
 
   const cardColor = getCardColor();
