@@ -151,8 +151,6 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
           ))}
         </div>
 
-        <AnimatorHistory history={animatorHistory} />
-        
         {participants.length > 0 && typeof (participants[0] as any)?.getChanceDivisor === 'function' && (
           <ChancePercentageEditor
             participants={participants}

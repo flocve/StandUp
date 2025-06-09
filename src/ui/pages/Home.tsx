@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { SelectionWheel } from '../components/SelectionWheel';
 import { ParticipantRanking } from '../components/ParticipantRanking';
-import { ChancePercentageEditor } from '../components/ChancePercentageEditor';
+import { AnimatorHistory } from '../components/AnimatorHistory';
 import { CurrentAnimator } from '../components/CurrentAnimator';
-import { Configuration } from './Configuration';
+import { AppSettings } from '../components/AppSettings';
+import { SettingsButton } from '../components/SettingsButton';
 import { useParticipantSelection } from '../hooks/useParticipantSelection';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
 import { useAnimators } from '../../hooks/useAnimators';
@@ -27,7 +28,7 @@ export const Home: React.FC = () => {
   const [selectionType, setSelectionType] = useState<SelectionType>('daily');
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
-  const [showConfiguration, setShowConfiguration] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [allWeeklyParticipants, setAllWeeklyParticipants] = useState<any[]>([]);
 
   // Mises à jour granulaires via la synchronisation temps réel
@@ -89,7 +90,7 @@ export const Home: React.FC = () => {
 
   // Hook pour gérer l'animateur courant (seulement si initialisé)
   // On utilise tous les participants weekly qui ne changent pas selon l'onglet
-  const { currentAnimator } = useAnimators(
+  const { currentAnimator, animatorHistory } = useAnimators(
     allWeeklyParticipants, 
     isInitialized ? participantRepository as any : { getAnimatorHistory: async () => [], addToAnimatorHistory: async () => {} }
   );
@@ -220,47 +221,51 @@ export const Home: React.FC = () => {
         </header>
 
         <main className="main">
-          <div className="content">
-            <SelectionWheel
-              participants={participants}
-              onSelect={handleSelection}
-              type={selectionType}
-              onUpdateChancePercentage={selectionType === 'weekly' ? handleChancePercentageUpdate : undefined}
-              allParticipants={allParticipants as DailyParticipant[] | undefined}
-              repository={participantRepository}
-              weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
-              dailyUseCases={selectionType === 'daily' ? dailyUseCases : undefined}
-              currentAnimator={currentAnimator}
-            />
-            {selectionType === 'daily' && allParticipants && (
-              <ParticipantRanking
-                participants={allParticipants as DailyParticipant[]}
-                onReset={resetParticipants}
+          <div className="main-content">
+            {/* Zone centrale - Sélection */}
+            <div className="selection-area">
+              <SelectionWheel
+                participants={participants}
+                onSelect={handleSelection}
+                type={selectionType}
+                onUpdateChancePercentage={selectionType === 'weekly' ? handleChancePercentageUpdate : undefined}
+                allParticipants={allParticipants as DailyParticipant[] | undefined}
+                repository={participantRepository}
+                weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
+                dailyUseCases={selectionType === 'daily' ? dailyUseCases : undefined}
+                currentAnimator={currentAnimator}
               />
-            )}
-            {selectionType === 'weekly' && (
-              <>
-                <ChancePercentageEditor
-                  participants={participants}
-                  onUpdateChancePercentage={handleChancePercentageUpdate}
+            </div>
+
+            {/* Zone pour le daily ranking si nécessaire */}
+            {selectionType === 'daily' && allParticipants && (
+              <div className="daily-ranking-area">
+                <ParticipantRanking
+                  participants={allParticipants as DailyParticipant[]}
+                  onReset={resetParticipants}
                 />
-              </>
+              </div>
             )}
           </div>
         </main>
 
-        {/* Bouton de configuration flottant */}
-        <button 
-          className="config-btn" 
-          onClick={() => setShowConfiguration(true)}
-          title="Configuration & Base de données"
-        >
-          ⚙️
-        </button>
+        {/* Bloc fixe à gauche - Nos derniers animateurs */}
+        {selectionType === 'weekly' && animatorHistory.length > 0 && (
+          <div className="fixed-left-panel">
+            <AnimatorHistory history={animatorHistory} />
+          </div>
+        )}
 
-        {/* Modal de configuration */}
-        {showConfiguration && (
-          <Configuration onClose={() => setShowConfiguration(false)} />
+        {/* Bouton de paramètres flottant */}
+        <SettingsButton onClick={() => setShowSettings(true)} />
+
+        {/* Modal de paramètres */}
+        {showSettings && (
+          <AppSettings 
+            onClose={() => setShowSettings(false)}
+            participants={participants}
+            onUpdateChancePercentage={handleChancePercentageUpdate}
+          />
         )}
       </div>
 
