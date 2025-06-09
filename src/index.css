@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* Thème par défaut (Dark Mode) */
+:root,
+html.theme-dark {
   --glass-background: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-shadow: rgba(0, 0, 0, 0.1);
@@ -30,6 +32,62 @@
   --accent-secondary: #8b5cf6;
 }
 
+/* White Mode */
+html.theme-white {
+  --glass-background: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.1);
+  --glass-shine: rgba(255, 255, 255, 0.8);
+  
+  --background-primary: rgba(248, 250, 252, 1);
+  --background-secondary: rgba(255, 255, 255, 0.95);
+  --text-primary: rgba(15, 23, 42, 0.95);
+  --text-secondary: rgba(51, 65, 85, 0.8);
+  --accent-primary: rgba(59, 130, 246, 1);
+  --accent-secondary: rgba(147, 51, 234, 1);
+  --surface-primary: rgba(0, 0, 0, 0.05);
+  --surface-secondary: rgba(0, 0, 0, 0.02);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.15);
+
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-card: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #8b5cf6;
+}
+
+/* Unicorn Mode */
+html.theme-unicorn {
+  --glass-background: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: rgba(0, 0, 0, 0.2);
+  --glass-shine: rgba(255, 255, 255, 0.1);
+  
+  --background-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --accent-primary: rgba(255, 20, 147, 0.9);
+  --accent-secondary: rgba(138, 43, 226, 0.9);
+  --surface-primary: rgba(255, 255, 255, 0.2);
+  --surface-secondary: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+
+  --bg-primary: #6b46c1;
+  --bg-secondary: #8b5cf6;
+  --bg-card: #a855f7;
+  --text-primary: #fbbf24;
+  --text-secondary: #f59e0b;
+  --text-muted: #d97706;
+  --accent-primary: #ec4899;
+  --accent-secondary: #8b5cf6;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background-primary: #000000;
@@ -53,6 +111,80 @@ body {
   background: linear-gradient(135deg, var(--background-primary), var(--background-secondary));
   color: var(--text-primary);
   min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+/* Unicorn Mode - Animations magiques */
+html.theme-unicorn body {
+  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+html.theme-unicorn .card {
+  box-shadow: 
+    0 8px 32px var(--glass-shadow),
+    0 0 20px rgba(255, 20, 147, 0.3),
+    inset 0 0 0 1px var(--glass-shine);
+}
+
+html.theme-unicorn .card:hover {
+  animation: unicornGlow 2s ease-in-out infinite;
+}
+
+html.theme-unicorn .selection-button {
+  background: linear-gradient(45deg, #ff1493, #8a2be2, #00bfff, #ff69b4);
+  background-size: 400% 400%;
+  animation: gradientShift 3s ease infinite;
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.5);
+}
+
+html.theme-unicorn .selection-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(255, 20, 147, 0.7);
+}
+
+html.theme-unicorn .title {
+  background: linear-gradient(45deg, #ff1493, #8a2be2, #00bfff, #ff69b4);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 3s ease infinite;
+  text-shadow: 0 0 20px rgba(255, 20, 147, 0.5);
+}
+
+html.theme-unicorn .tabs {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+html.theme-unicorn .tab.active {
+  background: linear-gradient(45deg, #ff1493, #8a2be2);
+  box-shadow: 0 0 15px rgba(255, 20, 147, 0.4);
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes unicornGlow {
+  0%, 100% { 
+    box-shadow: 
+      0 8px 32px var(--glass-shadow),
+      0 0 20px rgba(255, 20, 147, 0.3),
+      inset 0 0 0 1px var(--glass-shine);
+  }
+  50% { 
+    box-shadow: 
+      0 8px 32px var(--glass-shadow),
+      0 0 40px rgba(255, 20, 147, 0.6),
+      0 0 60px rgba(138, 43, 226, 0.4),
+      inset 0 0 0 1px var(--glass-shine);
+  }
 }
 
 .container {
