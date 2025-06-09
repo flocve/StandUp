@@ -1,7 +1,7 @@
 .theme-selector {
   position: fixed;
   bottom: 20px;
-  right: 33px;
+  right: 20px;
   z-index: 1000;
   background: var(--glass-background);
   backdrop-filter: blur(12px);
