@@ -44,6 +44,9 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
   const handleAnimatorSelection = async () => {
     if (isSpinning) return;
 
+    // Protection supplémentaire : désactiver immédiatement pour éviter les clics multiples
+    // Cette protection sera maintenue par l'état isSpinning du hook useParticipants
+    
     // Faire la vraie sélection avec les diviseurs
     const realWinner = await weeklyUseCases.selectWeeklyAnimator();
     

@@ -1,14 +1,14 @@
 .animator-history {
-  background: rgba(17, 17, 17, 0.6);
+  background: var(--glass-background);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 1.5rem;
   width: 100%;
   box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 10px 30px var(--shadow-color),
+    inset 0 0 0 1px var(--glass-shine);
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow-x: hidden;
@@ -23,7 +23,7 @@
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -39,7 +39,7 @@
   transform: translateX(-50%);
   width: 30px;
   height: 2px;
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   border-radius: 2px;
 }
 
@@ -60,8 +60,8 @@
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(59, 130, 246, 0.3) 10%,
-    rgba(59, 130, 246, 0.3) 90%,
+    var(--accent-primary-alpha) 10%,
+    var(--accent-primary-alpha) 90%,
     transparent 100%
   );
   background-size: 2px 100%;
@@ -74,19 +74,19 @@
 }
 
 .animator-history-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-background);
   border-radius: 2px;
 }
 
 .animator-history-list::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 4px var(--accent-primary-alpha);
 }
 
 .animator-history-list::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  box-shadow: 0 2px 8px var(--accent-primary-alpha);
 }
 
 .animator-history-item {
@@ -99,7 +99,7 @@
   border-radius: 0;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--glass-border);
   position: relative;
   cursor: pointer;
   box-sizing: border-box;
@@ -116,15 +116,15 @@
   transform: translateY(-50%);
   width: 8px;
   height: 8px;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--text-secondary);
   border-radius: 50%;
   transition: all 0.3s ease;
   z-index: 2;
 }
 
 .animator-history-item:first-child {
-  background: rgba(59, 130, 246, 0.1);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--accent-primary-alpha);
+  border-bottom: 1px solid var(--accent-primary);
   min-height: 60px;
   font-weight: 600;
   
@@ -141,7 +141,7 @@
   bottom: 0;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    rgba(59, 130, 246, 0.08) 50%, 
+    var(--accent-primary-alpha) 50%, 
     transparent 100%
   );
   opacity: 0;
@@ -152,28 +152,28 @@
 
 /* Bigger timeline dot for current */
 .animator-history-item:first-child::before {
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   box-shadow: 
-    0 0 0 3px rgba(59, 130, 246, 0.2),
-    0 2px 8px rgba(59, 130, 246, 0.3);
+    0 0 0 3px var(--accent-primary-alpha),
+    0 2px 8px var(--accent-primary-alpha);
   animation: pulse 2s ease-in-out infinite;
   z-index: 3;
 }
 
 .animator-history-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom-color: rgba(59, 130, 246, 0.4);
+  background: var(--glass-background);
+  border-bottom-color: var(--accent-primary);
   
 
 }
 
 .animator-history-item:hover::before {
-  background: #3B82F6;
+  background: var(--accent-primary);
   transform: translateY(-50%) scale(1.2);
 }
 
 .animator-history-item:first-child:hover {
-  background: rgba(59, 130, 246, 0.15);
+  background: var(--accent-primary-alpha);
 }
 
 .animator-history-number {
@@ -195,7 +195,7 @@
 }
 
 .animator-history-name {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 0.85rem;
   white-space: nowrap;
@@ -207,7 +207,7 @@
 .animator-history-item:first-child .animator-history-name {
   font-weight: 700;
   font-size: 1.1rem;
-  color: #3B82F6;
+  color: var(--accent-primary);
   text-shadow: none;
 }
 
@@ -216,14 +216,14 @@
   left: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   font-size: 0.65rem;
   font-weight: 500;
   white-space: nowrap;
-  background: rgba(17, 17, 17, 0.8);
+  background: var(--surface-secondary);
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
   text-align: center;
   width: 5.5rem;
   overflow: hidden;
@@ -231,9 +231,9 @@
 }
 
 .animator-history-item:first-child .animator-history-date {
-  color: rgba(59, 130, 246, 0.9);
-  background: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--accent-primary);
+  background: var(--accent-primary-alpha);
+  border-color: var(--accent-primary);
   font-weight: 600;
 }
 
@@ -247,13 +247,13 @@
 @keyframes pulse {
   0%, 100% {
     box-shadow: 
-      0 0 0 3px rgba(59, 130, 246, 0.2),
-      0 2px 8px rgba(59, 130, 246, 0.3);
+      0 0 0 3px var(--accent-primary-alpha),
+      0 2px 8px var(--accent-primary-alpha);
   }
   50% {
     box-shadow: 
-      0 0 0 6px rgba(59, 130, 246, 0.1),
-      0 2px 12px rgba(59, 130, 246, 0.4);
+      0 0 0 6px var(--accent-primary-alpha),
+      0 2px 12px var(--accent-primary-alpha);
   }
 }
 

@@ -20,6 +20,10 @@ html.theme-dark {
   --surface-secondary: rgba(255, 255, 255, 0.5);
   --border-color: rgba(0, 0, 0, 0.1);
   --shadow-color: rgba(0, 0, 0, 0.1);
+  --accent-primary-alpha: rgba(59, 130, 246, 0.3);
+  --accent-secondary-alpha: rgba(147, 51, 234, 0.2);
+  --success-color: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.4);
 
   /* Dark theme colors */
   --bg-primary: #111827;
@@ -49,6 +53,10 @@ html.theme-white {
   --surface-secondary: rgba(0, 0, 0, 0.02);
   --border-color: rgba(0, 0, 0, 0.1);
   --shadow-color: rgba(0, 0, 0, 0.15);
+  --accent-primary-alpha: rgba(59, 130, 246, 0.15);
+  --accent-secondary-alpha: rgba(147, 51, 234, 0.15);
+  --success-color: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.3);
 
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
@@ -77,6 +85,10 @@ html.theme-unicorn {
   --surface-secondary: rgba(255, 255, 255, 0.1);
   --border-color: rgba(255, 255, 255, 0.2);
   --shadow-color: rgba(0, 0, 0, 0.3);
+  --accent-primary-alpha: rgba(255, 20, 147, 0.25);
+  --accent-secondary-alpha: rgba(138, 43, 226, 0.25);
+  --success-color: #00ff7f;
+  --success-glow: rgba(0, 255, 127, 0.5);
 
   --bg-primary: #6b46c1;
   --bg-secondary: #8b5cf6;

@@ -10,16 +10,18 @@
 }
 
 .ranking {
-  background: rgba(17, 17, 17, 0.6);
+  background: var(--glass-background);
   border-radius: 12px;
   padding: 0.75rem;
   width: 100%;
   max-height: 400px;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 8px 32px var(--shadow-color),
+    inset 0 0 0 1px var(--glass-shine);
 }
 
 .ranking-header {
@@ -31,13 +33,13 @@
 }
 
 .ranking-title {
-  color: #3B82F6;
+  color: var(--accent-primary);
   font-size: 0.875rem;
   font-weight: 600;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -49,21 +51,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass-background);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #94A3B8;
+  color: var(--text-secondary);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
 
 .ranking-reset-button:hover {
-  background: rgba(59, 130, 246, 0.2);
-  color: #3B82F6;
+  background: var(--accent-primary-alpha);
+  color: var(--accent-primary);
   transform: rotate(90deg);
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: var(--accent-primary);
 }
 
 .ranking-list {
@@ -86,7 +88,7 @@
 }
 
 .ranking-list::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--glass-border);
   border-radius: 3px;
 }
 
@@ -95,22 +97,22 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
-  background: rgba(32, 32, 32, 0.6);
+  background: var(--surface-secondary);
   border-radius: 8px;
   transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
 }
 
 .ranking-item.spoken {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, var(--accent-primary-alpha) 0%, var(--accent-secondary-alpha) 100%);
+  border: 1px solid var(--accent-primary);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .ranking-item:hover {
-  background: rgba(45, 45, 45, 0.8);
+  background: var(--surface-primary);
   transform: translateX(-4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-shine);
 }
 
 .ranking-position {
@@ -119,24 +121,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--glass-background);
   border-radius: 50%;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .ranking-item.spoken .ranking-position {
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   color: white;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 4px var(--accent-primary-alpha);
 }
 
 .ranking-name {
   flex: 1;
   font-weight: 500;
   font-size: 0.875rem;
-  color: #fff;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -144,17 +146,17 @@
 
 .ranking-item.spoken .ranking-name {
   font-weight: 600;
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .ranking-status {
-  color: #10b981;
+  color: var(--success-color);
   font-size: 0.875rem;
   font-weight: 600;
-  text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  text-shadow: 0 0 8px var(--success-glow);
 }
 
 .azure-button {
