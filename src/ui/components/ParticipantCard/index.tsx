@@ -93,6 +93,11 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   // Calcul de la couleur de la carte basée sur les chances
   const chancePercentage = 'getChancePercentage' in participant ? participant.getChancePercentage() : 1;
   
+  // Calculer le pourcentage de chance réel pour l'affichage
+  const realChancePercentage = showPityInfo && 'getChancePercentage' in participant && allParticipants.length > 0 
+    ? calculateChancePercentage(allParticipants as Participant[], participant as Participant)
+    : 0;
+  
   // Détermine si ce participant a les plus hautes chances
   const isTopChance = showPityInfo && allParticipants.length > 0 && 
     chancePercentage === Math.min(...allParticipants.map(p => 
@@ -114,6 +119,19 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   
   // Conversion en RGB pour les propriétés CSS
   const rgbColor = hexToRgb(cardColor);
+
+  // Icône adaptée au thème pour le pourcentage de chance
+  const getChanceIcon = () => {
+    switch (theme) {
+      case 'unicorn':
+        return '🦄';
+      case 'white':
+        return '⚡';
+      case 'dark':
+      default:
+        return '🎯';
+    }
+  };
 
   return (
     <div
@@ -169,11 +187,11 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
         <div className="card-info">
           <h3 className="card-name">{participant.name.value}</h3>
           
-          {/* Compteur de chances pour les participants hebdomadaires */}
+          {/* Pourcentage de chance pour les participants hebdomadaires */}
           {showPityInfo && 'getChancePercentage' in participant && (
             <div className="pity-counter">
-              <span className="pity-star">⭐</span>
-              <span className="pity-count">{participant.getChancePercentage()}</span>
+              <span className="pity-star">{getChanceIcon()}</span>
+              <span className="pity-count">{realChancePercentage}%</span>
             </div>
           )}
         </div>

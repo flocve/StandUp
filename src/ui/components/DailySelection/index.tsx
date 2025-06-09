@@ -34,7 +34,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     isCurrentSelected,
     fadingOutParticipants,
     handleSelection
-  } = useParticipants(participants, 'daily', undefined, true);
+  } = useParticipants(participants, 'daily', undefined, false);
 
   const { lastSpeaker } = useDailyParticipants(allParticipants);
 
