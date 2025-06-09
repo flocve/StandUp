@@ -48,33 +48,6 @@ export const AppSettings: React.FC<AppSettingsProps> = ({
           ))}
         </div>
       </div>
-
-      <div className="setting-item">
-        <label>Paramètres de l'application</label>
-        <div className="switch-group">
-          <div className="switch-item">
-            <span>Animations</span>
-            <div className="switch">
-              <input type="checkbox" id="animations" defaultChecked />
-              <label htmlFor="animations"></label>
-            </div>
-          </div>
-          <div className="switch-item">
-            <span>Sons</span>
-            <div className="switch">
-              <input type="checkbox" id="sounds" />
-              <label htmlFor="sounds"></label>
-            </div>
-          </div>
-          <div className="switch-item">
-            <span>Notifications</span>
-            <div className="switch">
-              <input type="checkbox" id="notifications" defaultChecked />
-              <label htmlFor="notifications"></label>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 
@@ -185,35 +158,6 @@ export const AppSettings: React.FC<AppSettingsProps> = ({
       </div>
       
       <div className="advanced-options">
-        <div className="option-group">
-          <h4>Base de données</h4>
-          <div className="option-item">
-            <span>Synchronisation temps réel</span>
-            <div className="switch">
-              <input type="checkbox" id="realtime" defaultChecked />
-              <label htmlFor="realtime"></label>
-            </div>
-          </div>
-          <div className="option-item">
-            <span>Cache local</span>
-            <div className="switch">
-              <input type="checkbox" id="cache" defaultChecked />
-              <label htmlFor="cache"></label>
-            </div>
-          </div>
-        </div>
-        
-        <div className="option-group">
-          <h4>Performance</h4>
-          <div className="option-item">
-            <span>Mode haute performance</span>
-            <div className="switch">
-              <input type="checkbox" id="performance" />
-              <label htmlFor="performance"></label>
-            </div>
-          </div>
-        </div>
-
         <div className="option-group danger-zone">
           <h4>Zone de danger</h4>
           <button className="danger-btn">
@@ -262,4 +206,6 @@ export const AppSettings: React.FC<AppSettingsProps> = ({
       </div>
     </div>
   );
-}; 
+};
+
+export default AppSettings; 
