@@ -8,8 +8,21 @@ interface AnimatorHistoryEntry {
 
 interface AnimatorRepository {
   getAnimatorHistory: () => Promise<Array<{ id: string; date: string }>>;
-  addToAnimatorHistory: (participantId: string) => Promise<void>;
+  addToAnimatorHistory: (participantId: string, date?: Date) => Promise<void>;
 }
+
+// Fonction pour calculer le prochain lundi
+const getNextMonday = (): Date => {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, ..., 6 = samedi
+  const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek); // Si c'est dimanche, le prochain lundi est dans 1 jour
+  
+  const nextMonday = new Date(today);
+  nextMonday.setDate(today.getDate() + daysUntilMonday);
+  nextMonday.setHours(0, 0, 0, 0); // Commencer à minuit
+  
+  return nextMonday;
+};
 
 export const useAnimators = (
   participants: Participant[],
@@ -67,10 +80,11 @@ export const useAnimators = (
   }, [loadHistory, participants.length]);
 
   const addAnimator = async (animator: Participant) => {
-    await repository.addToAnimatorHistory(animator.id.value);
+    const nextMonday = getNextMonday();
+    await repository.addToAnimatorHistory(animator.id.value, nextMonday);
     const newHistoryEntry = {
       participant: animator,
-      date: new Date()
+      date: nextMonday
     };
     setAnimatorHistory(prev => [newHistoryEntry, ...prev]);
     setCurrentAnimator(animator);

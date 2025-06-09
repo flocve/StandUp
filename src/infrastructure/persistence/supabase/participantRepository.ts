@@ -224,12 +224,15 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
     }
   }
 
-  async addToAnimatorHistory(participantId: string): Promise<void> {
+  async addToAnimatorHistory(participantId: string, date?: Date): Promise<void> {
+    // Si aucune date n'est fournie, calculer le prochain lundi
+    const animatorDate = date || this.getNextMonday();
+    
     const { error } = await supabase
       .from('animator_history')
       .insert({
         participant_id: participantId,
-        date: new Date().toISOString()
+        date: animatorDate.toISOString()
       });
 
     if (error) {
@@ -254,6 +257,19 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
         })
         .eq('id', participantId);
     }
+  }
+
+  // Fonction pour calculer le prochain lundi
+  private getNextMonday(): Date {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, ..., 6 = samedi
+    const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek); // Si c'est dimanche, le prochain lundi est dans 1 jour
+    
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + daysUntilMonday);
+    nextMonday.setHours(0, 0, 0, 0); // Commencer à minuit
+    
+    return nextMonday;
   }
 
   async getAnimatorHistory(): Promise<Array<{ id: string; date: string }>> {

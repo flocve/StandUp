@@ -9,5 +9,5 @@ export interface ParticipantRepository {
   resetDailyParticipants(): Promise<void>;
   getParticipantById(id: ParticipantId): Promise<Participant | null>;
   updateChancePercentage(participantId: string, newValue: number): Promise<void>;
-  addToAnimatorHistory(participantId: string): Promise<void>;
+  addToAnimatorHistory(participantId: string, date?: Date): Promise<void>;
 } 
