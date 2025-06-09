@@ -13,6 +13,7 @@ interface DailySelectionProps {
   allParticipants?: DailyParticipant[];
   dailyUseCases?: DailySelectionUseCases;
   currentAnimator?: Participant | null;
+  onTerminate?: () => void;
 }
 
 export const DailySelection: React.FC<DailySelectionProps> = ({
@@ -20,7 +21,8 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
   onSelect,
   allParticipants,
   dailyUseCases,
-  currentAnimator
+  currentAnimator,
+  onTerminate
 }) => {
   const {
     participants: currentParticipants,
@@ -70,17 +72,31 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     }
   };
 
+  // Vérifier s'il faut afficher le bouton Terminer
+  const shouldShowTerminate = participants.length === 0 && currentSpeaker && onTerminate;
+
   return (
     <div className="wheel-section">
-      <button
-        onClick={handleDailySelection}
-        disabled={isSpinning}
-        className={`selection-button ${isSpinning ? 'selecting' : ''}`}
-      >
-        <div className="button-content">
-          {isSpinning ? 'Sélection en cours...' : 'Sélectionner'}
-        </div>
-      </button>
+      {!shouldShowTerminate ? (
+        <button
+          onClick={handleDailySelection}
+          disabled={isSpinning}
+          className={`selection-button ${isSpinning ? 'selecting' : ''}`}
+        >
+          <div className="button-content">
+            {isSpinning ? 'Sélection en cours...' : 'Sélectionner'}
+          </div>
+        </button>
+      ) : (
+        <button
+          onClick={onTerminate}
+          className="selection-button terminate-button"
+        >
+          <div className="button-content">
+            Terminer le Stand-up
+          </div>
+        </button>
+      )}
 
       <div className={`current-speaker ${
         isSpinning ? 'selecting' : 

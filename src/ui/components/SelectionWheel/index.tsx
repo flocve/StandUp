@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Participant, DailyParticipant } from '../../../domain/participant/entities';
 import { DailySelection } from '../DailySelection';
 import { AnimatorSelection } from '../AnimatorSelection';
@@ -30,7 +30,15 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
   dailyUseCases,
   currentAnimator
 }) => {
-  if (participants.length === 0) {
+  const [showFinalCompletion, setShowFinalCompletion] = useState(false);
+
+  // Fonction pour terminer définitivement le stand-up
+  const handleTerminateStandUp = () => {
+    setShowFinalCompletion(true);
+  };
+
+  // Si on a choisi de montrer la completion finale
+  if (showFinalCompletion) {
     return (
       <div className="completion-container">
         <div className="completion-emojis">
@@ -57,6 +65,7 @@ export const SelectionWheel: React.FC<SelectionWheelProps> = ({
             allParticipants={allParticipants}
             dailyUseCases={dailyUseCases}
             currentAnimator={currentAnimator}
+            onTerminate={handleTerminateStandUp}
           />
         ) : (
           repository && onUpdateChancePercentage && weeklyUseCases && (
