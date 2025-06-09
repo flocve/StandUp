@@ -4,8 +4,9 @@ import { AnimatorHistory } from '../AnimatorHistory';
 import { ChancePercentageEditor } from '../ChancePercentageEditor';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useAnimators } from '../../../hooks/useAnimators';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { Participant } from '../../../domain/participant/entities';
-import { getParticipantPhotoUrl, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
+import { getParticipantPhotoUrlWithTheme, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
 import type { WeeklySelectionUseCases } from '../../../application/weekly/useCases';
 import './styles.css';
 
@@ -24,6 +25,7 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
   repository,
   weeklyUseCases
 }) => {
+  const { theme } = useTheme();
   const {
     participants: currentParticipants,
     selectedParticipant,
@@ -92,9 +94,10 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
           <div className="current-speaker-avatar">
             {(selectedParticipant || currentAnimator) && (
               <img 
-                src={getParticipantPhotoUrl(
+                src={getParticipantPhotoUrlWithTheme(
                   (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value || '',
-                  (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.getPhotoUrl()
+                  (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.getPhotoUrl(),
+                  theme
                 )}
                 alt={(isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value}
                 className="current-speaker-image"

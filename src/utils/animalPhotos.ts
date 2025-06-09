@@ -48,13 +48,36 @@ function simpleHash(str: string): number {
 }
 
 /**
- * Génère une URL de photo d'animal mignon basée sur le nom du participant
- * Le même nom génèrera toujours la même photo pour la consistance
+ * Génère une photo d'animal mignon basée sur le nom du participant
+ * Utilise une approche déterministe pour que chaque nom ait toujours le même animal
  */
 export function generateCuteAnimalPhoto(participantName: string): string {
+  const animals = [
+    'cat', 'dog', 'panda', 'fox', 'rabbit', 'koala', 'penguin', 'owl',
+    'bear', 'lion', 'tiger', 'elephant', 'giraffe', 'zebra', 'horse',
+    'dolphin', 'whale', 'shark', 'turtle', 'frog', 'bird', 'butterfly',
+    'bee', 'ladybug', 'spider', 'snake', 'lizard', 'fish', 'crab'
+  ];
+  
   const hash = simpleHash(participantName);
-  const index = hash % CUTE_ANIMAL_APIS.length;
-  return CUTE_ANIMAL_APIS[index];
+  const animalIndex = hash % animals.length;
+  const animal = animals[animalIndex];
+  
+  // Utiliser une API qui génère des images d'animaux mignons
+  return `https://api.dicebear.com/7.x/animals/svg?seed=${encodeURIComponent(participantName + animal)}&backgroundColor=f0f8ff`;
+}
+
+/**
+ * Génère une image de licorne personnalisée basée sur le prénom pour le thème Unicorn Mode
+ * Chaque prénom aura sa propre licorne unique avec des couleurs et des accessoires différents
+ */
+export function generateUnicornAvatar(participantName: string): string {
+  
+  // Créer une graine unique combinant le nom et l'expression joyeuse
+  const seed = `${participantName}`;
+  
+  // Utiliser le style 'fun-emoji' qui génère des visages expressifs colorés
+  return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(seed)}&backgroundType=gradientLinear&eyes=closed,closed2,crying,cute,glasses,love,pissed,plain,sad,sleepClose,stars,wink,wink2&mouth=cute,kissHeart,lilSmile,smileLol,smileTeeth,tongueOut,wideSmile&scale=90&radius=50`;
 }
 
 /**
@@ -82,4 +105,18 @@ export function getParticipantPhotoUrl(participantName: string, customPhotoUrl?:
   
   // Générer une photo d'animal mignon
   return generateCuteAnimalPhoto(participantName);
+}
+
+/**
+ * Obtient l'URL de photo à utiliser pour un participant avec support du thème licorne
+ * En mode licorne, génère des avatars de licorne magiques
+ */
+export function getParticipantPhotoUrlWithTheme(participantName: string, customPhotoUrl?: string, theme?: string): string {
+  // Si le thème est licorne, utiliser des avatars de licorne personnalisés
+  if (theme === 'unicorn') {
+    return generateUnicornAvatar(participantName);
+  }
+  
+  // Sinon, utiliser la logique normale
+  return getParticipantPhotoUrl(participantName, customPhotoUrl);
 } 

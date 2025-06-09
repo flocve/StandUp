@@ -1,6 +1,7 @@
 import React from 'react';
 import { Participant, DailyParticipant } from '../../../domain/participant/entities';
-import { getParticipantPhotoUrl, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
+import { getParticipantPhotoUrlWithTheme, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
+import { useTheme } from '../../../contexts/ThemeContext';
 import './styles.css';
 
 interface ParticipantCardProps {
@@ -87,26 +88,31 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   isWaitingTurn = false,
   isCurrentAnimator = false
 }) => {
-  const isWeeklyParticipant = participant instanceof Participant;
+  const { theme } = useTheme();
   
-  // Calculer le pourcentage de chance basé sur le diviseur
-  const chancePercentage = allParticipants.length > 0 && isWeeklyParticipant ? 
-    calculateChancePercentage(allParticipants as Participant[], participant) : 0;
+  // Calcul de la couleur de la carte basée sur les chances
+  const chancePercentage = 'getChancePercentage' in participant ? participant.getChancePercentage() : 1;
+  
+  // Détermine si ce participant a les plus hautes chances
+  const isTopChance = showPityInfo && allParticipants.length > 0 && 
+    chancePercentage === Math.max(...allParticipants.map(p => 
+      'getChancePercentage' in p ? p.getChancePercentage() : 1
+    ));
 
-  // Vérifier si c'est un participant avec la plus haute chance
-  const maxChance = isWeeklyParticipant ? getMaxChancePercentage(allParticipants as Participant[]) : 0;
-  const isTopChance = showPityInfo && chancePercentage === maxChance && maxChance > 0;
+  // Couleur basée sur les chances pour les participants hebdomadaires
+  const getCardColor = () => {
+    if (!showPityInfo) {
+      return '#3B82F6'; // Bleu par défaut pour daily
+    }
+    
+    if (chancePercentage >= 3) return '#EF4444'; // Rouge pour hautes chances
+    if (chancePercentage >= 2) return '#F59E0B'; // Orange pour chances moyennes
+    return '#3B82F6'; // Bleu pour chances normales
+  };
 
-  // Choisir la couleur basée sur le mode
-  let cardColor: string;
-  if (showPityInfo && allParticipants.length > 0 && isWeeklyParticipant) {
-    // Mode Animateur : couleur basée sur les chances
-    cardColor = getColorByChance(chancePercentage);
-  } else {
-    // Mode Daily : couleur cohérente basée sur l'ID
-    cardColor = getConsistentColor(participant.id.value);
-  }
-
+  const cardColor = getCardColor();
+  
+  // Conversion en RGB pour les propriétés CSS
   const rgbColor = hexToRgb(cardColor);
 
   return (
@@ -129,7 +135,11 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
         
         <div className="card-avatar">
           {(() => {
-            const photoUrl = getParticipantPhotoUrl(participant.name.value, participant.getPhotoUrl());
+            const photoUrl = getParticipantPhotoUrlWithTheme(
+              participant.name.value, 
+              participant.getPhotoUrl(),
+              theme
+            );
             return (
               <img 
                 src={photoUrl} 
@@ -156,31 +166,17 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
         </div>
         
         {/* Nom et compteur sur la même ligne */}
-        <div className="name-counter-row">
+        <div className="card-info">
           <h3 className="card-name">{participant.name.value}</h3>
-          {isWeeklyParticipant && showPityInfo && (
+          
+          {/* Compteur de chances pour les participants hebdomadaires */}
+          {showPityInfo && 'getChancePercentage' in participant && (
             <div className="pity-counter">
-              <span className="pity-count">{participant.getChancePercentage() || 1}</span>
+              <span className="pity-star">⭐</span>
+              <span className="pity-count">{participant.getChancePercentage()}</span>
             </div>
           )}
         </div>
-        
-        {isWeeklyParticipant && showPityInfo && (
-          <div className="pity-stats-compact">
-            <div className="chance-percentage">
-              {chancePercentage}% de chance
-            </div>
-            <div className="chance-bar-container">
-              <div 
-                className="chance-bar" 
-                style={{
-                  width: `${Math.max(5, chancePercentage)}%`,
-                  backgroundColor: cardColor
-                }}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

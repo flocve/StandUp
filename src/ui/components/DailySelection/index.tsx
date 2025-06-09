@@ -3,9 +3,10 @@ import { DailyParticipant, Participant } from '../../../domain/participant/entit
 import { ParticipantCard } from '../ParticipantCard';
 import { useParticipants } from '../../../hooks/useParticipants';
 import { useDailyParticipants } from '../../../hooks/useDailyParticipants';
-import { getParticipantPhotoUrl, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
+import { getParticipantPhotoUrlWithTheme, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
 import type { DailySelectionUseCases } from '../../../application/daily/useCases';
-import '../SelectionWheel/styles.css';
+import './styles.css';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface DailySelectionProps {
   participants: DailyParticipant[];
@@ -24,6 +25,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
   currentAnimator,
   onTerminate
 }) => {
+  const { theme } = useTheme();
   const {
     participants: currentParticipants,
     selectedParticipant,
@@ -32,7 +34,7 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     isCurrentSelected,
     fadingOutParticipants,
     handleSelection
-  } = useParticipants(participants, 'daily');
+  } = useParticipants(participants, 'daily', undefined, true);
 
   const { lastSpeaker } = useDailyParticipants(allParticipants);
 
@@ -102,10 +104,10 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
         isSpinning ? 'selecting' : 
         isWinnerRevealed ? 'winner-revealed' : 
         isCurrentSelected ? 'current-speaker-selected' :
-        currentSpeaker ? 'current-speaker-selected' : ''
+        selectedParticipant ? 'current-speaker-selected' : ''
       }`}>
         <div className="current-speaker-label">
-          {isSpinning ? 'SÉLECTION EN COURS...' : isWinnerRevealed ? '🎯 C\'EST À TOI ! 🎯' : 'À TOI DE PARLER'}
+          {isSpinning ? 'SÉLECTION EN COURS...' : isWinnerRevealed ? '🎉 À TOI DE PARLER ! 🎉' : 'À TOI DE PARLER'}
           {isSpinning && <span className="dots">
             <span>.</span><span>.</span><span>.</span>
           </span>}
@@ -115,9 +117,10 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
         {(selectedParticipant || currentSpeaker) && (
           <div className="current-speaker-avatar">
             <img 
-              src={getParticipantPhotoUrl(
+              src={getParticipantPhotoUrlWithTheme(
                 (isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.name.value || '',
-                (isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.getPhotoUrl()
+                (isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.getPhotoUrl(),
+                theme
               )}
               alt={(isSpinning || isWinnerRevealed ? selectedParticipant : currentSpeaker)?.name.value}
               className="current-speaker-image"

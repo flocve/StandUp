@@ -1,6 +1,7 @@
 import React from 'react';
 import { Participant } from '../../../domain/participant/entities';
-import { getParticipantPhotoUrl, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
+import { getParticipantPhotoUrlWithTheme, generateFallbackAnimalPhoto } from '../../../utils/animalPhotos';
+import { useTheme } from '../../../contexts/ThemeContext';
 import './styles.css';
 
 interface CurrentAnimatorProps {
@@ -10,6 +11,8 @@ interface CurrentAnimatorProps {
 export const CurrentAnimator: React.FC<CurrentAnimatorProps> = ({
   currentAnimator
 }) => {
+  const { theme } = useTheme();
+  
   if (!currentAnimator) {
     return (
       <div className="current-animator-widget">
@@ -28,7 +31,11 @@ export const CurrentAnimator: React.FC<CurrentAnimatorProps> = ({
       <div className="animator-info">
         <div className="avatar-container">
           <img 
-            src={getParticipantPhotoUrl(currentAnimator.name.value, currentAnimator.getPhotoUrl())} 
+            src={getParticipantPhotoUrlWithTheme(
+              currentAnimator.name.value, 
+              currentAnimator.getPhotoUrl(),
+              theme
+            )} 
             alt={currentAnimator.name.value}
             className="animator-avatar"
             onError={(e) => {
