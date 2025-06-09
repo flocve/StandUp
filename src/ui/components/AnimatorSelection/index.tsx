@@ -95,22 +95,22 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
             {(selectedParticipant || currentAnimator) && (
               <img 
                 src={getParticipantPhotoUrlWithTheme(
-                  (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value || '',
-                  (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.getPhotoUrl(),
+                  (isSpinning || isWinnerRevealed ? selectedParticipant : currentAnimator || selectedParticipant)?.name.value || '',
+                  (isSpinning || isWinnerRevealed ? selectedParticipant : currentAnimator || selectedParticipant)?.getPhotoUrl(),
                   theme
                 )}
-                alt={(isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value}
+                alt={(isSpinning || isWinnerRevealed ? selectedParticipant : currentAnimator || selectedParticipant)?.name.value}
                 className="current-speaker-image"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  const fallbackUrl = generateFallbackAnimalPhoto((isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value || '');
+                  const fallbackUrl = generateFallbackAnimalPhoto((isSpinning || isWinnerRevealed ? selectedParticipant : currentAnimator || selectedParticipant)?.name.value || '');
                   if (target.src !== fallbackUrl) {
                     target.src = fallbackUrl;
                   } else {
                     target.style.display = 'none';
                     const parent = target.parentElement;
                     if (parent) {
-                      parent.innerHTML = (isSpinning || isWinnerRevealed ? selectedParticipant : selectedParticipant || currentAnimator)?.name.value.charAt(0) || '';
+                      parent.innerHTML = (isSpinning || isWinnerRevealed ? selectedParticipant : currentAnimator || selectedParticipant)?.name.value.charAt(0) || '';
                       parent.style.display = 'flex';
                       parent.style.alignItems = 'center';
                       parent.style.justifyContent = 'center';
@@ -128,8 +128,8 @@ export const AnimatorSelection: React.FC<AnimatorSelectionProps> = ({
             {isSpinning ? (
               selectedParticipant ? selectedParticipant.name.value : '...'
             ) : (
-              selectedParticipant ? selectedParticipant.name.value : 
-              currentAnimator ? currentAnimator.name.value : 'Aucun animateur sélectionné'
+              currentAnimator ? currentAnimator.name.value : 
+              selectedParticipant ? selectedParticipant.name.value : 'Aucun animateur sélectionné'
             )}
           </div>
           {isSpinning && (
