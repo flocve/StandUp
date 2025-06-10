@@ -74,6 +74,30 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
     }
   };
 
+  // Fonction pour la sélection directe d'un participant
+  const handleDirectSelect = async (participant: DailyParticipant) => {
+    if (isSpinning || !dailyUseCases) return;
+
+    try {
+      // Vérifier que le participant est disponible
+      const availableParticipants = await dailyUseCases.getAvailableParticipants();
+      const isAvailable = availableParticipants.some(p => p.id.value === participant.id.value);
+      
+      if (!isAvailable) {
+        console.error('Ce participant n\'est pas disponible pour la sélection');
+        return;
+      }
+
+      // Sélection directe sans animation - appeler directement onSelect
+      participant.markAsSpoken();
+      await dailyUseCases.updateParticipant(participant);
+      onSelect(participant);
+      
+    } catch (error) {
+      console.error('Erreur lors de la sélection directe:', error);
+    }
+  };
+
   // Vérifier s'il faut afficher le bouton Terminer
   const shouldShowTerminate = participants.length === 0 && currentSpeaker && onTerminate;
 
@@ -174,6 +198,8 @@ export const DailySelection: React.FC<DailySelectionProps> = ({
             allParticipants={currentParticipants}
             isWaitingTurn={isSpinning && selectedParticipant?.id.value !== participant.id.value}
             isCurrentAnimator={currentAnimator ? participant.name.value === currentAnimator.name.value : false}
+            onDirectSelect={(p) => handleDirectSelect(p as DailyParticipant)}
+            showDirectSelectButton={!isSpinning && !selectedParticipant}
           />
         ))}
       </div>

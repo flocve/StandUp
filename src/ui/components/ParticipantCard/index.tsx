@@ -14,6 +14,8 @@ interface ParticipantCardProps {
   allParticipants?: (Participant | DailyParticipant)[];
   isWaitingTurn?: boolean;
   isCurrentAnimator?: boolean;
+  onDirectSelect?: (participant: Participant | DailyParticipant) => void;
+  showDirectSelectButton?: boolean;
 }
 
 // Palette de couleurs basée sur les chances (du froid au chaud)
@@ -86,7 +88,9 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
   showPityInfo = false,
   allParticipants = [],
   isWaitingTurn = false,
-  isCurrentAnimator = false
+  isCurrentAnimator = false,
+  onDirectSelect,
+  showDirectSelectButton = false
 }) => {
   const { theme } = useTheme();
   
@@ -149,6 +153,20 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({
           <div className="animator-star">
             ⭐
           </div>
+        )}
+
+        {/* Bouton de sélection directe */}
+        {showDirectSelectButton && onDirectSelect && !isAnimating && (
+          <button
+            className="direct-select-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDirectSelect(participant);
+            }}
+            title={`Sélectionner ${participant.name.value} directement`}
+          >
+            <span className="direct-select-icon">🎯</span>
+          </button>
         )}
         
         <div className="card-avatar">

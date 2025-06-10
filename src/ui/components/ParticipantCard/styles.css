@@ -554,4 +554,83 @@
       0 0 20px rgba(255, 215, 0, 0.6),
       0 0 0 4px rgba(255, 255, 255, 0.5);
   }
+}
+
+/* Bouton de sélection directe */
+.direct-select-button {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8) rotate(-10deg);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 10;
+  box-shadow: 
+    0 4px 12px rgba(16, 185, 129, 0.4),
+    0 0 0 0 rgba(16, 185, 129, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.direct-select-button:hover {
+  transform: scale(1.1) rotate(0deg);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 
+    0 6px 20px rgba(16, 185, 129, 0.6),
+    0 0 0 4px rgba(16, 185, 129, 0.3);
+  animation: directSelectPulse 1.5s ease-in-out infinite;
+}
+
+.direct-select-button:active {
+  transform: scale(1) rotate(0deg);
+  transition: all 0.1s ease;
+}
+
+.direct-select-icon {
+  font-size: 1.2rem;
+}
+
+/* Afficher le bouton au survol de la carte */
+.card:hover .direct-select-button {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) rotate(0deg);
+}
+
+/* Animation du bouton */
+@keyframes directSelectPulse {
+  0%, 100% {
+    box-shadow: 
+      0 6px 20px rgba(16, 185, 129, 0.6),
+      0 0 0 4px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 8px 25px rgba(16, 185, 129, 0.8),
+      0 0 0 6px rgba(16, 185, 129, 0.5);
+  }
+}
+
+
+
+/* Masquer le bouton pendant les animations */
+.card.selected .direct-select-button,
+.card.not-selected .direct-select-button,
+.card.waiting-turn .direct-select-button,
+.card.winner .direct-select-button,
+.card.fading-out .direct-select-button {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none;
 } 
