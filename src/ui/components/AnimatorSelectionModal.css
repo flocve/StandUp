@@ -1,0 +1,395 @@
+/* AnimatorSelectionModal - Design moderne 2025 */
+.animator-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+.animator-modal-overlay.closing {
+  animation: overlayFadeOut 0.3s ease-out;
+}
+
+.animator-modal {
+  background: var(--glass-background);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 1400px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 
+    0 24px 60px var(--glass-shadow),
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 var(--glass-shine);
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.animator-modal-overlay.closing .animator-modal {
+  animation: modalSlideOut 0.3s ease-out;
+}
+
+/* Header de la modale */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--surface-primary);
+  position: relative;
+}
+
+.modal-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+}
+
+.header-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.header-content p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+  opacity: 0.8;
+}
+
+.close-button {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.close-button:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+/* Contenu principal */
+.modal-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  padding: 2rem;
+  max-height: calc(90vh - 200px);
+  overflow: hidden;
+}
+
+/* Zones de contenu */
+.selection-zone,
+.history-zone {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.selection-zone {
+  min-height: 600px;
+}
+
+.history-zone {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.selection-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(124, 58, 237, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.history-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 70% 30%, rgba(79, 124, 255, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Headers des zones */
+.zone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.zone-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.current-animator-info {
+  padding: 0.5rem 1rem;
+  background: var(--accent-secondary-alpha);
+  border: 1px solid var(--accent-secondary);
+  border-radius: 12px;
+  color: var(--accent-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.history-count {
+  padding: 0.5rem 1rem;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Conteneurs */
+.selection-container {
+  position: relative;
+  z-index: 1;
+  height: calc(100% - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Footer */
+.modal-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--glass-border);
+  background: var(--surface-primary);
+  display: flex;
+  justify-content: center;
+}
+
+.back-button {
+  padding: 1rem 2rem;
+  background: var(--glass-background);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px var(--glass-shadow);
+}
+
+.back-button:hover {
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--glass-shadow);
+}
+
+/* Animations */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) translateY(0);
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9) translateY(20px);
+  }
+}
+
+/* Custom scrollbar pour la zone historique */
+.history-zone::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-zone::-webkit-scrollbar-track {
+  background: var(--surface-secondary);
+  border-radius: 3px;
+}
+
+.history-zone::-webkit-scrollbar-thumb {
+  background: var(--accent-secondary);
+  border-radius: 3px;
+}
+
+.history-zone::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .modal-content {
+    grid-template-columns: 1fr 350px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .modal-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 1.5rem;
+  }
+  
+  .history-zone {
+    max-height: 300px;
+  }
+  
+  .selection-zone {
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .animator-modal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 1.5rem;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .header-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .zone-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .selection-zone {
+    min-height: 400px;
+  }
+}
+
+/* Styles temporaires pour les composants de test */
+.temp-selection,
+.temp-history {
+  padding: 2rem;
+  text-align: center;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+}
+
+.temp-button {
+  padding: 1rem 2rem;
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.temp-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--shadow-glow);
+}
+
+.temp-history ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.temp-history li {
+  padding: 0.5rem;
+  background: var(--surface-primary);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+} 

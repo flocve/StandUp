@@ -1,5 +1,5 @@
 import './App.css';
-import { Home } from './ui/pages/Home';
+import { Dashboard } from './ui/pages/Dashboard';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ThemeSelector } from './ui/components/ThemeSelector';
 import { UnicornParticles } from './ui/components/UnicornParticles';
@@ -10,7 +10,7 @@ function App() {
       <div className="App">
         <UnicornParticles />
         <ThemeSelector />
-        <Home />
+        <Dashboard />
       </div>
     </ThemeProvider>
   );
