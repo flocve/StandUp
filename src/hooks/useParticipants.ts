@@ -100,12 +100,12 @@ export const useParticipants = (
         setSelectedParticipant(participants[randomIndex]);
       }, 100);
 
-      const spinDuration = 2000;
+      const spinDuration = 500;
       setTimeout(() => {
         clearInterval(interval);
         
         // Phase de ralentissement court pour le Daily
-        let delays = [200, 350]; // Ralentissement court
+        let delays = [100, 150]; // Ralentissement court
         let delayIndex = 0;
         
         const slowDown = () => {
@@ -124,7 +124,7 @@ export const useParticipants = (
             // Retarder l'appel onSelect jusqu'à la fin de l'animation
             setTimeout(() => {
               onSelect(winner);
-            }, 1300); // Appeler onSelect juste avant la fin de l'animation (Daily plus court)
+            }, 200); // Appeler onSelect juste avant la fin de l'animation (Daily plus court)
 
             setTimeout(() => {
               // Pour le Daily Stand-up, on laisse le parent gérer la suppression via onSelect
@@ -142,7 +142,7 @@ export const useParticipants = (
               setIsCurrentSelected(true); // Passer à l'état stable final pour Daily aussi
               // Ne pas remettre selectedParticipant à null pour qu'il reste visible 
               // setSelectedParticipant(null); // ← Commenté pour garder le participant visible
-            }, 1500); // Animation finale pour Daily aussi
+            }, 400); // Animation finale pour Daily aussi
           }
         };
         

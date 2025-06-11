@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import type { DailyParticipant } from '../../domain/participant/entities';
+import { DailyParticipant } from '../../domain/participant/entities';
 import type { ParticipantRepository } from '../../domain/participant/repository';
 import type { DailySelectionUseCases } from '../../application/daily/useCases';
+import { useParticipants } from '../../hooks/useParticipants';
+import { useDailyParticipants } from '../../hooks/useDailyParticipants';
 import './StandUpModal.css';
 
 interface StandUpModalProps {
@@ -49,9 +51,27 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
   currentAnimator
 }) => {
   const [isClosing, setIsClosing] = useState(false);
-  const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  
+  // Hook système de shuffle existant qui fonctionne
+  const {
+    participants: shuffleParticipants,
+    selectedParticipant,
+    isSpinning,
+    isWinnerRevealed,
+    isCurrentSelected,
+    fadingOutParticipants,
+    handleSelection
+  } = useParticipants(allParticipants || [], 'daily', undefined, false);
+
+  // Hook pour récupérer le dernier speaker
+  const { lastSpeaker } = useDailyParticipants(allParticipants);
+
+  // States pour l'overlay d'animation
+  const [showShuffleOverlay, setShowShuffleOverlay] = useState(false);
+  const [currentShuffleIndex, setCurrentShuffleIndex] = useState(0);
+  const [shuffleNames, setShuffleNames] = useState<string[]>([]);
+  const [shufflePhase, setShufflePhase] = useState<'shuffling' | 'winner'>('shuffling');
+  const [winnerName, setWinnerName] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
@@ -70,9 +90,6 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     setTimeout(() => {
       onClose();
       setIsClosing(false);
-      setSelectedParticipant(null);
-      setIsSelecting(false);
-      setShowSuccessAnimation(false);
     }, 300);
   };
 
@@ -83,30 +100,123 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
   };
 
   const handleParticipantSelect = async (participant: any) => {
-    setSelectedParticipant(participant);
-    setIsSelecting(true);
-    
-    // Animation de sélection
-    setTimeout(() => {
-      setShowSuccessAnimation(true);
-    }, 800);
-    
-    // Appel de la fonction de sélection
-    setTimeout(() => {
+    if (isSpinning || !dailyUseCases) return;
+
+    try {
+      // Vérifier que le participant est disponible
+      const availableParticipants = await dailyUseCases.getAvailableParticipants();
+      const isAvailable = availableParticipants.some(p => p.id.value === participant.id.value);
+      
+      if (!isAvailable) {
+        console.error('Ce participant n\'est pas disponible pour la sélection');
+        return;
+      }
+
+      // Sélection directe - marquer comme ayant parlé et mettre à jour
+      participant.markAsSpoken();
+      await dailyUseCases.updateParticipant(participant);
       onSelect(participant);
-      setIsSelecting(false);
-      setShowSuccessAnimation(false);
-      handleClose();
-    }, 1500);
+      
+    } catch (error) {
+      console.error('Erreur lors de la sélection directe:', error);
+    }
   };
 
-  const handleRandomSelect = () => {
-    const availableParticipants = allParticipants?.filter(p => 
-      typeof p.hasSpoken === 'function' ? !p.hasSpoken() : !p.hasSpoken
-    );
-    if (availableParticipants && availableParticipants.length > 0) {
-      const randomIndex = Math.floor(Math.random() * availableParticipants.length);
-      handleParticipantSelect(availableParticipants[randomIndex]);
+  const handleShuffleSelect = async () => {
+    if (isSpinning || !dailyUseCases) return;
+
+    try {
+      // Obtenir la liste des participants disponibles
+      const available = await dailyUseCases.getAvailableParticipants();
+      
+      if (available.length === 0) {
+        console.error('Aucun participant disponible');
+        return;
+      }
+
+      // Préparer les noms pour l'animation
+      const names = available.map(p => String(p.name?.value || p.name || 'Participant'));
+      setShuffleNames(names);
+      setShowShuffleOverlay(true);
+      setCurrentShuffleIndex(0);
+      setShufflePhase('shuffling');
+      setWinnerName('');
+
+      console.log('🎲 Animation démarrée avec', available.length, 'participants');
+
+      // Animation des noms qui défilent (ultra rapide)
+      let currentIndex = 0;
+      let delay = 20; // Encore plus rapide
+      let cyclesToShow = Math.min(available.length + 3, 5); // Maximum 5 cycles
+      const maxDelay = 50; // Très court
+      const delayIncrement = 3; // Petits incréments
+
+      const animateNames = () => {
+        if (cyclesToShow > 0) {
+          setCurrentShuffleIndex(currentIndex % names.length);
+          currentIndex++;
+          cyclesToShow--;
+          
+          // Ralentir progressivement seulement à la toute fin
+          if (cyclesToShow < 3) { // Ralentissement sur les 3 derniers cycles seulement
+            delay += delayIncrement;
+          }
+          
+          setTimeout(animateNames, Math.min(delay, maxDelay));
+        } else {
+          // Animation terminée - NOUS faisons la vraie sélection
+          console.log('🎯 Sélection du gagnant...');
+          
+          // VRAIE sélection avec notre algorithme
+          const finalWinner = available[Math.floor(Math.random() * available.length)];
+          const winnerName = String(finalWinner.name?.value || finalWinner.name || 'Gagnant');
+          console.log('🏆 Gagnant sélectionné:', winnerName);
+          
+          // Continuer l'animation lentement pendant que le hook fait son animation
+          let finalAnimationRunning = true;
+          const continueAnimation = () => {
+            if (finalAnimationRunning) {
+              setCurrentShuffleIndex((prev) => (prev + 1) % names.length);
+              setTimeout(continueAnimation, 80);
+            }
+          };
+          continueAnimation();
+          
+          // Le hook fait juste l'animation avec notre gagnant prédéterminé
+          handleSelection(async (hookWinner) => {
+            // Arrêter l'animation finale
+            finalAnimationRunning = false;
+            
+            // Utiliser NOTRE gagnant (pas celui du hook)
+            console.log('🎭 Animation terminée, affichage de notre gagnant:', winnerName);
+            
+            // Passer en phase "winner" pour montrer le résultat
+            setWinnerName(winnerName);
+            setShufflePhase('winner');
+            
+            // Mettre à jour la base de données avec NOTRE gagnant
+            try {
+              finalWinner.markAsSpoken();
+              await dailyUseCases.updateParticipant(finalWinner);
+              onSelect(finalWinner);
+              console.log('✅ Base de données mise à jour avec notre gagnant');
+            } catch (error) {
+              console.error('Erreur lors de la mise à jour:', error);
+            }
+            
+            // Masquer l'overlay après avoir bien montré le gagnant
+            setTimeout(() => {
+              setShowShuffleOverlay(false);
+            }, 1500);
+          }, finalWinner); // Passer notre gagnant au hook
+        }
+      };
+
+      // Démarrer l'animation immédiatement
+      animateNames();
+      
+    } catch (error) {
+      console.error('Erreur lors de la sélection shuffle:', error);
     }
   };
 
@@ -119,36 +229,65 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     typeof p.hasSpoken === 'function' ? !p.hasSpoken() : !p.hasSpoken
   ) || [];
 
-  // Trouver le speaker courant (celui qui vient d'être sélectionné)
-  const currentSpeaker = participants && participants.length > 0 ? participants[0] : null;
+  // Trouver le speaker courant - soit celui sélectionné dans l'animation, soit le dernier speaker
+  const currentSpeaker = selectedParticipant instanceof DailyParticipant && selectedParticipant.hasSpoken()
+    ? selectedParticipant
+    : lastSpeaker;
 
   if (!isOpen) return null;
 
   return (
     <div 
-      className={`standup-modal-overlay ${isClosing ? 'closing' : ''} ${isSelecting ? 'selecting' : ''}`}
+      className={`standup-modal-overlay ${isClosing ? 'closing' : ''} ${isSpinning ? 'selecting' : ''}`}
       onClick={handleBackdropClick}
     >
       <div className="standup-modal">
-        {/* Animation de sélection overlay */}
-        {isSelecting && (
-          <div className="selection-overlay">
-            <div className="selection-animation">
-              <div className="selection-spinner"></div>
-              <div className="selection-text">
-                {showSuccessAnimation ? (
-                  <>
-                    <div className="success-icon">🎉</div>
-                    <h3>Sélectionné !</h3>
-                    <p>{selectedParticipant?.name?.value || selectedParticipant?.name}</p>
-                  </>
-                ) : (
-                  <>
-                    <h3>Sélection en cours...</h3>
-                    <p>Préparation du stand-up</p>
-                  </>
-                )}
-              </div>
+        
+        {/* Overlay d'animation de shuffle */}
+        {showShuffleOverlay && (
+          <div className={`shuffle-overlay ${shufflePhase}`}>
+            <div className="shuffle-animation-container">
+              {shufflePhase === 'shuffling' ? (
+                <>
+                  <div className="shuffle-title">
+                    <span className="shuffle-emoji">🎲</span>
+                    <h2>Sélection en cours...</h2>
+                    <p>Qui va présenter aujourd'hui ?</p>
+                  </div>
+                  
+                  <div className="shuffle-name-display">
+                    <div className="shuffle-name">
+                      {shuffleNames[currentShuffleIndex] || 'Sélection...'}
+                    </div>
+                  </div>
+                  
+                  <div className="shuffle-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </>
+              ) : shufflePhase === 'winner' ? (
+                <>
+                  <div className="winner-title">
+                    <span className="winner-emoji">🎉</span>
+                    <h2>Sélectionné !</h2>
+                    <p>C'est au tour de...</p>
+                  </div>
+                  
+                  <div className="winner-name-display">
+                    <div className="winner-name">
+                      {winnerName}
+                    </div>
+                  </div>
+                  
+                  <div className="winner-celebration">
+                    <span>🎊</span>
+                    <span>✨</span>
+                    <span>🎊</span>
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
         )}
@@ -173,61 +312,104 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
         </div>
 
         {/* Speaker Courant - En Haut */}
-        {currentSpeaker && (
-          <div className="current-speaker-section">
-            <div className="current-speaker-card">
-              <div className="speaker-status">
-                <span className="live-indicator"></span>
-                <span>EN COURS</span>
-              </div>
-              
-              {(() => {
-                const speakerName = String(currentSpeaker.name?.value || currentSpeaker.name || 'Speaker');
-                const avatarColor = getAvatarColor(speakerName);
-                const hasPhoto = 'getPhotoUrl' in currentSpeaker && currentSpeaker.getPhotoUrl && currentSpeaker.getPhotoUrl();
+        <div className="current-speaker-section">
+          <div className="current-speaker-card">
+            {currentSpeaker ? (
+              <>
+                <div className="speaker-status">
+                  <span className="live-indicator"></span>
+                  <span>EN COURS</span>
+                </div>
                 
-                return (
-                  <>
-                    <div className="current-speaker-avatar">
-                      {hasPhoto ? (
-                        <img 
-                          src={currentSpeaker.getPhotoUrl!()}
-                          alt={speakerName}
-                          className="current-speaker-photo"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            const parent = target.parentElement;
-                            if (parent) {
-                              target.style.display = 'none';
-                              parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                              parent.innerHTML = `<div class="current-speaker-fallback">${speakerName.charAt(0).toUpperCase()}</div>`;
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div 
-                          className="current-speaker-fallback"
-                          style={{
-                            background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                            color: avatarColor.text
-                          }}
-                        >
-                          {speakerName.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div className="speaker-ring"></div>
-                    </div>
-                    
-                    <div className="current-speaker-info">
-                      <h3>{speakerName}</h3>
-                      <p>Partage ses avancées maintenant</p>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
+                {(() => {
+                  const speakerName = String(currentSpeaker.name?.value || currentSpeaker.name || 'Speaker');
+                  const avatarColor = getAvatarColor(speakerName);
+                  
+                  // Vérification améliorée pour la photo
+                  let photoUrl = null;
+                  if ('getPhotoUrl' in currentSpeaker && typeof currentSpeaker.getPhotoUrl === 'function') {
+                    try {
+                      photoUrl = currentSpeaker.getPhotoUrl();
+                    } catch (error) {
+                      // Erreur silencieuse, on continue avec les autres méthodes
+                    }
+                  }
+                  
+                  // Vérifier aussi les autres propriétés possibles
+                  if (!photoUrl && (currentSpeaker as any).photoUrl) {
+                    photoUrl = (currentSpeaker as any).photoUrl;
+                  }
+                  if (!photoUrl && (currentSpeaker as any).avatar) {
+                    photoUrl = (currentSpeaker as any).avatar;
+                  }
+                  if (!photoUrl && (currentSpeaker as any).photo) {
+                    photoUrl = (currentSpeaker as any).photo;
+                  }
+                  
+                  const hasPhoto = photoUrl && photoUrl.trim() !== '';
+                  
+                  return (
+                    <>
+                      <div className="current-speaker-avatar">
+                        {hasPhoto ? (
+                          <img 
+                            src={photoUrl}
+                            alt={speakerName}
+                            className="current-speaker-photo"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              const parent = target.parentElement;
+                              if (parent) {
+                                target.style.display = 'none';
+                                parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                parent.innerHTML = `<div class="current-speaker-fallback" style="color: ${avatarColor.text}">${speakerName.charAt(0).toUpperCase()}</div>`;
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div 
+                            className="current-speaker-fallback"
+                            style={{
+                              background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                              color: avatarColor.text
+                            }}
+                          >
+                            {speakerName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="speaker-ring"></div>
+                      </div>
+                      
+                      <div className="current-speaker-info">
+                        <h3>{speakerName}</h3>
+                        <p>Partage ses avancées maintenant</p>
+                      </div>
+                    </>
+                  );
+                })()}
+              </>
+            ) : (
+              <>
+                <div className="speaker-status waiting">
+                  <span className="waiting-indicator"></span>
+                  <span>EN ATTENTE</span>
+                </div>
+                
+                <div className="current-speaker-avatar waiting">
+                  <div className="waiting-avatar">
+                    <span>🎯</span>
+                  </div>
+                  <div className="speaker-ring waiting"></div>
+                </div>
+                
+                <div className="current-speaker-info">
+                  <h3>Prêt à commencer ?</h3>
+                  <p>Sélectionnez quelqu'un pour démarrer le stand-up !</p>
+                </div>
+              </>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Contenu principal - Layout 2 colonnes */}
         <div className="modal-content">
@@ -253,12 +435,14 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                       (currentAnimator.id?.value || currentAnimator.id) === 
                       (participant.id?.value || participant.id)
                     );
+                    const isShuffling = isSpinning && selectedParticipant?.id === participant.id;
+                    const isWinner = isWinnerRevealed && selectedParticipant?.id === participant.id;
                     
                     return (
                       <div 
                         key={String(participant.id?.value || participant.id)}
-                        className={`available-card ${isCurrentSelected ? 'selected' : ''} ${isAnimator ? 'animator' : ''}`}
-                        onClick={() => handleParticipantSelect(participant)}
+                        className={`available-card ${isCurrentSelected ? 'selected' : ''} ${isAnimator ? 'animator' : ''} ${isShuffling ? 'shuffling' : ''} ${isWinner ? 'winner' : ''}`}
+                        onClick={() => !isSpinning && handleParticipantSelect(participant)}
                       >
                         <div className="available-avatar">
                           {hasPhoto ? (
@@ -302,8 +486,8 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 <div className="shuffle-section">
                   <button 
                     className="shuffle-button"
-                    onClick={handleRandomSelect}
-                    disabled={isSelecting}
+                    onClick={handleShuffleSelect}
+                    disabled={isSpinning}
                   >
                     <div className="shuffle-icon">🎲</div>
                     <span>Shuffle & Sélectionner</span>
@@ -318,9 +502,12 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 <button 
                   className="restart-button"
                   onClick={onReset}
+                  title="Nouveau tour"
                 >
-                  <span>🔄</span>
-                  Nouveau tour
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3 3v5h5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </button>
               </div>
             )}
@@ -334,22 +521,36 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 <h3>Ont parlé</h3>
                 <span className="history-count">{participantsWhoSpoke.length}</span>
               </div>
+              {participantsWhoSpoke.length > 0 && (
+                <button 
+                  className="reset-history-button"
+                  onClick={onReset}
+                  title="Recommencer - Remettre tout le monde en attente"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3 3v5h5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
             </div>
 
             {participantsWhoSpoke.length > 0 ? (
               <div className="history-list">
-                {participantsWhoSpoke.map((participant, index) => {
+                {[...participantsWhoSpoke].reverse().map((participant, index) => {
                   const participantName = String(participant.name?.value || participant.name || 'P');
                   const avatarColor = getAvatarColor(participantName);
                   const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
+                  const isLatestSpeaker = index === 0; // Le premier de la liste inversée
+                  const originalOrder = participantsWhoSpoke.length - index; // Ordre original pour l'affichage
                   
                   return (
                     <div 
                       key={String(participant.id?.value || participant.id)}
-                      className="history-item"
+                      className={`history-item ${isLatestSpeaker ? 'latest-speaker' : ''}`}
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      <div className="history-order">{index + 1}</div>
+                      <div className="history-order">{originalOrder}</div>
                       
                       <div className="history-avatar">
                         {hasPhoto ? (
