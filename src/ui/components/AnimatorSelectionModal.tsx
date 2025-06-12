@@ -54,7 +54,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
     setTimeout(() => {
       onClose();
       setIsClosing(false);
-    }, 300);
+    }, 250); // Synchronisé avec l'animation CSS
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {

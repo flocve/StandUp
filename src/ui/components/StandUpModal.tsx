@@ -68,6 +68,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
 
   // States pour l'overlay d'animation
   const [showShuffleOverlay, setShowShuffleOverlay] = useState(false);
+  const [isShuffleOverlayClosing, setIsShuffleOverlayClosing] = useState(false);
   const [currentShuffleIndex, setCurrentShuffleIndex] = useState(0);
   const [shuffleNames, setShuffleNames] = useState<string[]>([]);
   const [shufflePhase, setShufflePhase] = useState<'shuffling' | 'winner'>('shuffling');
@@ -90,7 +91,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     setTimeout(() => {
       onClose();
       setIsClosing(false);
-    }, 300);
+    }, 250); // Synchronisé avec l'animation CSS
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -204,9 +205,13 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
               console.error('Erreur lors de la mise à jour:', error);
             }
             
-            // Masquer l'overlay après avoir bien montré le gagnant
+            // Masquer l'overlay après avoir bien montré le gagnant avec transition douce
             setTimeout(() => {
-              setShowShuffleOverlay(false);
+              setIsShuffleOverlayClosing(true);
+              setTimeout(() => {
+                setShowShuffleOverlay(false);
+                setIsShuffleOverlayClosing(false);
+              }, 800); // Durée de l'animation de fermeture
             }, 1500);
           }, finalWinner); // Passer notre gagnant au hook
         }
@@ -245,7 +250,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
         
         {/* Overlay d'animation de shuffle */}
         {showShuffleOverlay && (
-          <div className={`shuffle-overlay ${shufflePhase}`}>
+          <div className={`shuffle-overlay ${shufflePhase} ${isShuffleOverlayClosing ? 'closing' : ''}`}>
             <div className="shuffle-animation-container">
               {shufflePhase === 'shuffling' ? (
                 <>
@@ -313,7 +318,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
 
         {/* Speaker Courant - En Haut */}
         <div className="current-speaker-section">
-          <div className="current-speaker-card">
+          <div className={`current-speaker-card ${!currentSpeaker ? 'waiting-mode' : ''}`}>
             {currentSpeaker ? (
               <>
                 <div className="speaker-status">
@@ -395,10 +400,9 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   <span>EN ATTENTE</span>
                 </div>
                 
-                <div className="current-speaker-avatar waiting">
-                  <div className="waiting-avatar">
-                    <span>🎯</span>
-                  </div>
+                {/* Avatar invisible pour maintenir la structure et la taille */}
+                <div className="current-speaker-avatar waiting invisible">
+                  <div className="waiting-avatar-placeholder"></div>
                   <div className="speaker-ring waiting"></div>
                 </div>
                 
