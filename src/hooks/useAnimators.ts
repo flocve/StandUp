@@ -24,6 +24,21 @@ const getNextMonday = (): Date => {
   return nextMonday;
 };
 
+// Fonction pour calculer le pourcentage de chance basé sur le diviseur
+const calculateChancePercentage = (participants: Participant[], currentParticipant: Participant): number => {
+  // Calculer le poids de chaque participant selon le système de diviseur
+  const weights = participants.map(p => {
+    const divider = Math.max(1, p.getChancePercentage() || 1);
+    return Math.max(1, Math.floor(100 / divider));
+  });
+  
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  const currentDivider = Math.max(1, currentParticipant.getChancePercentage() || 1);
+  const currentWeight = Math.max(1, Math.floor(100 / currentDivider));
+  
+  return Math.round((currentWeight / totalWeight) * 100);
+};
+
 export const useAnimators = (
   participants: Participant[],
   repository: AnimatorRepository
@@ -90,9 +105,15 @@ export const useAnimators = (
     setCurrentAnimator(animator);
   };
 
+  // Fonction pour obtenir le pourcentage de chance d'un participant
+  const getParticipantChancePercentage = useCallback((participant: Participant): number => {
+    return calculateChancePercentage(participants, participant);
+  }, [participants]);
+
   return {
     animatorHistory,
     currentAnimator,
-    addAnimator
+    addAnimator,
+    getParticipantChancePercentage
   };
 }; 

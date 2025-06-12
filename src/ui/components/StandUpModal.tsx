@@ -86,6 +86,23 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     };
   }, [isOpen]);
 
+  // Gestion de la touche Échap
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
