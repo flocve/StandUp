@@ -195,21 +195,6 @@ export const Dashboard: React.FC = () => {
     getPassageCount: () => 0
   };
 
-  console.log('Dashboard Debug:', {
-    isInitialized,
-    currentAnimator,
-    allParticipants: allParticipants?.length,
-    dailyParticipants: dailyParticipants?.length,
-    weeklyParticipants: weeklyParticipants?.length,
-    isLoading,
-    error,
-    participantsWithStatus: allParticipants?.map(p => ({
-      name: p.name?.value || p.name,
-      hasSpoken: typeof p.hasSpoken === 'function' ? p.hasSpoken() : p.hasSpoken,
-      hasSpokenType: typeof p.hasSpoken
-    }))
-  });
-
   // Utilitaire pour obtenir le nom sous forme de string
   const getNameString = (participantOrName: any) => {
     if (!participantOrName) return '';
@@ -219,6 +204,8 @@ export const Dashboard: React.FC = () => {
     if (typeof participantOrName.name === 'string') return participantOrName.name;
     return '';
   };
+
+
 
   // Affichage pendant l'initialisation
   if (!isInitialized) {

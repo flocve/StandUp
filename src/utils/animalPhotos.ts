@@ -48,6 +48,19 @@ function simpleHash(str: string): number {
 }
 
 /**
+ * Teste si une URL d'image est accessible
+ */
+export async function testImageUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    console.error('Erreur test image:', url, error);
+    return false;
+  }
+}
+
+/**
  * Génère une photo d'animal mignon basée sur le nom du participant
  * Utilise une approche déterministe pour que chaque nom ait toujours le même animal
  */
@@ -63,8 +76,8 @@ export function generateCuteAnimalPhoto(participantName: string): string {
   const animalIndex = hash % animals.length;
   const animal = animals[animalIndex];
   
-  // Utiliser une API qui génère des images d'animaux mignons
-  return `https://api.dicebear.com/7.x/animals/svg?seed=${encodeURIComponent(participantName + animal)}&backgroundColor=f0f8ff`;
+  // Utiliser DiceBear avec style animal - plus fiable que les APIs externes
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(participantName + animal)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
 }
 
 /**
@@ -117,6 +130,11 @@ export function getParticipantPhotoUrlWithTheme(participantName: string, customP
     return generateUnicornAvatar(participantName);
   }
   
-  // Sinon, utiliser la logique normale
-  return getParticipantPhotoUrl(participantName, customPhotoUrl);
+  // Si une photo personnalisée existe, l'utiliser
+  if (customPhotoUrl && customPhotoUrl.trim()) {
+    return customPhotoUrl;
+  }
+  
+  // Sinon, générer un avatar
+  return generateCuteAnimalPhoto(participantName);
 } 
