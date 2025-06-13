@@ -605,12 +605,6 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                       );
                     })}
                   </div>
-                  
-                  {currentElimination && (
-                    <div className="elimination-announcement">
-                      😌 SAUVÉ: {String(currentElimination.name?.value || currentElimination.name)} ÉCHAPPE À LA PUNITION !
-                    </div>
-                  )}
                 </>
               ) : battlePhase === 'duel' ? (
                 <>
@@ -702,7 +696,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                                 />
                               </div>
                               <div className="card-name">{candidateName}</div>
-                              <div className="card-fate">Risque d'être animateur...</div>
+                              <div className="card-fate">Le prochain animateur est...</div>
                             </>
                           );
                         })()}
@@ -721,7 +715,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                   <div className="winner-title">
                     <span className="winner-emoji">😅</span>
                     <h2>ANIMATEUR SACRIFIÉ !</h2>
-                    <p>Bonne chance pour animer cette semaine...</p>
+                    <p>Bonne chance pour animer la semaine prochaine...</p>
                   </div>
                   
                   <div className="winner-name-display">
