@@ -9,7 +9,7 @@
   box-shadow: 
     0 4px 20px rgba(16, 185, 129, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  
   z-index: 1000;
   min-width: 180px;
   transition: all 0.3s ease;
@@ -105,3 +105,4 @@
     margin-bottom: 0.35rem;
   }
 } 
+

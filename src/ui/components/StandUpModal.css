@@ -5,12 +5,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: 
-    radial-gradient(circle at 30% 20%, rgba(79, 124, 255, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 70% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
-    rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 1000;
   animation: overlayFadeIn 0.3s ease-out;
 }
@@ -28,13 +23,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.04) 100%);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--background-primary);
+  border: 1px solid var(--border-primary);
   border-radius: 32px;
   width: 90vw;
   max-width: 1200px;
@@ -57,9 +47,7 @@
 .selection-overlay {
   position: absolute;
   inset: 0;
-  background: 
-    radial-gradient(circle, rgba(79, 124, 255, 0.9) 0%, rgba(124, 58, 237, 0.8) 100%);
-  backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, #4f7cff 0%, #7c3aed 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,11 +97,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 2rem 3rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: 
-    linear-gradient(135deg, 
-      rgba(79, 124, 255, 0.05) 0%,
-      rgba(124, 58, 237, 0.03) 100%);
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--surface-secondary);
   position: relative;
 }
 
@@ -163,7 +148,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  background: var(--surface-primary);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -320,7 +305,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 .close-button {
   width: 56px;
   height: 56px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-primary);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   color: var(--text-secondary);
@@ -332,7 +317,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 }
 
 .close-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-primary);
   color: var(--text-primary);
   transform: scale(1.05);
   border-color: rgba(255, 255, 255, 0.2);
@@ -341,11 +326,8 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 /* Section du speaker courant - Layout horizontal intégré */
 .current-speaker-section {
   padding: 2rem;
-  background: 
-    linear-gradient(135deg, 
-      rgba(79, 124, 255, 0.08) 0%,
-      rgba(139, 92, 246, 0.06) 100%);
-  border: 2px solid rgba(79, 124, 255, 0.2);
+  background: var(--surface-secondary);
+  border: 2px solid var(--accent-primary);
   border-radius: 24px;
   margin: 1.5rem 3rem;
   position: relative;
@@ -353,7 +335,6 @@ html.theme-unicorn .shuffle-button-integrated:hover {
     0 16px 32px rgba(0, 0, 0, 0.12),
     0 6px 16px rgba(79, 124, 255, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
   overflow: hidden;
 }
 
@@ -422,7 +403,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
     0 12px 32px rgba(255, 107, 107, 0.5),
     0 6px 20px rgba(255, 107, 107, 0.3),
     0 0 0 3px rgba(255, 107, 107, 0.2);
-  backdrop-filter: blur(20px);
+  
   transform: translateZ(0);
   min-width: 160px;
   animation: buttonPulse 2s ease-in-out infinite;
@@ -433,7 +414,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  background: var(--surface-primary);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -501,7 +482,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 }
 
 .speaker-status.waiting {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+  background: var(--surface-primary);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
@@ -518,7 +499,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 }
 
 .current-speaker-avatar.waiting {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+  background: var(--surface-primary);
 }
 
 .current-speaker-avatar.waiting.invisible {
@@ -538,7 +519,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+  background: var(--surface-primary);
   font-size: 2rem;
   animation: waitingAvatarBreathe 3s ease-in-out infinite;
 }
@@ -704,7 +685,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+  background: var(--surface-primary);
   border: 1px solid rgba(255, 215, 0, 0.3);
   border-radius: 16px;
   color: var(--text-primary);
@@ -741,7 +722,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateZ(0);
-  backdrop-filter: blur(16px);
+  
   position: relative;
   overflow: hidden;
   height: 60px;
@@ -984,7 +965,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  background: var(--surface-primary);
   transform: translateX(-100%);
   transition: transform 0.6s ease;
 }
@@ -1057,7 +1038,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 }
 
 .history-item.latest-speaker .done-text {
-  background: linear-gradient(135deg, rgba(79, 124, 255, 0.2), rgba(124, 58, 237, 0.1));
+  background: var(--surface-primary);
   color: var(--accent-primary);
   border: 1px solid rgba(79, 124, 255, 0.3);
   font-weight: 700;
@@ -1134,7 +1115,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 }
 
 .done-text {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+  background: var(--surface-primary);
   color: #10b981;
   padding: 0.15rem 0.5rem;
   border-radius: 6px;
@@ -1424,7 +1405,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
   align-items: center;
   gap: 1rem;
   padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-primary);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: var(--text-primary);
@@ -1434,7 +1415,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
 }
 
 .return-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-primary);
   transform: translateY(-2px);
 }
 
@@ -1694,7 +1675,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
     linear-gradient(135deg, 
       rgba(15, 23, 42, 0.98) 0%,
       rgba(30, 41, 59, 0.95) 100%);
-  backdrop-filter: blur(20px);
+  
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2159,3 +2140,7 @@ html.theme-unicorn .shuffle-button-integrated:hover {
       0 0 0 5px rgba(79, 124, 255, 0.4);
   }
 } 
+
+
+
+

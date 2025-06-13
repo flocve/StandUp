@@ -264,9 +264,9 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
       className={`animator-modal-overlay ${isClosing ? 'closing' : ''}`}
       onClick={handleBackdropClick}
     >
-      <div className="animator-modal liquid-glass-strong">
+      <div className="animator-modal">
         {/* Header de la modale */}
-        <div className="modal-header liquid-glass-subtle">
+        <div className="modal-header">
           <div className="header-content">
             <h2>Sélection de l'animateur</h2>
             <p>Choisissez l'animateur pour la semaine prochaine</p>
@@ -327,7 +327,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                   {/* Bouton Sélection à droite */}
                   <div className="animator-right">
                     <button 
-                      className="selection-button-integrated liquid-glass-button"
+                      className="selection-button-integrated"
                       onClick={() => {
                         // Sélection aléatoire pondérée
                         const availableParticipants = participants.filter(p => 
@@ -363,7 +363,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                   {/* Bouton Sélection à droite même en mode attente */}
                   <div className="animator-right">
                     <button 
-                      className="selection-button-integrated liquid-glass-button"
+                      className="selection-button-integrated"
                       onClick={() => {
                         // Sélection aléatoire pondérée
                         const availableParticipants = participants.filter(p => 
@@ -388,7 +388,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
         {/* Contenu principal - 2 colonnes */}
         <div className="modal-content">
           {/* Colonne Gauche - Participants Disponibles */}
-          <div className="available-section liquid-glass-subtle">
+          <div className="available-section">
             <div className="section-header">
               <div className="section-title">
                 <span className="section-icon">👑</span>
@@ -422,7 +422,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                 return (
                   <div 
                     key={String(participant.id?.value || participant.id)}
-                    className={`available-card liquid-glass-interactive ${isCurrentAnimator ? 'current-animator' : ''} ${isTopChance ? 'top-chance' : ''}`}
+                    className={`available-card ${isCurrentAnimator ? 'current-animator' : ''} ${isTopChance ? 'top-chance' : ''}`}
                     onClick={() => !isCurrentAnimator && handleAnimatorSelect(participant)}
                   >
                     <div className="available-avatar">
@@ -461,7 +461,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
           </div>
 
           {/* Zone historique */}
-          <div className="history-zone liquid-glass-subtle">
+          <div className="history-zone">
             <div className="zone-header">
               <h3>📈 Historique des animateurs</h3>
               <div className="history-count">

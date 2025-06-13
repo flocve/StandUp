@@ -16,9 +16,9 @@
   flex-direction: column;
   width: 100%;
   margin: 0 auto;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 2px solid var(--glass-border);
+  
+  -webkit-
+  border: 2px solid var(--border-primary);
 }
 
 /* Style spécial pour ceux avec la plus haute chance */
@@ -56,7 +56,7 @@
     0 6px 15px var(--shadow-color),
     0 0 0 3px rgba(var(--card-color-rgb), 0.5),
     0 0 20px rgba(var(--card-color-rgb), 0.3);
-  border: 2px solid var(--glass-shine);
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .card.top-chance .card-name {
@@ -168,7 +168,7 @@
     0 6px 15px var(--shadow-color),
     0 0 0 3px rgba(var(--card-color-rgb), 0.4),
     0 0 20px rgba(var(--card-color-rgb), 0.3);
-  border: 2px solid var(--glass-shine);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
   position: relative;
 }
@@ -217,8 +217,8 @@
   );
   padding: 0.5rem 1rem;
   border-radius: 1rem;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  
+  -webkit-
   border: 2px solid rgba(var(--card-color-rgb), 0.7);
   box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.2),
@@ -579,8 +579,8 @@
   box-shadow: 
     0 4px 12px rgba(16, 185, 129, 0.4),
     0 0 0 0 rgba(16, 185, 129, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  
+  -webkit-
 }
 
 .direct-select-button:hover {
@@ -634,3 +634,4 @@
   visibility: hidden !important;
   pointer-events: none;
 } 
+

@@ -273,7 +273,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
       className={`standup-modal-overlay ${isClosing ? 'closing' : ''} ${isSpinning ? 'selecting' : ''}`}
       onClick={handleBackdropClick}
     >
-      <div className="standup-modal liquid-glass-strong">
+              <div className="standup-modal">
         
         {/* Overlay d'animation de shuffle */}
         {showShuffleOverlay && (
@@ -325,7 +325,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
         )}
 
         {/* Header moderne */}
-        <div className="modal-header liquid-glass-subtle">
+        <div className="modal-header">
           <div className="header-content">
             <div className="header-icon">🎯</div>
             <div className="header-text">
@@ -416,7 +416,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   {availableParticipants.length > 0 && (
                     <div className="speaker-right">
                       <button 
-                        className="shuffle-button-integrated liquid-glass-button"
+                        className="shuffle-button-integrated"
                         onClick={handleShuffleSelect}
                         disabled={isSpinning}
                       >
@@ -452,7 +452,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   {availableParticipants.length > 0 && (
                     <div className="speaker-right">
                       <button 
-                        className="shuffle-button-integrated liquid-glass-button"
+                        className="shuffle-button-integrated"
                         onClick={handleShuffleSelect}
                         disabled={isSpinning}
                       >
@@ -470,7 +470,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
         {/* Contenu principal - Layout 2 colonnes */}
         <div className="modal-content">
           {/* Colonne Gauche - Participants Disponibles */}
-          <div className="available-section liquid-glass-subtle">
+          <div className="available-section">
             <div className="section-header">
               <div className="section-title">
                 <span className="section-icon">👥</span>
@@ -495,7 +495,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   return (
                     <div 
                       key={String(participant.id?.value || participant.id)}
-                      className={`available-card liquid-glass-interactive ${isCurrentSelected ? 'selected' : ''} ${isAnimator ? 'animator' : ''} ${isShuffling ? 'shuffling' : ''} ${isWinner ? 'winner' : ''}`}
+                      className={`available-card ${isCurrentSelected ? 'selected' : ''} ${isAnimator ? 'animator' : ''} ${isShuffling ? 'shuffling' : ''} ${isWinner ? 'winner' : ''}`}
                       onClick={() => !isSpinning && handleParticipantSelect(participant)}
                     >
                       <div className="available-avatar">
@@ -542,7 +542,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 <h3>Tour terminé !</h3>
                 <p>Tous les participants ont partagé</p>
                 <button 
-                  className="restart-button liquid-glass-button"
+                  className="restart-button"
                   onClick={onReset}
                   title="Nouveau tour"
                 >
@@ -556,7 +556,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
           </div>
 
           {/* Colonne Droite - Historique (dans l'ordre) */}
-          <div className="history-section liquid-glass-subtle">
+          <div className="history-section">
             <div className="section-header">
               <div className="section-title">
                 <span className="section-icon">✅</span>
@@ -630,9 +630,9 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
         </div>
 
         {/* Footer moderne */}
-        <div className="modal-footer liquid-glass-subtle">
+        <div className="modal-footer">
           <button 
-            className="return-button liquid-glass-button"
+            className="return-button"
             onClick={handleClose}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">

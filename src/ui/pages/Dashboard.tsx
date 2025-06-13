@@ -367,7 +367,7 @@ export const Dashboard: React.FC = () => {
               const avatarColor = getAvatarColor(participantName);
               
               return (
-                <div key={String(participant.id?.value || participant.id)} className="speaker-card liquid-glass-interactive">
+                <div key={String(participant.id?.value || participant.id)} className="speaker-card">
                   <img 
                     src={getPhotoUrl(participant)}
                     alt={participantName}
@@ -423,7 +423,7 @@ export const Dashboard: React.FC = () => {
             return (
               <>
                 <button 
-                  className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'primary highlighted' : 'primary'} liquid-glass-button`}
+                  className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'primary highlighted' : 'primary'}`}
                   onClick={() => setShowStandUpModal(true)}
                   disabled={isLoading}
                 >
@@ -435,7 +435,7 @@ export const Dashboard: React.FC = () => {
                 </button>
 
                 <button 
-                  className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'secondary highlighted-urgent' : 'secondary'} liquid-glass-button`}
+                  className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'secondary highlighted-urgent' : 'secondary'}`}
                   onClick={() => setShowAnimatorModal(true)}
                   disabled={isLoading || Boolean(hasNextWeekAnimator)}
                 >

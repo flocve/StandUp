@@ -1,14 +1,14 @@
 /* WeekPeriodDisplay - Design moderne 2025 */
 .week-period-display {
-  background: var(--glass-background);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-primary);
+  
+  -webkit-
+  border: 1px solid var(--border-primary);
   border-radius: 24px;
   padding: 2rem;
   box-shadow: 
-    0 16px 40px var(--glass-shadow),
-    inset 0 1px 0 var(--glass-shine);
+    0 16px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -264,3 +264,4 @@
     font-size: 1.125rem;
   }
 } 
+
