@@ -111,40 +111,133 @@
   transform: scale(1.05);
 }
 
-/* Section Animateur Courant - En Haut */
+/* Section de l'animateur courant - Layout horizontal intégré */
 .current-animator-section {
-  padding: 2rem 3rem;
-  border-bottom: 1px solid var(--glass-border);
+  padding: 2rem;
   background: 
     linear-gradient(135deg, 
-      rgba(79, 124, 255, 0.08) 0%,
-      rgba(124, 58, 237, 0.05) 100%);
+      rgba(255, 215, 0, 0.08) 0%,
+      rgba(255, 193, 7, 0.06) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  border-radius: 24px;
+  margin: 1.5rem 3rem;
+  position: relative;
+  box-shadow: 
+    0 16px 32px rgba(0, 0, 0, 0.12),
+    0 6px 16px rgba(255, 215, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+}
+
+.current-animator-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(135deg, 
+      rgba(255, 215, 0, 0.05) 0%,
+      transparent 50%,
+      rgba(255, 193, 7, 0.05) 100%);
+  border-radius: inherit;
+  z-index: 0;
 }
 
 .current-animator-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  padding: 1.5rem;
-  background: 
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 100%);
-  border: 2px solid var(--accent-primary);
-  border-radius: 20px;
+  flex-direction: column;
+  gap: 1.5rem;
   position: relative;
-  overflow: hidden;
-  min-height: 140px;
+  z-index: 1;
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
 }
 
-.current-animator-card::before {
+/* Layout horizontal pour le contenu animateur + bouton */
+.animator-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+}
+
+.animator-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.animator-right {
+  flex-shrink: 0;
+}
+
+/* Bouton sélection intégré */
+.selection-button-integrated {
+  background: linear-gradient(135deg, #ffd700, #ffb300);
+  color: #1a1a1a;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 20px rgba(255, 215, 0, 0.3),
+    0 3px 10px rgba(255, 215, 0, 0.2);
+  backdrop-filter: blur(16px);
+  transform: translateZ(0);
+  min-width: 140px;
+}
+
+.selection-button-integrated::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--accent-gradient);
-  opacity: 0.03;
-  animation: currentAnimatorPulse 3s ease-in-out infinite alternate;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.selection-button-integrated:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 12px 28px rgba(255, 215, 0, 0.4),
+    0 5px 15px rgba(255, 215, 0, 0.3);
+  background: linear-gradient(135deg, #ffed4e, #ffd700);
+}
+
+.selection-button-integrated:hover::before {
+  opacity: 1;
+}
+
+.selection-button-integrated:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.selection-button-integrated .selection-icon {
+  font-size: 1.2rem;
+  animation: crownBounce 2s ease-in-out infinite;
+}
+
+@keyframes crownBounce {
+  0%, 100% { 
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% { 
+    transform: translateY(-3px) rotate(3deg);
+  }
 }
 
 .animator-status {
@@ -173,25 +266,30 @@
 
 .current-animator-avatar {
   position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 24px;
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
   overflow: hidden;
-  border: 3px solid var(--accent-primary);
-  box-shadow: 
-    0 12px 32px rgba(79, 124, 255, 0.3),
-    0 0 0 3px rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  background: var(--surface-secondary);
+  z-index: 2;
 }
 
-.current-animator-photo,
-.current-animator-fallback {
+.current-animator-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  position: relative;
+  z-index: 2;
+}
+
+.current-animator-fallback {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   position: relative;
@@ -200,34 +298,34 @@
 
 .animator-ring {
   position: absolute;
-  inset: -6px;
+  inset: -4px;
   border: 2px solid transparent;
-  border-radius: 30px;
-  background: conic-gradient(var(--accent-primary), var(--accent-secondary), var(--accent-primary));
+  border-radius: 24px;
+  background: conic-gradient(#ffd700, #ffb300, #ffd700);
   background-clip: padding-box;
   animation: rotateRing 4s linear infinite;
   z-index: 1;
 }
 
 .current-animator-info {
-  text-align: center;
+  text-align: left;
   position: relative;
   z-index: 1;
 }
 
 .current-animator-info h3 {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
-  background: var(--accent-gradient);
+  margin: 0 0 0.25rem 0;
+  background: linear-gradient(135deg, #ffd700, #ffb300);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .current-animator-info p {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
   margin: 0;
   opacity: 0.8;

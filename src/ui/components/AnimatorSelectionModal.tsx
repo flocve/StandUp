@@ -144,60 +144,96 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                   <span>ANIMATEUR ACTUEL</span>
                 </div>
                 
-                {(() => {
-                  const animatorName = String(currentAnimator.name?.value || currentAnimator.name || 'Animateur');
-                  const avatarColor = getAvatarColor(animatorName);
-                  
-                  let photoUrl = null;
-                  if ('getPhotoUrl' in currentAnimator && typeof currentAnimator.getPhotoUrl === 'function') {
-                    try {
-                      photoUrl = currentAnimator.getPhotoUrl();
-                    } catch (error) {
-                      // Erreur silencieuse
-                    }
-                  }
-                  
-                  const hasPhoto = photoUrl && photoUrl.trim() !== '';
-                  
-                  return (
-                    <>
-                      <div className="current-animator-avatar">
-                        {hasPhoto ? (
-                          <img 
-                            src={photoUrl}
-                            alt={animatorName}
-                            className="current-animator-photo"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const parent = target.parentElement;
-                              if (parent) {
-                                target.style.display = 'none';
-                                parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                parent.innerHTML = `<div class="current-animator-fallback" style="color: ${avatarColor.text}">${animatorName.charAt(0).toUpperCase()}</div>`;
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div 
-                            className="current-animator-fallback"
-                            style={{
-                              background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                              color: avatarColor.text
-                            }}
-                          >
-                            {animatorName.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="animator-ring"></div>
-                      </div>
+                <div className="animator-content">
+                  <div className="animator-left">
+                    {(() => {
+                      const animatorName = String(currentAnimator.name?.value || currentAnimator.name || 'Animateur');
+                      const avatarColor = getAvatarColor(animatorName);
                       
-                      <div className="current-animator-info">
-                        <h3>{animatorName}</h3>
-                        <p>Anime l'équipe cette semaine</p>
-                      </div>
-                    </>
-                  );
-                })()}
+                      // Vérification améliorée pour la photo
+                      let photoUrl = null;
+                      if ('getPhotoUrl' in currentAnimator && typeof currentAnimator.getPhotoUrl === 'function') {
+                        try {
+                          photoUrl = currentAnimator.getPhotoUrl();
+                        } catch (error) {
+                          // Erreur silencieuse, on continue avec les autres méthodes
+                        }
+                      }
+                      
+                      // Vérifier aussi les autres propriétés possibles
+                      if (!photoUrl && (currentAnimator as any).photoUrl) {
+                        photoUrl = (currentAnimator as any).photoUrl;
+                      }
+                      if (!photoUrl && (currentAnimator as any).avatar) {
+                        photoUrl = (currentAnimator as any).avatar;
+                      }
+                      if (!photoUrl && (currentAnimator as any).photo) {
+                        photoUrl = (currentAnimator as any).photo;
+                      }
+                      
+                      const hasPhoto = photoUrl && photoUrl.trim() !== '';
+                      
+                      return (
+                        <>
+                          <div className="current-animator-avatar">
+                            {hasPhoto ? (
+                              <img 
+                                src={photoUrl}
+                                alt={animatorName}
+                                className="current-animator-photo"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    target.style.display = 'none';
+                                    parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                    parent.innerHTML = `<div class="current-animator-fallback" style="color: ${avatarColor.text}">${animatorName.charAt(0).toUpperCase()}</div>`;
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div 
+                                className="current-animator-fallback"
+                                style={{
+                                  background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                                  color: avatarColor.text
+                                }}
+                              >
+                                {animatorName.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="animator-ring"></div>
+                          </div>
+                          
+                          <div className="current-animator-info">
+                            <h3>{animatorName}</h3>
+                            <p>Anime l'équipe cette semaine</p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Bouton Sélection à droite */}
+                  <div className="animator-right">
+                    <button 
+                      className="selection-button-integrated"
+                      onClick={() => {
+                        // Sélection aléatoire pondérée
+                        const availableParticipants = participants.filter(p => 
+                          !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
+                        );
+                        if (availableParticipants.length > 0) {
+                          const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
+                          handleAnimatorSelect(randomParticipant);
+                        }
+                      }}
+                    >
+                      <div className="selection-icon">👑</div>
+                      <span>Changer</span>
+                    </button>
+                  </div>
+                </div>
               </>
             ) : (
               <>
@@ -206,9 +242,33 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                   <span>EN ATTENTE</span>
                 </div>
                 
-                <div className="current-animator-info">
-                  <h3>Aucun animateur sélectionné</h3>
-                  <p>Choisissez un animateur pour la semaine prochaine !</p>
+                <div className="animator-content">
+                  <div className="animator-left">
+                    <div className="current-animator-info">
+                      <h3>Aucun animateur sélectionné</h3>
+                      <p>Choisissez un animateur pour la semaine prochaine !</p>
+                    </div>
+                  </div>
+
+                  {/* Bouton Sélection à droite même en mode attente */}
+                  <div className="animator-right">
+                    <button 
+                      className="selection-button-integrated"
+                      onClick={() => {
+                        // Sélection aléatoire pondérée
+                        const availableParticipants = participants.filter(p => 
+                          !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
+                        );
+                        if (availableParticipants.length > 0) {
+                          const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
+                          handleAnimatorSelect(randomParticipant);
+                        }
+                      }}
+                    >
+                      <div className="selection-icon">👑</div>
+                      <span>Sélectionner</span>
+                    </button>
+                  </div>
                 </div>
               </>
             )}
@@ -300,24 +360,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
               })()}
             </div>
 
-            <div className="shuffle-section">
-              <button 
-                className="shuffle-button"
-                onClick={() => {
-                  // Sélection aléatoire pondérée
-                  const availableParticipants = participants.filter(p => 
-                    !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
-                  );
-                  if (availableParticipants.length > 0) {
-                    const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
-                    handleAnimatorSelect(randomParticipant);
-                  }
-                }}
-              >
-                <div className="shuffle-icon">🎲</div>
-                <span>Sélection Aléatoire</span>
-              </button>
-            </div>
+
           </div>
 
           {/* Zone historique */}
