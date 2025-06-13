@@ -137,8 +137,6 @@
   margin: 0;
 }
 
-
-
 .animator-card {
   display: flex;
   align-items: center;
@@ -149,14 +147,11 @@
 }
 
 .animator-card:hover {
-  transform: translateY(-2px);
+  box-shadow: none;
 }
 
 .animator-card:hover .animator-avatar {
-  transform: scale(1.05);
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.15);
+  box-shadow: none;
 }
 
 .animator-card:hover .animator-glow {
@@ -381,15 +376,11 @@
 }
 
 .animator-info h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 2.2rem;
+  font-weight: 900;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
-  line-height: 1.2;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
-  -webkit-background-clip: text;
-  background-clip: text;
+  margin: 0 0 0.3rem 0;
+  letter-spacing: -0.01em;
 }
 
 .animator-card:hover .animator-info h3 {
@@ -401,17 +392,17 @@
 }
 
 .animator-info p {
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: var(--text-secondary);
+  margin: 0;
+  opacity: 0.85;
   font-weight: 500;
-  opacity: 0.8;
-  margin-bottom: 1.5rem;
 }
 
 .animator-badges {
+  margin-top: 0.7rem;
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .badge {
@@ -880,4 +871,19 @@
   .button-icon {
     font-size: 1.5rem;
   }
+}
+
+.next-animator-discreet {
+  position: absolute;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  background: rgba(0,0,0,0.08);
+  border-radius: 1.2rem;
+  padding: 0.3rem 0.7rem;
+  z-index: 2;
 } 

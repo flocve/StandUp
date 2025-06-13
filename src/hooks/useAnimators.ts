@@ -39,6 +39,52 @@ const calculateChancePercentage = (participants: Participant[], currentParticipa
   return Math.round((currentWeight / totalWeight) * 100);
 };
 
+// Fonction utilitaire pour obtenir le numéro de semaine ISO
+const getISOWeek = (date: Date): number => {
+  const tmpDate = new Date(date.getTime());
+  tmpDate.setHours(0, 0, 0, 0);
+  // Jeudi de la semaine courante
+  tmpDate.setDate(tmpDate.getDate() + 3 - ((tmpDate.getDay() + 6) % 7));
+  const week1 = new Date(tmpDate.getFullYear(), 0, 4);
+  return (
+    1 + Math.round(
+      ((tmpDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7
+    )
+  );
+};
+
+// Retourne l'animateur de la semaine courante
+const getCurrentWeekAnimator = (animatorHistory: AnimatorHistoryEntry[]): AnimatorHistoryEntry | null => {
+  const now = new Date();
+  const currentWeek = getISOWeek(now);
+  const currentYear = now.getFullYear();
+  return (
+    animatorHistory.find(entry => {
+      const entryWeek = getISOWeek(entry.date);
+      const entryYear = entry.date.getFullYear();
+      return entryWeek === currentWeek && entryYear === currentYear;
+    }) || null
+  );
+};
+
+// Retourne l'animateur de la semaine suivante
+const getNextWeekAnimator = (animatorHistory: AnimatorHistoryEntry[]): AnimatorHistoryEntry | null => {
+  const now = new Date();
+  const currentWeek = getISOWeek(now);
+  const currentYear = now.getFullYear();
+  // Cherche la première entrée dont la semaine est > semaine courante
+  return (
+    animatorHistory.find(entry => {
+      const entryWeek = getISOWeek(entry.date);
+      const entryYear = entry.date.getFullYear();
+      return (
+        entryYear > currentYear ||
+        (entryYear === currentYear && entryWeek > currentWeek)
+      );
+    }) || null
+  );
+};
+
 export const useAnimators = (
   participants: Participant[],
   repository: AnimatorRepository
@@ -114,6 +160,8 @@ export const useAnimators = (
     animatorHistory,
     currentAnimator,
     addAnimator,
-    getParticipantChancePercentage
+    getParticipantChancePercentage,
+    getCurrentWeekAnimator: () => getCurrentWeekAnimator(animatorHistory),
+    getNextWeekAnimator: () => getNextWeekAnimator(animatorHistory),
   };
 }; 

@@ -12,7 +12,7 @@ interface UseParticipantSelectionProps {
 
 interface ParticipantSelectionState {
   participants: Participant[] | DailyParticipant[];
-  allParticipants: DailyParticipant[] | null;
+  allParticipants: DailyParticipant[];
   isLoading: boolean;
   error: Error | null;
 }
@@ -24,7 +24,7 @@ export const useParticipantSelection = ({
 }: UseParticipantSelectionProps) => {
   const [state, setState] = useState<ParticipantSelectionState>({
     participants: [],
-    allParticipants: null,
+    allParticipants: [],
     isLoading: true,
     error: null
   });
@@ -43,7 +43,7 @@ export const useParticipantSelection = ({
         const all = await dailyUseCases.getParticipantsStatus();
         setState({
           participants: available,
-          allParticipants: all,
+          allParticipants: all || [],
           isLoading: false,
           error: null
         });
@@ -51,7 +51,7 @@ export const useParticipantSelection = ({
         const participants = await weeklyUseCases.getAllParticipants();
         setState({
           participants,
-          allParticipants: null,
+          allParticipants: [],
           isLoading: false,
           error: null
         });
@@ -155,7 +155,7 @@ export const useParticipantSelection = ({
             return p;
           });
 
-          const updatedAllParticipants = prev.allParticipants?.map(p => {
+          const updatedAllParticipants = prev.allParticipants.map(p => {
             if (p.id.value === participantId) {
               if (changes.has_spoken !== undefined && changes.has_spoken) {
                 p.markAsSpoken();
@@ -163,7 +163,7 @@ export const useParticipantSelection = ({
               // markAsSpoken() gère automatiquement lastParticipation
             }
             return p;
-          }) || null;
+          });
           
           return {
             ...prev,

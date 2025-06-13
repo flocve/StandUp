@@ -82,7 +82,12 @@ export const Dashboard: React.FC = () => {
   });
 
   // Hook pour gérer l'animateur courant
-  const { currentAnimator, animatorHistory } = useAnimators(
+  const {
+    currentAnimator,
+    animatorHistory,
+    getCurrentWeekAnimator,
+    getNextWeekAnimator
+  } = useAnimators(
     allWeeklyParticipants, 
     isInitialized ? participantRepository as any : { getAnimatorHistory: async () => [], addToAnimatorHistory: async () => {} }
   );
@@ -155,13 +160,12 @@ export const Dashboard: React.FC = () => {
   };
 
   // Calculer les statistiques dynamiques
-  const getAnimatorStats = () => {
-    const totalParticipants = allParticipants?.length || 0;
-    const participantsSpoken = allParticipants?.filter(p => 
+  const getAnimatorStats = (participants: any[]) => {
+    const totalParticipants = participants.length;
+    const participantsSpoken = participants.filter(p => 
       typeof p.hasSpoken === 'function' ? p.hasSpoken() : p.hasSpoken
-    )?.length || 0;
+    ).length;
     const animatorPassages = currentAnimator?.getPassageCount() || 0;
-    
     return {
       totalParticipants,
       participantsSpoken,
@@ -170,9 +174,11 @@ export const Dashboard: React.FC = () => {
     };
   };
 
-  const stats = getAnimatorStats();
+  const stats = getAnimatorStats(allParticipants || []);
   
-  const debugAnimator = currentAnimator || { 
+  const currentWeekEntry = getCurrentWeekAnimator();
+  const nextWeekEntry = getNextWeekAnimator();
+  const debugAnimator = currentWeekEntry?.participant || { 
     name: { value: 'Aucun animateur' }, 
     id: { value: 'no-animator' },
     getPhotoUrl: () => undefined,
@@ -193,6 +199,16 @@ export const Dashboard: React.FC = () => {
       hasSpokenType: typeof p.hasSpoken
     }))
   });
+
+  // Utilitaire pour obtenir le nom sous forme de string
+  const getNameString = (participantOrName: any) => {
+    if (!participantOrName) return '';
+    if (typeof participantOrName === 'string') return participantOrName;
+    if (typeof participantOrName.name === 'object' && 'value' in participantOrName.name) return participantOrName.name.value;
+    if (typeof participantOrName.value === 'string') return participantOrName.value;
+    if (typeof participantOrName.name === 'string') return participantOrName.name;
+    return '';
+  };
 
   // Affichage pendant l'initialisation
   if (!isInitialized) {
@@ -250,24 +266,24 @@ export const Dashboard: React.FC = () => {
             <div className="animator-header">
               <h2>Animateur actuel</h2>
             </div>
-            <div className="animator-card">
+            <div className="animator-card" style={{ position: 'relative' }}>
               {debugAnimator ? (
                 <>
                   <div className="animator-avatar">
                     {debugAnimator?.getPhotoUrl && debugAnimator.getPhotoUrl() ? (
                       <img 
                         src={debugAnimator.getPhotoUrl()}
-                        alt={String(debugAnimator.name?.value || debugAnimator.name || 'Animateur')}
+                        alt={getNameString(debugAnimator) || 'Animateur'}
                         className="animator-photo"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           const parent = target.parentElement;
                           if (parent) {
-                            const animatorName = String(debugAnimator.name?.value || debugAnimator.name || 'A');
+                            const animatorName = getNameString(debugAnimator);
                             const color = getAvatarColor(animatorName);
                             target.style.display = 'none';
                             parent.style.background = `linear-gradient(135deg, ${color.bg}, ${color.bg}dd)`;
-                            parent.innerHTML = `<div class="avatar-fallback">${animatorName.charAt(0).toUpperCase()}</div>`;
+                            parent.innerHTML = `<div class=\"avatar-fallback\">${animatorName.charAt(0).toUpperCase()}</div>`;
                           }
                         }}
                       />
@@ -275,20 +291,18 @@ export const Dashboard: React.FC = () => {
                       <div 
                         className="avatar-fallback"
                         style={{
-                          background: `linear-gradient(135deg, ${getAvatarColor(String(debugAnimator.name?.value || debugAnimator.name || 'A')).bg}, ${getAvatarColor(String(debugAnimator.name?.value || debugAnimator.name || 'A')).bg}dd)`,
+                          background: `linear-gradient(135deg, ${getAvatarColor(getNameString(debugAnimator) || 'A').bg}, ${getAvatarColor(getNameString(debugAnimator) || 'A').bg}dd)`,
                           color: 'white'
                         }}
                       >
-                        {String(debugAnimator.name?.value || debugAnimator.name || 'A').charAt(0).toUpperCase()}
+                        {getNameString(debugAnimator).charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
-                  
-                  <div className="animator-info">
-                    <h3>{String(debugAnimator.name?.value || debugAnimator.name || 'Animateur')}</h3>
-                    <p>En fonction cette semaine</p>
-                    
-                    <div className="animator-badges">
+                  <div className="animator-info" style={{ textAlign: 'center', flex: 1 }}>
+                    <h3 style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 0.3rem 0', letterSpacing: '-0.01em' }}>{getNameString(debugAnimator) || 'Animateur'}</h3>
+                    <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', margin: 0, opacity: 0.85, fontWeight: 500 }}>En fonction cette semaine</p>
+                    <div className="animator-badges" style={{ marginTop: '0.7rem', display: 'flex', justifyContent: 'center' }}>
                       <div className="badge experience-badge">
                         <div className="badge-icon">🎯</div>
                         <div className="badge-content">
@@ -298,8 +312,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Éléments décoratifs animés */}
+              
                   <div className="floating-elements">
                     <div className="floating-circle circle-1"></div>
                     <div className="floating-circle circle-2"></div>
@@ -318,6 +331,21 @@ export const Dashboard: React.FC = () => {
                 </div>
               )}
             </div>
+            {nextWeekEntry && nextWeekEntry.participant && (
+                    <div className="next-animator-discreet" style={{ position: 'absolute', bottom: '1.2rem', right: '1.2rem', opacity: 0.7, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', background: 'rgba(0,0,0,0.08)', borderRadius: '1.2rem', padding: '0.3rem 0.7rem' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', background: `linear-gradient(135deg, ${getAvatarColor(getNameString(nextWeekEntry.participant)).bg}, ${getAvatarColor(getNameString(nextWeekEntry.participant)).bg}dd)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
+                        {nextWeekEntry.participant.getPhotoUrl && nextWeekEntry.participant.getPhotoUrl() ? (
+                          <img src={nextWeekEntry.participant.getPhotoUrl()} alt={getNameString(nextWeekEntry.participant)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          getNameString(nextWeekEntry.participant).charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: '0.93rem', opacity: 0.8 }}>Prochain animateur</div>
+                        <div style={{ fontWeight: 700 }}>{getNameString(nextWeekEntry.participant)}</div>
+                      </div>
+                    </div>
+                  )}
           </div>
 
           <WeekPeriodDisplay />
@@ -327,9 +355,9 @@ export const Dashboard: React.FC = () => {
                   <div className="speakers-section">
             <h2>Équipe</h2>
             <div className="speakers-grid">
-            {allParticipants && allParticipants.length > 0 ? (
-              allParticipants.slice(0, 8).map((participant) => {
-              const participantName = String(participant.name?.value || participant.name || 'P');
+            {(allParticipants || []).length > 0 ? (
+              (allParticipants || []).slice(0, 8).map((participant) => {
+              const participantName = getNameString(participant);
               const avatarColor = getAvatarColor(participantName);
               const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
               
@@ -379,10 +407,10 @@ export const Dashboard: React.FC = () => {
                 <p className="no-participants-hint">Les participants apparaîtront ici une fois l'application connectée.</p>
               </div>
             )}
-            {(allParticipants?.length || 0) > 8 && (
+            {((allParticipants || []).length || 0) > 8 && (
               <div className="speaker-card more-speakers">
                 <div className="more-count">
-                  +{(allParticipants?.length || 0) - 8}
+                  +{((allParticipants || []).length || 0) - 8}
                 </div>
                 <span className="speaker-name">autres</span>
               </div>
