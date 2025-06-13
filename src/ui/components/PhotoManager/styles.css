@@ -4,7 +4,7 @@
   border-radius: 1rem;
   padding: 1.5rem;
   margin: 2rem 0;
-  backdrop-filter: blur(10px);
+  
 }
 
 .photo-manager h3 {
@@ -176,3 +176,4 @@
     justify-content: center;
   }
 } 
+

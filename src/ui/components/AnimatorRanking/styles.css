@@ -12,8 +12,8 @@
   border-radius: 1.25rem;
   padding: 1.25rem;
   width: 320px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  
+  -webkit-
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -42,8 +42,8 @@
   border-radius: 1.25rem;
   padding: 1.25rem;
   width: 320px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  
+  -webkit-
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -118,3 +118,4 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 0.5rem;
 } 
+

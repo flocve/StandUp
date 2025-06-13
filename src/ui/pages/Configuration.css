@@ -6,7 +6,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(12px);
+  
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,17 +15,15 @@
 }
 
 .config-modal {
-  background: var(--glass-background);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+  background: var(--background-primary);
+  border: 1px solid var(--border-primary);
   border-radius: 24px;
   width: 90vw;
   max-width: 1200px;
   height: 85vh;
   box-shadow: 
     0 25px 50px rgba(0, 0, 0, 0.4),
-    inset 0 0 0 1px var(--glass-shine);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -56,8 +54,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-primary);
+  
 }
 
 .config-header h2 {
@@ -72,7 +70,7 @@
 
 .close-btn {
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-primary);
   color: var(--text-primary);
   width: 40px;
   height: 40px;
@@ -98,8 +96,8 @@
   padding: 0.25rem;
   margin: 0 2rem;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  
+  border: 1px solid var(--border-primary);
 }
 
 .config-tabs .tab {
@@ -140,9 +138,9 @@
 
 /* Message */
 .message {
-  background: var(--glass-background);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
+  
   color: var(--text-primary);
   padding: 1rem;
   border-radius: 12px;
@@ -156,7 +154,7 @@
 
 .message button {
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-primary);
   color: var(--text-secondary);
   width: 24px;
   height: 24px;
@@ -199,10 +197,10 @@
 }
 
 .table-container {
-  background: var(--glass-background);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
   border-radius: 12px;
-  backdrop-filter: blur(8px);
+  
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   max-height: 300px;
@@ -219,7 +217,7 @@ table thead {
   color: var(--text-primary);
   position: sticky;
   top: 0;
-  backdrop-filter: blur(8px);
+  
 }
 
 table th {
@@ -234,7 +232,7 @@ table th {
 
 table td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--border-primary);
   color: var(--text-primary);
 }
 
@@ -254,11 +252,11 @@ table tbody tr:nth-child(even) {
 }
 
 .tool-section {
-  background: var(--glass-background);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
   padding: 1.5rem;
   border-radius: 12px;
-  backdrop-filter: blur(8px);
+  
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
@@ -280,12 +278,12 @@ table tbody tr:nth-child(even) {
   flex: 1;
   min-width: 200px;
   padding: 0.75rem;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
   font-size: 1rem;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
-  backdrop-filter: blur(4px);
+  
   transition: all 0.2s ease;
 }
 
@@ -356,11 +354,11 @@ table tbody tr:nth-child(even) {
 }
 
 .stat-card {
-  background: var(--glass-background);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
   padding: 2rem;
   border-radius: 12px;
-  backdrop-filter: blur(8px);
+  
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   text-align: center;
   transition: all 0.3s ease;
@@ -419,7 +417,7 @@ table tbody tr:nth-child(even) {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
+  
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -452,17 +450,17 @@ table tbody tr:nth-child(even) {
   left: 2rem;
   width: 60px;
   height: 60px;
-  background: var(--glass-background);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
   border-radius: 50%;
   color: var(--text-primary);
   font-size: 1.5rem;
   cursor: pointer;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  
+  -webkit-
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px var(--glass-shine);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   z-index: 100;
   display: flex;
@@ -546,3 +544,4 @@ table tbody tr:nth-child(even) {
     font-size: 1.2rem;
   }
 } 
+

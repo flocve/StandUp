@@ -48,9 +48,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     },
     unicorn: {
       name: 'unicorn',
-      displayName: 'Unicorn Mode',
-      description: 'Mode magique et coloré',
-      emoji: '🦄'
+      displayName: 'Mode Licorne Pastel',
+      description: 'Mode magique et coloré avec effets pastels',
+      emoji: '🦄✨'
     }
   } as const;
 
