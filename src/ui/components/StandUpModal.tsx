@@ -343,72 +343,90 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   <span>EN COURS</span>
                 </div>
                 
-                {(() => {
-                  const speakerName = String(currentSpeaker.name?.value || currentSpeaker.name || 'Speaker');
-                  const avatarColor = getAvatarColor(speakerName);
-                  
-                  // Vérification améliorée pour la photo
-                  let photoUrl = null;
-                  if ('getPhotoUrl' in currentSpeaker && typeof currentSpeaker.getPhotoUrl === 'function') {
-                    try {
-                      photoUrl = currentSpeaker.getPhotoUrl();
-                    } catch (error) {
-                      // Erreur silencieuse, on continue avec les autres méthodes
-                    }
-                  }
-                  
-                  // Vérifier aussi les autres propriétés possibles
-                  if (!photoUrl && (currentSpeaker as any).photoUrl) {
-                    photoUrl = (currentSpeaker as any).photoUrl;
-                  }
-                  if (!photoUrl && (currentSpeaker as any).avatar) {
-                    photoUrl = (currentSpeaker as any).avatar;
-                  }
-                  if (!photoUrl && (currentSpeaker as any).photo) {
-                    photoUrl = (currentSpeaker as any).photo;
-                  }
-                  
-                  const hasPhoto = photoUrl && photoUrl.trim() !== '';
-                  
-                  return (
-                    <>
-                      <div className="current-speaker-avatar">
-                        {hasPhoto ? (
-                          <img 
-                            src={photoUrl}
-                            alt={speakerName}
-                            className="current-speaker-photo"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const parent = target.parentElement;
-                              if (parent) {
-                                target.style.display = 'none';
-                                parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                parent.innerHTML = `<div class="current-speaker-fallback" style="color: ${avatarColor.text}">${speakerName.charAt(0).toUpperCase()}</div>`;
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div 
-                            className="current-speaker-fallback"
-                            style={{
-                              background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                              color: avatarColor.text
-                            }}
-                          >
-                            {speakerName.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="speaker-ring"></div>
-                      </div>
+                <div className="speaker-content">
+                  <div className="speaker-left">
+                    {(() => {
+                      const speakerName = String(currentSpeaker.name?.value || currentSpeaker.name || 'Speaker');
+                      const avatarColor = getAvatarColor(speakerName);
                       
-                      <div className="current-speaker-info">
-                        <h3>{speakerName}</h3>
-                        <p>Partage ses avancées maintenant</p>
-                      </div>
-                    </>
-                  );
-                })()}
+                      // Vérification améliorée pour la photo
+                      let photoUrl = null;
+                      if ('getPhotoUrl' in currentSpeaker && typeof currentSpeaker.getPhotoUrl === 'function') {
+                        try {
+                          photoUrl = currentSpeaker.getPhotoUrl();
+                        } catch (error) {
+                          // Erreur silencieuse, on continue avec les autres méthodes
+                        }
+                      }
+                      
+                      // Vérifier aussi les autres propriétés possibles
+                      if (!photoUrl && (currentSpeaker as any).photoUrl) {
+                        photoUrl = (currentSpeaker as any).photoUrl;
+                      }
+                      if (!photoUrl && (currentSpeaker as any).avatar) {
+                        photoUrl = (currentSpeaker as any).avatar;
+                      }
+                      if (!photoUrl && (currentSpeaker as any).photo) {
+                        photoUrl = (currentSpeaker as any).photo;
+                      }
+                      
+                      const hasPhoto = photoUrl && photoUrl.trim() !== '';
+                      
+                      return (
+                        <>
+                          <div className="current-speaker-avatar">
+                            {hasPhoto ? (
+                              <img 
+                                src={photoUrl}
+                                alt={speakerName}
+                                className="current-speaker-photo"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    target.style.display = 'none';
+                                    parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                    parent.innerHTML = `<div class="current-speaker-fallback" style="color: ${avatarColor.text}">${speakerName.charAt(0).toUpperCase()}</div>`;
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div 
+                                className="current-speaker-fallback"
+                                style={{
+                                  background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                                  color: avatarColor.text
+                                }}
+                              >
+                                {speakerName.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="speaker-ring"></div>
+                          </div>
+                          
+                          <div className="current-speaker-info">
+                            <h3>{speakerName}</h3>
+                            <p>Partage ses avancées maintenant</p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Bouton Shuffle à droite */}
+                  {availableParticipants.length > 0 && (
+                    <div className="speaker-right">
+                      <button 
+                        className="shuffle-button-integrated"
+                        onClick={handleShuffleSelect}
+                        disabled={isSpinning}
+                      >
+                        <div className="shuffle-icon">🎲</div>
+                        <span>Suivant</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>
@@ -417,15 +435,33 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   <span>EN ATTENTE</span>
                 </div>
                 
-                {/* Avatar invisible pour maintenir la structure et la taille */}
-                <div className="current-speaker-avatar waiting invisible">
-                  <div className="waiting-avatar-placeholder"></div>
-                  <div className="speaker-ring waiting"></div>
-                </div>
-                
-                <div className="current-speaker-info">
-                  <h3>Prêt à commencer ?</h3>
-                  <p>Sélectionnez quelqu'un pour démarrer le stand-up !</p>
+                <div className="speaker-content">
+                  <div className="speaker-left">
+                    {/* Avatar invisible pour maintenir la structure et la taille */}
+                    <div className="current-speaker-avatar waiting invisible">
+                      <div className="waiting-avatar-placeholder"></div>
+                      <div className="speaker-ring waiting"></div>
+                    </div>
+                    
+                    <div className="current-speaker-info">
+                      <h3>Prêt à commencer ?</h3>
+                      <p>Sélectionnez quelqu'un pour démarrer le stand-up !</p>
+                    </div>
+                  </div>
+
+                  {/* Bouton Shuffle à droite même en mode attente */}
+                  {availableParticipants.length > 0 && (
+                    <div className="speaker-right">
+                      <button 
+                        className="shuffle-button-integrated"
+                        onClick={handleShuffleSelect}
+                        disabled={isSpinning}
+                      >
+                        <div className="shuffle-icon">🎲</div>
+                        <span>Commencer</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -445,76 +481,63 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
             </div>
 
             {availableParticipants.length > 0 ? (
-              <>
-                <div className="available-grid">
-                  {availableParticipants.map((participant) => {
-                    const participantName = String(participant.name?.value || participant.name || 'P');
-                    const avatarColor = getAvatarColor(participantName);
-                    const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
-                    const isCurrentSelected = selectedParticipant?.id === participant.id;
-                    const isAnimator = currentAnimator && (
-                      (currentAnimator.id?.value || currentAnimator.id) === 
-                      (participant.id?.value || participant.id)
-                    );
-                    const isShuffling = isSpinning && selectedParticipant?.id === participant.id;
-                    const isWinner = isWinnerRevealed && selectedParticipant?.id === participant.id;
-                    
-                    return (
-                      <div 
-                        key={String(participant.id?.value || participant.id)}
-                        className={`available-card ${isCurrentSelected ? 'selected' : ''} ${isAnimator ? 'animator' : ''} ${isShuffling ? 'shuffling' : ''} ${isWinner ? 'winner' : ''}`}
-                        onClick={() => !isSpinning && handleParticipantSelect(participant)}
-                      >
-                        <div className="available-avatar">
-                          {hasPhoto ? (
-                            <img 
-                              src={participant.getPhotoUrl!()}
-                              alt={participantName}
-                              className="available-photo"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  target.style.display = 'none';
-                                  parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                  parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div 
-                              className="available-fallback"
-                              style={{
-                                background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                                color: avatarColor.text
-                              }}
-                            >
-                              {participantName.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="available-name">
-                          {participantName}
-                        </div>
-                        
-                        {isAnimator && <div className="animator-star">⭐</div>}
+              <div className="available-grid">
+                {availableParticipants.map((participant) => {
+                  const participantName = String(participant.name?.value || participant.name || 'P');
+                  const avatarColor = getAvatarColor(participantName);
+                  const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
+                  const isCurrentSelected = selectedParticipant?.id === participant.id;
+                  const isAnimator = currentAnimator && (
+                    (currentAnimator.id?.value || currentAnimator.id) === 
+                    (participant.id?.value || participant.id)
+                  );
+                  const isShuffling = isSpinning && selectedParticipant?.id === participant.id;
+                  const isWinner = isWinnerRevealed && selectedParticipant?.id === participant.id;
+                  
+                  return (
+                    <div 
+                      key={String(participant.id?.value || participant.id)}
+                      className={`available-card ${isCurrentSelected ? 'selected' : ''} ${isAnimator ? 'animator' : ''} ${isShuffling ? 'shuffling' : ''} ${isWinner ? 'winner' : ''}`}
+                      onClick={() => !isSpinning && handleParticipantSelect(participant)}
+                    >
+                      <div className="available-avatar">
+                        {hasPhoto ? (
+                          <img 
+                            src={participant.getPhotoUrl!()}
+                            alt={participantName}
+                            className="available-photo"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              const parent = target.parentElement;
+                              if (parent) {
+                                target.style.display = 'none';
+                                parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div 
+                            className="available-fallback"
+                            style={{
+                              background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                              color: avatarColor.text
+                            }}
+                          >
+                            {participantName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-
-                <div className="shuffle-section">
-                  <button 
-                    className="shuffle-button"
-                    onClick={handleShuffleSelect}
-                    disabled={isSpinning}
-                  >
-                    <div className="shuffle-icon">🎲</div>
-                    <span>Shuffle & Sélectionner</span>
-                  </button>
-                </div>
-              </>
+                      
+                      <div className="available-name">
+                        {participantName}
+                      </div>
+                      
+                      {isAnimator && <div className="animator-star">⭐</div>}
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
               <div className="all-done-state">
                 <div className="celebration-icon">🎉</div>
