@@ -4,6 +4,7 @@ import type { ParticipantRepository } from '../../domain/participant/repository'
 import type { DailySelectionUseCases } from '../../application/daily/useCases';
 import { useParticipants } from '../../hooks/useParticipants';
 import { useDailyParticipants } from '../../hooks/useDailyParticipants';
+import { getParticipantPhotoUrlWithTheme } from '../../utils/animalPhotos';
 import './StandUpModal.css';
 
 interface StandUpModalProps {
@@ -16,6 +17,7 @@ interface StandUpModalProps {
   repository: ParticipantRepository;
   dailyUseCases: DailySelectionUseCases;
   currentAnimator?: any;
+  theme?: string;
 }
 
 // Fonction pour générer une couleur d'avatar basée sur le nom
@@ -39,6 +41,13 @@ const getAvatarColor = (name: string) => {
   return colors[Math.abs(hash) % colors.length];
 };
 
+// Fonction helper pour obtenir l'URL de photo avec support du thème
+const getPhotoUrl = (participant: any, theme?: string) => {
+  const participantName = String(participant?.name?.value || participant?.name || 'Participant');
+  const customPhotoUrl = participant?.getPhotoUrl?.();
+  return getParticipantPhotoUrlWithTheme(participantName, customPhotoUrl, theme);
+};
+
 export const StandUpModal: React.FC<StandUpModalProps> = ({
   isOpen,
   onClose,
@@ -48,7 +57,8 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
   onReset,
   repository,
   dailyUseCases,
-  currentAnimator
+  currentAnimator,
+  theme
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   
@@ -349,58 +359,23 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                       const speakerName = String(currentSpeaker.name?.value || currentSpeaker.name || 'Speaker');
                       const avatarColor = getAvatarColor(speakerName);
                       
-                      // Vérification améliorée pour la photo
-                      let photoUrl = null;
-                      if ('getPhotoUrl' in currentSpeaker && typeof currentSpeaker.getPhotoUrl === 'function') {
-                        try {
-                          photoUrl = currentSpeaker.getPhotoUrl();
-                        } catch (error) {
-                          // Erreur silencieuse, on continue avec les autres méthodes
-                        }
-                      }
-                      
-                      // Vérifier aussi les autres propriétés possibles
-                      if (!photoUrl && (currentSpeaker as any).photoUrl) {
-                        photoUrl = (currentSpeaker as any).photoUrl;
-                      }
-                      if (!photoUrl && (currentSpeaker as any).avatar) {
-                        photoUrl = (currentSpeaker as any).avatar;
-                      }
-                      if (!photoUrl && (currentSpeaker as any).photo) {
-                        photoUrl = (currentSpeaker as any).photo;
-                      }
-                      
-                      const hasPhoto = photoUrl && photoUrl.trim() !== '';
-                      
                       return (
                         <>
                           <div className="current-speaker-avatar">
-                            {hasPhoto ? (
-                              <img 
-                                src={photoUrl}
-                                alt={speakerName}
-                                className="current-speaker-photo"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    target.style.display = 'none';
-                                    parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                    parent.innerHTML = `<div class="current-speaker-fallback" style="color: ${avatarColor.text}">${speakerName.charAt(0).toUpperCase()}</div>`;
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <div 
-                                className="current-speaker-fallback"
-                                style={{
-                                  background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                                  color: avatarColor.text
-                                }}
-                              >
-                                {speakerName.charAt(0).toUpperCase()}
-                              </div>
-                            )}
+                            <img 
+                              src={getPhotoUrl(currentSpeaker, theme)}
+                              alt={speakerName}
+                              className="current-speaker-photo"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  target.style.display = 'none';
+                                  parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                  parent.innerHTML = `<div class="current-speaker-fallback" style="color: ${avatarColor.text}">${speakerName.charAt(0).toUpperCase()}</div>`;
+                                }
+                              }}
+                            />
                             <div className="speaker-ring"></div>
                           </div>
                           
@@ -485,7 +460,6 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 {availableParticipants.map((participant) => {
                   const participantName = String(participant.name?.value || participant.name || 'P');
                   const avatarColor = getAvatarColor(participantName);
-                  const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
                   const isCurrentSelected = selectedParticipant?.id === participant.id;
                   const isAnimator = currentAnimator && (
                     (currentAnimator.id?.value || currentAnimator.id) === 
@@ -501,32 +475,20 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                       onClick={() => !isSpinning && handleParticipantSelect(participant)}
                     >
                       <div className="available-avatar">
-                        {hasPhoto ? (
-                          <img 
-                            src={participant.getPhotoUrl!()}
-                            alt={participantName}
-                            className="available-photo"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const parent = target.parentElement;
-                              if (parent) {
-                                target.style.display = 'none';
-                                parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div 
-                            className="available-fallback"
-                            style={{
-                              background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                              color: avatarColor.text
-                            }}
-                          >
-                            {participantName.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <img 
+                          src={getPhotoUrl(participant, theme)}
+                          alt={participantName}
+                          className="available-photo"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            const parent = target.parentElement;
+                            if (parent) {
+                              target.style.display = 'none';
+                              parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                              parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                            }
+                          }}
+                        />
                       </div>
                       
                       <div className="available-name">
@@ -596,7 +558,6 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 {[...participantsWhoSpoke].reverse().map((participant, index) => {
                   const participantName = String(participant.name?.value || participant.name || 'P');
                   const avatarColor = getAvatarColor(participantName);
-                  const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
                   const isLatestSpeaker = index === 0; // Le premier de la liste inversée
                   const originalOrder = participantsWhoSpoke.length - index; // Ordre original pour l'affichage
                   
@@ -609,32 +570,20 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                       <div className="history-order">{originalOrder}</div>
                       
                       <div className="history-avatar">
-                        {hasPhoto ? (
-                          <img 
-                            src={participant.getPhotoUrl!()}
-                            alt={participantName}
-                            className="history-photo"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const parent = target.parentElement;
-                              if (parent) {
-                                target.style.display = 'none';
-                                parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                parent.innerHTML = `<div class="history-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div 
-                            className="history-fallback"
-                            style={{
-                              background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                              color: avatarColor.text
-                            }}
-                          >
-                            {participantName.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <img 
+                          src={getPhotoUrl(participant, theme)}
+                          alt={participantName}
+                          className="history-photo"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            const parent = target.parentElement;
+                            if (parent) {
+                              target.style.display = 'none';
+                              parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                              parent.innerHTML = `<div class="history-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                            }
+                          }}
+                        />
                         <div className="done-badge">✓</div>
                       </div>
                       

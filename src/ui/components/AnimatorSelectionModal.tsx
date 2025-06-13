@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { ParticipantRepository } from '../../domain/participant/repository';
 import type { WeeklySelectionUseCases } from '../../application/weekly/useCases';
 import { useAnimators } from '../../hooks/useAnimators';
+import { getParticipantPhotoUrlWithTheme } from '../../utils/animalPhotos';
 import './AnimatorSelectionModal.css';
 
 interface AnimatorSelectionModalProps {
@@ -13,6 +14,7 @@ interface AnimatorSelectionModalProps {
   weeklyUseCases: WeeklySelectionUseCases;
   currentAnimator?: any;
   nextWeekAnimator?: any;
+  theme?: string;
 }
 
 export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
@@ -22,7 +24,8 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
   onSelect,
   repository,
   weeklyUseCases,
-  currentAnimator
+  currentAnimator,
+  theme
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [showSelectionOverlay, setShowSelectionOverlay] = useState(false);
@@ -73,6 +76,13 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
       return `${baseClass} long-name`;
     }
     return baseClass;
+  };
+
+  // Fonction helper pour obtenir l'URL de photo avec support du thème
+  const getPhotoUrl = (participant: any) => {
+    const participantName = String(participant?.name?.value || participant?.name || 'Participant');
+    const customPhotoUrl = participant?.getPhotoUrl?.();
+    return getParticipantPhotoUrlWithTheme(participantName, customPhotoUrl, theme);
   };
 
   useEffect(() => {
@@ -285,58 +295,23 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                       const animatorName = String(currentAnimator.name?.value || currentAnimator.name || 'Animateur');
                       const avatarColor = getAvatarColor(animatorName);
                       
-                      // Vérification améliorée pour la photo
-                      let photoUrl = null;
-                      if ('getPhotoUrl' in currentAnimator && typeof currentAnimator.getPhotoUrl === 'function') {
-                        try {
-                          photoUrl = currentAnimator.getPhotoUrl();
-                        } catch (error) {
-                          // Erreur silencieuse, on continue avec les autres méthodes
-                        }
-                      }
-                      
-                      // Vérifier aussi les autres propriétés possibles
-                      if (!photoUrl && (currentAnimator as any).photoUrl) {
-                        photoUrl = (currentAnimator as any).photoUrl;
-                      }
-                      if (!photoUrl && (currentAnimator as any).avatar) {
-                        photoUrl = (currentAnimator as any).avatar;
-                      }
-                      if (!photoUrl && (currentAnimator as any).photo) {
-                        photoUrl = (currentAnimator as any).photo;
-                      }
-                      
-                      const hasPhoto = photoUrl && photoUrl.trim() !== '';
-                      
                       return (
                         <>
                           <div className="current-animator-avatar">
-                            {hasPhoto ? (
-                              <img 
-                                src={photoUrl}
-                                alt={animatorName}
-                                className="current-animator-photo"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    target.style.display = 'none';
-                                    parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                    parent.innerHTML = `<div class="current-animator-fallback" style="color: ${avatarColor.text}">${animatorName.charAt(0).toUpperCase()}</div>`;
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <div 
-                                className="current-animator-fallback"
-                                style={{
-                                  background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                                  color: avatarColor.text
-                                }}
-                              >
-                                {animatorName.charAt(0).toUpperCase()}
-                              </div>
-                            )}
+                            <img 
+                              src={getPhotoUrl(currentAnimator)}
+                              alt={animatorName}
+                              className="current-animator-photo"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  target.style.display = 'none';
+                                  parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                  parent.innerHTML = `<div class="current-animator-fallback" style="color: ${avatarColor.text}">${animatorName.charAt(0).toUpperCase()}</div>`;
+                                }
+                              }}
+                            />
                             <div className="animator-ring"></div>
                           </div>
                           
@@ -438,7 +413,6 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                 return participantsWithChances.map(({ participant, chancePercentage }) => {
                   const participantName = String(participant.name?.value || participant.name || 'Participant');
                   const avatarColor = getAvatarColor(participantName);
-                  const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
                   const isCurrentAnimator = currentAnimator && (
                     (currentAnimator.id?.value || currentAnimator.id) === 
                     (participant.id?.value || participant.id)
@@ -452,32 +426,20 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                     onClick={() => !isCurrentAnimator && handleAnimatorSelect(participant)}
                   >
                     <div className="available-avatar">
-                      {hasPhoto ? (
-                        <img 
-                          src={participant.getPhotoUrl!()}
-                          alt={participantName}
-                          className="available-photo"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            const parent = target.parentElement;
-                            if (parent) {
-                              target.style.display = 'none';
-                              parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                              parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div 
-                          className="available-fallback"
-                          style={{
-                            background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                            color: avatarColor.text
-                          }}
-                        >
-                          {participantName.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <img 
+                        src={getPhotoUrl(participant)}
+                        alt={participantName}
+                        className="available-photo"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          const parent = target.parentElement;
+                          if (parent) {
+                            target.style.display = 'none';
+                            parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                            parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                          }
+                        }}
+                      />
                     </div>
                     
                     <div className="available-name">
@@ -611,17 +573,6 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                       const isEliminating = currentElimination === participant;
                       const isEliminated = eliminatedParticipants.some(p => p === participant);
                       
-                      let photoUrl = null;
-                      if ('getPhotoUrl' in participant && typeof participant.getPhotoUrl === 'function') {
-                        try {
-                          photoUrl = participant.getPhotoUrl();
-                        } catch (error) {
-                          // Erreur silencieuse
-                        }
-                      }
-                      
-                      const hasPhoto = photoUrl && photoUrl.trim() !== '';
-                      
                       return (
                         <div 
                           key={String(participant.id?.value || participant.id)}
@@ -632,32 +583,20 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                           }`}
                         >
                           <div className="battle-avatar">
-                            {hasPhoto ? (
-                              <img 
-                                src={photoUrl}
-                                alt={participantName}
-                                className="battle-avatar-photo"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    target.style.display = 'none';
-                                    parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                    parent.innerHTML = `<div class="battle-avatar-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <div 
-                                className="battle-avatar-fallback"
-                                style={{
-                                  background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                                  color: avatarColor.text
-                                }}
-                              >
-                                {participantName.charAt(0).toUpperCase()}
-                              </div>
-                            )}
+                            <img 
+                              src={getPhotoUrl(participant)}
+                              alt={participantName}
+                              className="battle-avatar-photo"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  target.style.display = 'none';
+                                  parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                  parent.innerHTML = `<div class="battle-avatar-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
+                                }
+                              }}
+                            />
                           </div>
                           <div className="battle-name">{participantName}</div>
                           {isEliminating && <div className="elimination-effect">😅</div>}
@@ -697,47 +636,23 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                           const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
                           const avatarColor = getAvatarColor(candidateName);
                           
-                          // Vérification pour la photo
-                          let photoUrl = null;
-                          if ('getPhotoUrl' in candidate && typeof candidate.getPhotoUrl === 'function') {
-                            try {
-                              photoUrl = candidate.getPhotoUrl();
-                            } catch (error) {
-                              // Erreur silencieuse
-                            }
-                          }
-                          
-                          const hasPhoto = photoUrl && photoUrl.trim() !== '';
-                          
                           return (
                             <>
                               <div className="card-avatar">
-                                {hasPhoto ? (
-                                  <img 
-                                    src={photoUrl}
-                                    alt={candidateName}
-                                    className="card-photo"
-                                    onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      const parent = target.parentElement;
-                                      if (parent) {
-                                        target.style.display = 'none';
-                                        parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                        parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
-                                      }
-                                    }}
-                                  />
-                                ) : (
-                                  <div 
-                                    className="card-fallback"
-                                    style={{
-                                      background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                                      color: avatarColor.text
-                                    }}
-                                  >
-                                    {candidateName.charAt(0).toUpperCase()}
-                                  </div>
-                                )}
+                                <img 
+                                  src={getPhotoUrl(candidate)}
+                                  alt={candidateName}
+                                  className="card-photo"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      target.style.display = 'none';
+                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                      parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
+                                    }
+                                  }}
+                                />
                               </div>
                               <div className="card-name">{candidateName}</div>
                               <div className="card-fate">Risque d'être animateur...</div>
@@ -768,47 +683,23 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                           const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
                           const avatarColor = getAvatarColor(candidateName);
                           
-                          // Vérification pour la photo
-                          let photoUrl = null;
-                          if ('getPhotoUrl' in candidate && typeof candidate.getPhotoUrl === 'function') {
-                            try {
-                              photoUrl = candidate.getPhotoUrl();
-                            } catch (error) {
-                              // Erreur silencieuse
-                            }
-                          }
-                          
-                          const hasPhoto = photoUrl && photoUrl.trim() !== '';
-                          
                           return (
                             <>
                               <div className="card-avatar">
-                                {hasPhoto ? (
-                                  <img 
-                                    src={photoUrl}
-                                    alt={candidateName}
-                                    className="card-photo"
-                                    onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      const parent = target.parentElement;
-                                      if (parent) {
-                                        target.style.display = 'none';
-                                        parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                        parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
-                                      }
-                                    }}
-                                  />
-                                ) : (
-                                  <div 
-                                    className="card-fallback"
-                                    style={{
-                                      background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                                      color: avatarColor.text
-                                    }}
-                                  >
-                                    {candidateName.charAt(0).toUpperCase()}
-                                  </div>
-                                )}
+                                <img 
+                                  src={getPhotoUrl(candidate)}
+                                  alt={candidateName}
+                                  className="card-photo"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      target.style.display = 'none';
+                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                      parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
+                                    }
+                                  }}
+                                />
                               </div>
                               <div className="card-name">{candidateName}</div>
                               <div className="card-fate">Risque d'être animateur...</div>
