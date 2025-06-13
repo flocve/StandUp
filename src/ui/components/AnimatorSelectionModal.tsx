@@ -24,6 +24,17 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
   currentAnimator
 }) => {
   const [isClosing, setIsClosing] = useState(false);
+  const [showSelectionOverlay, setShowSelectionOverlay] = useState(false);
+  const [isSelectionOverlayClosing, setIsSelectionOverlayClosing] = useState(false);
+  const [selectedAnimatorName, setSelectedAnimatorName] = useState<string>('');
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [battlePhase, setBattlePhase] = useState<'battle-royal' | 'duel' | 'winner'>('battle-royal');
+  const [remainingParticipants, setRemainingParticipants] = useState<any[]>([]);
+  const [eliminatedParticipants, setEliminatedParticipants] = useState<any[]>([]);
+  const [currentElimination, setCurrentElimination] = useState<any>(null);
+  const [duelCandidates, setDuelCandidates] = useState<any[]>([]);
+  const [currentShuffleIndex, setCurrentShuffleIndex] = useState(0);
+  const [winnerName, setWinnerName] = useState<string>('');
   
   // Utiliser le hook useAnimators pour les vraies données
   const { animatorHistory, addAnimator, getParticipantChancePercentage } = useAnimators(
@@ -50,6 +61,17 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
     }, 0);
     
     return colors[Math.abs(hash) % colors.length];
+  };
+
+  // Fonction pour déterminer la classe CSS selon la longueur du nom
+  const getDuelNameClass = (name: string) => {
+    const baseClass = 'duel-name';
+    if (name.length > 10) {
+      return `${baseClass} very-long-name`;
+    } else if (name.length > 7) {
+      return `${baseClass} long-name`;
+    }
+    return baseClass;
   };
 
   useEffect(() => {
@@ -96,20 +118,132 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
   };
 
   const handleAnimatorSelect = async (participant: any) => {
+    if (isSelecting) return;
+    
     try {
-      // Utiliser le hook pour ajouter l'animateur
-      await addAnimator(participant);
+      setIsSelecting(true);
+      const finalWinnerName = String(participant.name?.value || participant.name || 'Animateur');
       
-      // Appeler la logique de sélection
-      await onSelect(participant);
+      // Préparer le battle royal avec tous les participants
+      setRemainingParticipants([...participants]);
+      setEliminatedParticipants([]);
+      setCurrentElimination(null);
+      setBattlePhase('battle-royal');
+      setWinnerName('');
       
-      // Fermer la modale après un délai pour voir l'animation
-      setTimeout(() => {
-        handleClose();
-      }, 1500);
+      // Afficher l'overlay d'animation
+      setShowSelectionOverlay(true);
+      
+      console.log('🥊 Battle Royal commencé avec', participants.length, 'participants');
+      
+      // Démarrer le battle royal
+      setTimeout(() => startBattleRoyal(participant, finalWinnerName), 1000);
+      
     } catch (error) {
       console.error('Erreur lors de la sélection de l\'animateur:', error);
+      setIsSelecting(false);
     }
+  };
+
+  const startBattleRoyal = (finalWinner: any, finalWinnerName: string) => {
+    let currentParticipants = [...participants];
+    
+    const eliminateParticipant = () => {
+      if (currentParticipants.length <= 2) {
+        // DUEL FINAL !
+        console.log('⚔️ DUEL FINAL !');
+        setDuelCandidates(currentParticipants);
+        setBattlePhase('duel');
+        setTimeout(() => startEpicDuel(finalWinner, finalWinnerName), 1000);
+        return;
+      }
+      
+      // Éliminer un participant (sauf le gagnant final)
+      const eliminationCandidates = currentParticipants.filter(p => 
+        String(p.name?.value || p.name || 'Participant') !== finalWinnerName || currentParticipants.length === 2
+      );
+      
+      const victimIndex = Math.floor(Math.random() * eliminationCandidates.length);
+      const victim = eliminationCandidates[victimIndex];
+      
+      // Animation d'élimination
+      setCurrentElimination(victim);
+      console.log('💥 Élimination de', String(victim.name?.value || victim.name));
+      
+      setTimeout(() => {
+        // Retirer le participant éliminé
+        const realIndex = currentParticipants.findIndex(p => p === victim);
+        currentParticipants.splice(realIndex, 1);
+        
+        setRemainingParticipants([...currentParticipants]);
+        setEliminatedParticipants(prev => [...prev, victim]);
+        setCurrentElimination(null);
+        
+        // Pause avant la prochaine élimination (2x plus rapide)
+        const delay = currentParticipants.length > 3 ? 1000 : 1500;
+        setTimeout(eliminateParticipant, delay);
+      }, 1250); // 2x plus rapide
+    };
+    
+    // Première élimination (2x plus rapide)
+    setTimeout(eliminateParticipant, 1000);
+  };
+
+  const startEpicDuel = (finalWinner: any, finalWinnerName: string) => {
+    let duelIndex = 0;
+    let duelIterations = 50;
+    const baseDuelDelay = 60;
+    
+    const animateDuel = () => {
+      if (duelIterations > 0) {
+        setCurrentShuffleIndex(duelIndex % 2);
+        duelIndex++;
+        duelIterations--;
+        
+        let currentDelay = baseDuelDelay;
+        const progress = (50 - duelIterations) / 50;
+        
+        if (progress < 0.3) {
+          currentDelay = baseDuelDelay - (progress / 0.3) * 20;
+        } else if (progress < 0.7) {
+          currentDelay = 40;
+        } else if (progress < 0.9) {
+          currentDelay = 40 + ((progress - 0.7) / 0.2) * 160;
+        } else {
+          currentDelay = 300;
+        }
+        
+        setTimeout(animateDuel, Math.floor(currentDelay));
+      } else {
+        // Duel terminé !
+        console.log('🏆 Victoire !');
+        setWinnerName(finalWinnerName);
+        setBattlePhase('winner');
+        
+        // Finaliser la sélection
+        setTimeout(async () => {
+          try {
+            await addAnimator(finalWinner);
+            await onSelect(finalWinner);
+            
+            setTimeout(() => {
+              setIsSelectionOverlayClosing(true);
+              setTimeout(() => {
+                setShowSelectionOverlay(false);
+                setIsSelectionOverlayClosing(false);
+                setIsSelecting(false);
+              }, 800);
+            }, 2000);
+          } catch (error) {
+            console.error('Erreur:', error);
+            setShowSelectionOverlay(false);
+            setIsSelecting(false);
+          }
+        }, 1000);
+      }
+    };
+    
+    setTimeout(animateDuel, 500);
   };
 
   if (!isOpen) return null;
@@ -450,6 +584,270 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
             ← Retour au dashboard
           </button>
         </div>
+
+        {/* Overlay d'animation de sélection */}
+        {showSelectionOverlay && (
+          <div className={`selection-overlay ${battlePhase} ${isSelectionOverlayClosing ? 'closing' : ''}`}>
+            <div className="selection-animation-container">
+              {battlePhase === 'battle-royal' ? (
+                <>
+                  <div className="selection-title">
+                    <span className="selection-emoji">🥊</span>
+                    <h2>BATTLE ROYAL</h2>
+                    <p>Élimination en cours...</p>
+                  </div>
+                  
+                  <div className="battle-counter">
+                    <h3>Participants restants: {remainingParticipants.length}</h3>
+                    <p>Élimination progressive jusqu'au duel final</p>
+                  </div>
+                  
+                  <div className="battle-royal-arena">
+                    {participants.map((participant) => {
+                      const participantName = String(participant.name?.value || participant.name || 'Participant');
+                      const avatarColor = getAvatarColor(participantName);
+                      const isRemaining = remainingParticipants.some(p => p === participant);
+                      const isEliminating = currentElimination === participant;
+                      const isEliminated = eliminatedParticipants.some(p => p === participant);
+                      
+                      let photoUrl = null;
+                      if ('getPhotoUrl' in participant && typeof participant.getPhotoUrl === 'function') {
+                        try {
+                          photoUrl = participant.getPhotoUrl();
+                        } catch (error) {
+                          // Erreur silencieuse
+                        }
+                      }
+                      
+                      const hasPhoto = photoUrl && photoUrl.trim() !== '';
+                      
+                      return (
+                        <div 
+                          key={String(participant.id?.value || participant.id)}
+                          className={`battle-participant ${
+                            isEliminating ? 'eliminating' : 
+                            isEliminated ? 'eliminated' : 
+                            isRemaining ? 'remaining' : ''
+                          }`}
+                        >
+                          <div className="battle-avatar">
+                            {hasPhoto ? (
+                              <img 
+                                src={photoUrl}
+                                alt={participantName}
+                                className="battle-avatar-photo"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    target.style.display = 'none';
+                                    parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                    parent.innerHTML = `<div class="battle-avatar-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div 
+                                className="battle-avatar-fallback"
+                                style={{
+                                  background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                                  color: avatarColor.text
+                                }}
+                              >
+                                {participantName.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="battle-name">{participantName}</div>
+                          {isEliminating && <div className="elimination-effect">😅</div>}
+                          {isEliminated && <div className="elimination-effect">😌</div>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {currentElimination && (
+                    <div className="elimination-announcement">
+                      😌 SAUVÉ: {String(currentElimination.name?.value || currentElimination.name)} ÉCHAPPE À LA PUNITION !
+                    </div>
+                  )}
+                </>
+              ) : battlePhase === 'duel' ? (
+                <>
+                  <div className="card-duel-title">
+                    <span className="duel-emoji">🃏</span>
+                    <h2>QUI SERA L'ANIMATEUR SACRIFIÉ ?</h2>
+                    <p>Les deux derniers candidats s'affrontent dans un duel de cartes...</p>
+                  </div>
+                  
+                  <div className="card-battle-arena">
+                    <div className={`duel-card left ${currentShuffleIndex === 0 ? 'winner-card' : ''}`}>
+                      <div className="card-glow"></div>
+                      <div className="card-inner">
+                        <div className="card-header">
+                          <div className="card-title">CANDIDAT #1</div>
+                          <div className="card-stress">😰</div>
+                        </div>
+                        
+                        {(() => {
+                          const candidate = duelCandidates[0];
+                          if (!candidate) return null;
+                          
+                          const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
+                          const avatarColor = getAvatarColor(candidateName);
+                          
+                          // Vérification pour la photo
+                          let photoUrl = null;
+                          if ('getPhotoUrl' in candidate && typeof candidate.getPhotoUrl === 'function') {
+                            try {
+                              photoUrl = candidate.getPhotoUrl();
+                            } catch (error) {
+                              // Erreur silencieuse
+                            }
+                          }
+                          
+                          const hasPhoto = photoUrl && photoUrl.trim() !== '';
+                          
+                          return (
+                            <>
+                              <div className="card-avatar">
+                                {hasPhoto ? (
+                                  <img 
+                                    src={photoUrl}
+                                    alt={candidateName}
+                                    className="card-photo"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      const parent = target.parentElement;
+                                      if (parent) {
+                                        target.style.display = 'none';
+                                        parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                        parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
+                                      }
+                                    }}
+                                  />
+                                ) : (
+                                  <div 
+                                    className="card-fallback"
+                                    style={{
+                                      background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                                      color: avatarColor.text
+                                    }}
+                                  >
+                                    {candidateName.charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="card-name">{candidateName}</div>
+                              <div className="card-fate">Risque d'être animateur...</div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                    
+                    <div className="battle-vs-section">
+                      <div className="vs-lightning">⚡</div>
+                      <div className="vs-text">VS</div>
+                      <div className="vs-fire">🔥</div>
+                    </div>
+                    
+                    <div className={`duel-card right ${currentShuffleIndex === 1 ? 'winner-card' : ''}`}>
+                      <div className="card-glow"></div>
+                      <div className="card-inner">
+                        <div className="card-header">
+                          <div className="card-title">CANDIDAT #2</div>
+                          <div className="card-stress">😰</div>
+                        </div>
+                        
+                        {(() => {
+                          const candidate = duelCandidates[1];
+                          if (!candidate) return null;
+                          
+                          const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
+                          const avatarColor = getAvatarColor(candidateName);
+                          
+                          // Vérification pour la photo
+                          let photoUrl = null;
+                          if ('getPhotoUrl' in candidate && typeof candidate.getPhotoUrl === 'function') {
+                            try {
+                              photoUrl = candidate.getPhotoUrl();
+                            } catch (error) {
+                              // Erreur silencieuse
+                            }
+                          }
+                          
+                          const hasPhoto = photoUrl && photoUrl.trim() !== '';
+                          
+                          return (
+                            <>
+                              <div className="card-avatar">
+                                {hasPhoto ? (
+                                  <img 
+                                    src={photoUrl}
+                                    alt={candidateName}
+                                    className="card-photo"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      const parent = target.parentElement;
+                                      if (parent) {
+                                        target.style.display = 'none';
+                                        parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                        parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
+                                      }
+                                    }}
+                                  />
+                                ) : (
+                                  <div 
+                                    className="card-fallback"
+                                    style={{
+                                      background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                                      color: avatarColor.text
+                                    }}
+                                  >
+                                    {candidateName.charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="card-name">{candidateName}</div>
+                              <div className="card-fate">Risque d'être animateur...</div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="duel-highlight">
+                    <div className="card-duel-spotlight">
+                      {String(duelCandidates[currentShuffleIndex]?.name?.value || duelCandidates[currentShuffleIndex]?.name || '')}
+                    </div>
+                  </div>
+                </>
+              ) : battlePhase === 'winner' ? (
+                <>
+                  <div className="winner-title">
+                    <span className="winner-emoji">😅</span>
+                    <h2>ANIMATEUR SACRIFIÉ !</h2>
+                    <p>Bonne chance pour animer cette semaine...</p>
+                  </div>
+                  
+                  <div className="winner-name-display">
+                    <div className="winner-name">
+                      {winnerName}
+                    </div>
+                  </div>
+                  
+                  <div className="winner-celebration">
+                    <span>😂</span>
+                    <span>🎭</span>
+                    <span>💪</span>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

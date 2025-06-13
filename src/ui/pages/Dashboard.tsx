@@ -469,7 +469,8 @@ export const Dashboard: React.FC = () => {
           onSelect={(participant: any) => {
             // Logique de sélection d'animateur
             console.log('Animateur sélectionné:', participant);
-            setShowAnimatorModal(false);
+            // Modal reste ouverte - l'utilisateur peut la fermer manuellement
+            // setShowAnimatorModal(false);
           }}
           repository={participantRepository}
           weeklyUseCases={weeklyUseCases}
