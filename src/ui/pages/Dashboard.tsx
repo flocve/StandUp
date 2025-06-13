@@ -352,7 +352,7 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Liste des speakers */}
-                  <div className="speakers-section">
+          <div className="speakers-section liquid-glass">
             <h2>Équipe</h2>
             <div className="speakers-grid">
             {(allParticipants || []).length > 0 ? (
@@ -362,7 +362,7 @@ export const Dashboard: React.FC = () => {
               const hasPhoto = 'getPhotoUrl' in participant && participant.getPhotoUrl && participant.getPhotoUrl();
               
               return (
-                <div key={String(participant.id?.value || participant.id)} className="speaker-card">
+                <div key={String(participant.id?.value || participant.id)} className="speaker-card liquid-glass-interactive">
                   {hasPhoto ? (
                     <img 
                       src={'getPhotoUrl' in participant ? participant.getPhotoUrl() : ''}
@@ -421,7 +421,7 @@ export const Dashboard: React.FC = () => {
         {/* Boutons d'action */}
         <div className="action-buttons">
           <button 
-            className="action-button primary"
+            className="action-button primary liquid-glass-button"
             onClick={() => setShowStandUpModal(true)}
             disabled={isLoading}
           >
@@ -433,7 +433,7 @@ export const Dashboard: React.FC = () => {
           </button>
 
           <button 
-            className="action-button secondary"
+            className="action-button secondary liquid-glass-button"
             onClick={() => setShowAnimatorModal(true)}
             disabled={isLoading}
           >
@@ -478,4 +478,4 @@ export const Dashboard: React.FC = () => {
       )}
     </div>
   );
-}; 
+};

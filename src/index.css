@@ -5,11 +5,24 @@
 /* Thème par défaut (Dark Mode) - Style moderne inspiré par GlassFlow */
 :root,
 html.theme-dark {
-  /* Variables glassmorphism modernes */
-  --glass-background: rgba(15, 20, 35, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: rgba(0, 0, 0, 0.25);
-  --glass-shine: rgba(255, 255, 255, 0.03);
+  /* Variables liquid glass modernes */
+  --glass-background: rgba(15, 20, 35, 0.7);
+  --glass-background-secondary: rgba(25, 30, 45, 0.5);
+  --glass-background-tertiary: rgba(35, 40, 55, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-secondary: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
+  --glass-shadow-light: rgba(0, 0, 0, 0.15);
+  --glass-shine: rgba(255, 255, 255, 0.06);
+  --glass-shine-strong: rgba(255, 255, 255, 0.12);
+  
+  /* Variables pour l'effet liquid */
+  --liquid-blur: 20px;
+  --liquid-blur-strong: 30px;
+  --liquid-blur-subtle: 10px;
+  --liquid-saturate: 180%;
+  --liquid-contrast: 110%;
+  --liquid-brightness: 110%;
   
   /* Couleurs de fond modernes avec gradients subtils */
   --background-primary: linear-gradient(135deg, #0a0f1c 0%, #1a1f35 50%, #0f1420 100%);
@@ -64,10 +77,23 @@ html.theme-dark {
 
 /* White Mode */
 html.theme-white {
-  --glass-background: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --glass-shadow: rgba(0, 0, 0, 0.1);
-  --glass-shine: rgba(255, 255, 255, 0.8);
+  --glass-background: rgba(255, 255, 255, 0.7);
+  --glass-background-secondary: rgba(248, 250, 252, 0.6);
+  --glass-background-tertiary: rgba(241, 245, 249, 0.4);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --glass-border-secondary: rgba(0, 0, 0, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.12);
+  --glass-shadow-light: rgba(0, 0, 0, 0.06);
+  --glass-shine: rgba(255, 255, 255, 0.9);
+  --glass-shine-strong: rgba(255, 255, 255, 1);
+  
+  /* Variables pour l'effet liquid */
+  --liquid-blur: 15px;
+  --liquid-blur-strong: 25px;
+  --liquid-blur-subtle: 8px;
+  --liquid-saturate: 120%;
+  --liquid-contrast: 105%;
+  --liquid-brightness: 105%;
   
   --background-primary: rgba(248, 250, 252, 1);
   --background-secondary: rgba(255, 255, 255, 0.95);
@@ -96,10 +122,23 @@ html.theme-white {
 
 /* Unicorn Mode */
 html.theme-unicorn {
-  --glass-background: rgba(255, 255, 255, 0.15);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-shadow: rgba(0, 0, 0, 0.2);
-  --glass-shine: rgba(255, 255, 255, 0.1);
+  --glass-background: rgba(255, 255, 255, 0.18);
+  --glass-background-secondary: rgba(255, 255, 255, 0.12);
+  --glass-background-tertiary: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-border-secondary: rgba(255, 255, 255, 0.25);
+  --glass-shadow: rgba(0, 0, 0, 0.25);
+  --glass-shadow-light: rgba(0, 0, 0, 0.15);
+  --glass-shine: rgba(255, 255, 255, 0.15);
+  --glass-shine-strong: rgba(255, 255, 255, 0.25);
+  
+  /* Variables pour l'effet liquid - plus intense pour le mode magique */
+  --liquid-blur: 25px;
+  --liquid-blur-strong: 40px;
+  --liquid-blur-subtle: 15px;
+  --liquid-saturate: 200%;
+  --liquid-contrast: 120%;
+  --liquid-brightness: 115%;
   
   --background-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --background-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -139,6 +178,285 @@ html.theme-unicorn {
     --border-color: rgba(255, 255, 255, 0.1);
     --shadow-color: rgba(0, 0, 0, 0.3);
   }
+}
+
+/* ===== LIQUID GLASS GLOBALS ===== */
+
+/* Base liquid glass component */
+.liquid-glass {
+  background: var(--glass-background);
+  backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px var(--glass-shadow),
+    0 2px 8px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--glass-shine-strong) 0%, transparent 25%, transparent 75%, var(--glass-shine) 100%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Variants d'intensité */
+.liquid-glass-subtle {
+  background: var(--glass-background-tertiary);
+  backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(calc(var(--liquid-saturate) * 0.8)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(calc(var(--liquid-saturate) * 0.8)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  border: 1px solid var(--glass-border-secondary);
+  box-shadow: 
+    0 4px 16px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine);
+}
+
+.liquid-glass-strong {
+  background: var(--glass-background-secondary);
+  backdrop-filter: blur(var(--liquid-blur-strong)) saturate(calc(var(--liquid-saturate) * 1.2)) contrast(calc(var(--liquid-contrast) * 1.1)) brightness(calc(var(--liquid-brightness) * 1.05));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-strong)) saturate(calc(var(--liquid-saturate) * 1.2)) contrast(calc(var(--liquid-contrast) * 1.1)) brightness(calc(var(--liquid-brightness) * 1.05));
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 16px 64px var(--glass-shadow),
+    0 4px 16px var(--glass-shadow-light),
+    inset 0 2px 4px var(--glass-shine-strong);
+}
+
+/* Effets de hover pour liquid glass */
+.liquid-glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 16px 48px var(--glass-shadow),
+    0 4px 16px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Effets pour les éléments interactifs */
+.liquid-glass-interactive {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.liquid-glass-interactive:hover {
+  backdrop-filter: blur(calc(var(--liquid-blur) * 1.2)) saturate(calc(var(--liquid-saturate) * 1.1)) contrast(calc(var(--liquid-contrast) * 1.05)) brightness(calc(var(--liquid-brightness) * 1.05));
+  -webkit-backdrop-filter: blur(calc(var(--liquid-blur) * 1.2)) saturate(calc(var(--liquid-saturate) * 1.1)) contrast(calc(var(--liquid-contrast) * 1.05)) brightness(calc(var(--liquid-brightness) * 1.05));
+  border-color: var(--glass-shine);
+}
+
+.liquid-glass-interactive:active {
+  transform: scale(0.98);
+}
+
+/* Liquid glass buttons */
+.liquid-glass-button {
+  background: var(--glass-background);
+  backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass-button:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--glass-shine-strong) 0%, transparent 50%, var(--glass-shine) 100%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.liquid-glass-button:hover {
+  transform: translateY(-1px);
+  backdrop-filter: blur(calc(var(--liquid-blur) * 1.3)) saturate(calc(var(--liquid-saturate) * 1.15)) contrast(calc(var(--liquid-contrast) * 1.08)) brightness(calc(var(--liquid-brightness) * 1.08));
+  -webkit-backdrop-filter: blur(calc(var(--liquid-blur) * 1.3)) saturate(calc(var(--liquid-saturate) * 1.15)) contrast(calc(var(--liquid-contrast) * 1.08)) brightness(calc(var(--liquid-brightness) * 1.08));
+  box-shadow: 
+    0 8px 24px var(--glass-shadow),
+    0 2px 8px var(--glass-shadow-light),
+    inset 0 1px 2px var(--glass-shine);
+}
+
+.liquid-glass-button:active {
+  transform: scale(0.96);
+}
+
+/* Liquid flowing animation */
+@keyframes liquidFlow {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(45deg);
+  }
+}
+
+.liquid-glass-flowing:after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -100%;
+  width: 100%;
+  height: calc(100% + 4px);
+  background: linear-gradient(90deg, transparent, var(--glass-shine-strong), transparent);
+  transform: rotate(45deg);
+  animation: liquidFlow 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Animation de ripple pour les interactions */
+@keyframes liquidRipple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.liquid-glass-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass-ripple:after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--glass-shine-strong);
+  transform: scale(0);
+  animation: liquidRipple 0.6s linear;
+  pointer-events: none;
+}
+
+/* ===== LIQUID GLASS UTILITIES ===== */
+
+/* Apply liquid glass effect to any element */
+.apply-liquid-glass {
+  background: var(--glass-background) !important;
+  backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness)) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 
+    0 8px 32px var(--glass-shadow),
+    0 2px 8px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine) !important;
+}
+
+.apply-liquid-glass-subtle {
+  background: var(--glass-background-tertiary) !important;
+  backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(calc(var(--liquid-saturate) * 0.8)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(calc(var(--liquid-saturate) * 0.8)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness)) !important;
+  border: 1px solid var(--glass-border-secondary) !important;
+  box-shadow: 
+    0 4px 16px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine) !important;
+}
+
+.apply-liquid-glass-strong {
+  background: var(--glass-background-secondary) !important;
+  backdrop-filter: blur(var(--liquid-blur-strong)) saturate(calc(var(--liquid-saturate) * 1.2)) contrast(calc(var(--liquid-contrast) * 1.1)) brightness(calc(var(--liquid-brightness) * 1.05)) !important;
+  -webkit-backdrop-filter: blur(var(--liquid-blur-strong)) saturate(calc(var(--liquid-saturate) * 1.2)) contrast(calc(var(--liquid-contrast) * 1.1)) brightness(calc(var(--liquid-brightness) * 1.05)) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 
+    0 16px 64px var(--glass-shadow),
+    0 4px 16px var(--glass-shadow-light),
+    inset 0 2px 4px var(--glass-shine-strong) !important;
+}
+
+/* Enhanced effects for specific theme modes */
+html.theme-unicorn .apply-liquid-glass,
+html.theme-unicorn .liquid-glass {
+  animation: liquidGlowPulse 4s ease-in-out infinite;
+}
+
+html.theme-unicorn .apply-liquid-glass-strong,
+html.theme-unicorn .liquid-glass-strong {
+  animation: liquidGlowPulse 3s ease-in-out infinite, liquidColorShift 8s ease-in-out infinite;
+}
+
+@keyframes liquidGlowPulse {
+  0%, 100% {
+    box-shadow: 
+      0 8px 32px var(--glass-shadow),
+      0 2px 8px var(--glass-shadow-light),
+      inset 0 1px 1px var(--glass-shine),
+      0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 12px 48px var(--glass-shadow),
+      0 4px 16px var(--glass-shadow-light),
+      inset 0 1px 1px var(--glass-shine),
+      0 0 40px rgba(255, 255, 255, 0.2);
+  }
+}
+
+@keyframes liquidColorShift {
+  0%, 100% {
+    border-color: var(--glass-border);
+  }
+  25% {
+    border-color: rgba(255, 20, 147, 0.4);
+  }
+  50% {
+    border-color: rgba(138, 43, 226, 0.4);
+  }
+  75% {
+    border-color: rgba(0, 191, 255, 0.4);
+  }
+}
+
+/* Enhanced white mode effects */
+html.theme-white .apply-liquid-glass,
+html.theme-white .liquid-glass {
+  box-shadow: 
+    0 8px 32px var(--glass-shadow),
+    0 2px 8px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine),
+    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.theme-white .apply-liquid-glass:hover,
+html.theme-white .liquid-glass:hover {
+  box-shadow: 
+    0 16px 48px var(--glass-shadow),
+    0 4px 16px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine),
+    0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Dark mode enhanced liquid effects */
+html.theme-dark .apply-liquid-glass,
+html.theme-dark .liquid-glass {
+  box-shadow: 
+    0 8px 32px var(--glass-shadow),
+    0 2px 8px var(--glass-shadow-light),
+    inset 0 1px 1px var(--glass-shine),
+    0 0 20px rgba(79, 124, 255, 0.05) !important;
+}
+
+html.theme-dark .apply-liquid-glass-strong,
+html.theme-dark .liquid-glass-strong {
+  box-shadow: 
+    0 16px 64px var(--glass-shadow),
+    0 4px 16px var(--glass-shadow-light),
+    inset 0 2px 4px var(--glass-shine-strong),
+    0 0 30px rgba(79, 124, 255, 0.1) !important;
 }
 
 body {
@@ -293,8 +611,8 @@ html.theme-unicorn .tab.active {
   gap: 6px;
   padding: 6px;
   background: var(--glass-background);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   margin-bottom: 32px;
@@ -356,21 +674,21 @@ html.theme-unicorn .tab.active {
 
 .card {
   background: var(--glass-background);
+  backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  border: 1px solid var(--glass-border);
   border-radius: 20px;
   padding: 28px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
-  position: relative;
-  transform-style: preserve-3d;
-  will-change: transform;
   box-shadow: 
     0 12px 40px var(--glass-shadow),
-    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 4px 12px var(--glass-shadow-light),
     inset 0 1px 0 var(--glass-shine);
+  position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 /* Effet de brillance moderne pour les cartes */
@@ -592,8 +910,8 @@ html.theme-unicorn .tab.active {
     0 4px 12px var(--glass-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  -webkit-backdrop-filter: blur(var(--liquid-blur-subtle)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
@@ -753,12 +1071,12 @@ html.theme-unicorn .tab.active {
 .flex.flex-col.items-center.justify-center.min-h-\[400px\].w-full {
   background: var(--glass-background);
   border-radius: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
+  -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate)) contrast(var(--liquid-contrast)) brightness(var(--liquid-brightness));
   border: 1px solid var(--glass-border);
   box-shadow: 
     0 20px 60px var(--glass-shadow),
-    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 8px 24px var(--glass-shadow-light),
     inset 0 1px 0 var(--glass-shine);
   padding: 3rem 2rem;
   margin: 1.5rem;
