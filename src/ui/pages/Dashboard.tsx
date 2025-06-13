@@ -358,7 +358,7 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Liste des speakers */}
-          <div className="speakers-section liquid-glass">
+          <div className="speakers-section">
             <h2>Équipe</h2>
             <div className="speakers-grid">
             {(allParticipants || []).length > 0 ? (

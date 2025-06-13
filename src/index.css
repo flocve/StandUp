@@ -122,47 +122,87 @@ html.theme-white {
 
 /* Unicorn Mode */
 html.theme-unicorn {
-  --glass-background: rgba(255, 255, 255, 0.18);
-  --glass-background-secondary: rgba(255, 255, 255, 0.12);
-  --glass-background-tertiary: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.35);
-  --glass-border-secondary: rgba(255, 255, 255, 0.25);
-  --glass-shadow: rgba(0, 0, 0, 0.25);
-  --glass-shadow-light: rgba(0, 0, 0, 0.15);
-  --glass-shine: rgba(255, 255, 255, 0.15);
-  --glass-shine-strong: rgba(255, 255, 255, 0.25);
+  --glass-background: rgba(255, 255, 255, 0.25);
+  --glass-background-secondary: rgba(255, 255, 255, 0.18);
+  --glass-background-tertiary: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-border-secondary: rgba(255, 255, 255, 0.3);
+  --glass-shadow: rgba(0, 0, 0, 0.15);
+  --glass-shadow-light: rgba(0, 0, 0, 0.08);
+  --glass-shine: rgba(255, 255, 255, 0.3);
+  --glass-shine-strong: rgba(255, 255, 255, 0.5);
   
-  /* Variables pour l'effet liquid - plus intense pour le mode magique */
-  --liquid-blur: 25px;
-  --liquid-blur-strong: 40px;
-  --liquid-blur-subtle: 15px;
-  --liquid-saturate: 200%;
-  --liquid-contrast: 120%;
-  --liquid-brightness: 115%;
+  /* Variables pour l'effet liquid - plus doux pour le mode pastel */
+  --liquid-blur: 30px;
+  --liquid-blur-strong: 45px;
+  --liquid-blur-subtle: 20px;
+  --liquid-saturate: 150%;
+  --liquid-contrast: 110%;
+  --liquid-brightness: 120%;
   
-  --background-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --background-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --text-primary: rgba(255, 255, 255, 0.95);
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --accent-primary: rgba(255, 20, 147, 0.9);
-  --accent-secondary: rgba(138, 43, 226, 0.9);
-  --surface-primary: rgba(255, 255, 255, 0.2);
-  --surface-secondary: rgba(255, 255, 255, 0.1);
-  --border-color: rgba(255, 255, 255, 0.2);
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --accent-primary-alpha: rgba(255, 20, 147, 0.25);
-  --accent-secondary-alpha: rgba(138, 43, 226, 0.25);
-  --success-color: #00ff7f;
-  --success-glow: rgba(0, 255, 127, 0.5);
+  /* Couleurs pastelles licorne */
+  --background-primary: linear-gradient(135deg, 
+    #fce7f3 0%,   /* Rose pastel */
+    #e0e7ff 25%,  /* Lavande pastel */
+    #fef3c7 50%,  /* Jaune pastel */
+    #d1fae5 75%,  /* Vert menthe pastel */
+    #fce7f3 100%  /* Rose pastel */
+  );
+  --background-secondary: linear-gradient(135deg, 
+    #fbcfe8 0%,   /* Rose plus intense */
+    #c7d2fe 50%,  /* Bleu lavande */
+    #fde68a 100%  /* Jaune crème */
+  );
+  
+  /* Texte avec couleurs pastelles */
+  --text-primary: rgba(139, 69, 19, 0.9);  /* Brun chocolat doux */
+  --text-secondary: rgba(160, 82, 45, 0.8); /* Brun moyen */
+  --text-muted: rgba(205, 133, 63, 0.7);   /* Sable doré */
+  
+  /* Accents pastels licorne */
+  --accent-primary: #ec4899;    /* Rose vif mais doux */
+  --accent-secondary: #a855f7;  /* Violet pastel */
+  --accent-tertiary: #06b6d4;   /* Cyan pastel */
+  --accent-gradient: linear-gradient(135deg, 
+    #fbbf24 0%,   /* Or pastel */
+    #ec4899 25%,  /* Rose */
+    #a855f7 50%,  /* Violet */
+    #06b6d4 75%,  /* Cyan */
+    #10b981 100%  /* Vert menthe */
+  );
+  
+  /* Surfaces avec transparence douce */
+  --surface-primary: rgba(255, 255, 255, 0.3);
+  --surface-secondary: rgba(255, 255, 255, 0.2);
+  --surface-hover: rgba(255, 255, 255, 0.4);
+  
+  /* Bordures et ombres douces */
+  --border-color: rgba(255, 255, 255, 0.3);
+  --shadow-color: rgba(139, 69, 19, 0.15);
+  --shadow-glow: rgba(236, 72, 153, 0.2);
+  
+  /* Couleurs alpha pastelles */
+  --accent-primary-alpha: rgba(236, 72, 153, 0.2);
+  --accent-secondary-alpha: rgba(168, 85, 247, 0.2);
+  --accent-tertiary-alpha: rgba(6, 182, 212, 0.2);
+  
+  /* Couleurs de succès pastelles */
+  --success-color: #34d399;
+  --success-glow: rgba(52, 211, 153, 0.3);
+  --warning-color: #fbbf24;
+  --warning-glow: rgba(251, 191, 36, 0.3);
+  --error-color: #f472b6;
+  --error-glow: rgba(244, 114, 182, 0.3);
 
-  --bg-primary: #6b46c1;
-  --bg-secondary: #8b5cf6;
-  --bg-card: #a855f7;
-  --text-primary: #fbbf24;
-  --text-secondary: #f59e0b;
-  --text-muted: #d97706;
+  /* Variables héritées avec couleurs pastelles */
+  --bg-primary: linear-gradient(135deg, #fce7f3 0%, #e0e7ff 100%);
+  --bg-secondary: linear-gradient(135deg, #fbcfe8 0%, #c7d2fe 100%);
+  --bg-card: linear-gradient(135deg, #fef3c7 0%, #d1fae5 100%);
+  --text-primary: #8b4513;
+  --text-secondary: #a0522d;
+  --text-muted: #cd853f;
   --accent-primary: #ec4899;
-  --accent-secondary: #8b5cf6;
+  --accent-secondary: #a855f7;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -381,82 +421,209 @@ html.theme-unicorn {
 /* Enhanced effects for specific theme modes */
 html.theme-unicorn .apply-liquid-glass,
 html.theme-unicorn .liquid-glass {
-  animation: liquidGlowPulse 4s ease-in-out infinite;
+  animation: unicornMagicPulse 4s ease-in-out infinite;
+  border: 2px solid transparent;
+  background-image: 
+    linear-gradient(var(--glass-background), var(--glass-background)),
+    linear-gradient(135deg, #fbbf24, #ec4899, #a855f7, #06b6d4, #10b981);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
 }
 
 html.theme-unicorn .apply-liquid-glass-strong,
 html.theme-unicorn .liquid-glass-strong {
-  animation: liquidGlowPulse 3s ease-in-out infinite, liquidColorShift 8s ease-in-out infinite;
+  animation: unicornMagicPulse 3s ease-in-out infinite, unicornRainbowShift 6s ease-in-out infinite;
 }
 
-@keyframes liquidGlowPulse {
+/* Ajout d'étoiles magiques flottantes */
+html.theme-unicorn body::after {
+  content: '✨ 🌟 ⭐ 💫 🦄 🌈 ✨ 🌟 ⭐ 💫';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  font-size: 1.5rem;
+  opacity: 0.3;
+  animation: unicornStarsFloat 20s linear infinite;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: space-around;
+}
+
+/* Effets spéciaux pour les cartes en mode licorne */
+html.theme-unicorn .card {
+  position: relative;
+  overflow: visible;
+}
+
+html.theme-unicorn .card::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  background: linear-gradient(135deg, 
+    #fbbf24 0%, #ec4899 25%, #a855f7 50%, #06b6d4 75%, #10b981 100%);
+  border-radius: inherit;
+  opacity: 0.6;
+  z-index: -1;
+  animation: unicornCardGlow 4s ease-in-out infinite;
+}
+
+html.theme-unicorn .card:hover::before {
+  opacity: 0.8;
+  animation-duration: 2s;
+}
+
+/* Boutons magiques licorne */
+html.theme-unicorn .selection-button {
+  background: linear-gradient(135deg, 
+    rgba(251, 191, 36, 0.9) 0%,
+    rgba(236, 72, 153, 0.9) 50%,
+    rgba(168, 85, 247, 0.9) 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  overflow: hidden;
+}
+
+html.theme-unicorn .selection-button::before {
+  content: '🦄✨';
+  position: absolute;
+  top: 50%;
+  left: -20px;
+  transform: translateY(-50%);
+  animation: unicornButtonFloat 3s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+html.theme-unicorn .selection-button:hover::before {
+  left: calc(100% + 10px);
+  transition: left 1.5s ease-in-out;
+}
+
+/* Animation du titre en mode licorne */
+html.theme-unicorn .title {
+  background: linear-gradient(45deg, 
+    #fbbf24, #ec4899, #a855f7, #06b6d4, #10b981, #fbbf24);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: unicornTitleRainbow 4s ease-in-out infinite;
+  position: relative;
+}
+
+html.theme-unicorn .title::after {
+  content: '🦄';
+  position: absolute;
+  top: -10px;
+  right: -30px;
+  font-size: 2rem;
+  animation: unicornTitleFloat 3s ease-in-out infinite;
+}
+
+/* Onglets avec effets arc-en-ciel */
+html.theme-unicorn .tabs {
+  background: linear-gradient(135deg, 
+    rgba(252, 231, 243, 0.8) 0%,
+    rgba(224, 231, 255, 0.8) 50%,
+    rgba(254, 243, 199, 0.8) 100%);
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 8px 32px rgba(236, 72, 153, 0.2);
+}
+
+html.theme-unicorn .tab.active {
+  background: linear-gradient(135deg, #fbbf24, #ec4899, #a855f7);
+  color: white;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.4);
+  position: relative;
+}
+
+html.theme-unicorn .tab.active::before {
+  content: '✨';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  animation: unicornTabSparkle 2s ease-in-out infinite;
+}
+
+/* Nouvelles animations licorne */
+@keyframes unicornMagicPulse {
   0%, 100% {
     box-shadow: 
       0 8px 32px var(--glass-shadow),
       0 2px 8px var(--glass-shadow-light),
       inset 0 1px 1px var(--glass-shine),
-      0 0 20px rgba(255, 255, 255, 0.1);
+      0 0 20px rgba(236, 72, 153, 0.3);
   }
   50% {
     box-shadow: 
       0 12px 48px var(--glass-shadow),
       0 4px 16px var(--glass-shadow-light),
       inset 0 1px 1px var(--glass-shine),
-      0 0 40px rgba(255, 255, 255, 0.2);
+      0 0 40px rgba(168, 85, 247, 0.5);
   }
 }
 
-@keyframes liquidColorShift {
-  0%, 100% {
-    border-color: var(--glass-border);
+@keyframes unicornRainbowShift {
+  0% { filter: hue-rotate(0deg) saturate(1.2); }
+  25% { filter: hue-rotate(90deg) saturate(1.4); }
+  50% { filter: hue-rotate(180deg) saturate(1.6); }
+  75% { filter: hue-rotate(270deg) saturate(1.4); }
+  100% { filter: hue-rotate(360deg) saturate(1.2); }
+}
+
+@keyframes unicornStarsFloat {
+  0% { transform: translateY(100vh) rotate(0deg); }
+  100% { transform: translateY(-100px) rotate(360deg); }
+}
+
+@keyframes unicornCardGlow {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(1);
   }
-  25% {
-    border-color: rgba(255, 20, 147, 0.4);
-  }
-  50% {
-    border-color: rgba(138, 43, 226, 0.4);
-  }
-  75% {
-    border-color: rgba(0, 191, 255, 0.4);
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.02);
   }
 }
 
-/* Enhanced white mode effects */
-html.theme-white .apply-liquid-glass,
-html.theme-white .liquid-glass {
-  box-shadow: 
-    0 8px 32px var(--glass-shadow),
-    0 2px 8px var(--glass-shadow-light),
-    inset 0 1px 1px var(--glass-shine),
-    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+@keyframes unicornButtonFloat {
+  0%, 100% { transform: translateY(-50%) rotate(0deg); }
+  50% { transform: translateY(-60%) rotate(15deg); }
 }
 
-html.theme-white .apply-liquid-glass:hover,
-html.theme-white .liquid-glass:hover {
-  box-shadow: 
-    0 16px 48px var(--glass-shadow),
-    0 4px 16px var(--glass-shadow-light),
-    inset 0 1px 1px var(--glass-shine),
-    0 4px 12px rgba(0, 0, 0, 0.15) !important;
+@keyframes unicornTitleRainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Dark mode enhanced liquid effects */
-html.theme-dark .apply-liquid-glass,
-html.theme-dark .liquid-glass {
-  box-shadow: 
-    0 8px 32px var(--glass-shadow),
-    0 2px 8px var(--glass-shadow-light),
-    inset 0 1px 1px var(--glass-shine),
-    0 0 20px rgba(79, 124, 255, 0.05) !important;
+@keyframes unicornTitleFloat {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg);
+    filter: drop-shadow(0 0 10px rgba(236, 72, 153, 0.5));
+  }
+  50% { 
+    transform: translateY(-10px) rotate(10deg);
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.7));
+  }
 }
 
-html.theme-dark .apply-liquid-glass-strong,
-html.theme-dark .liquid-glass-strong {
-  box-shadow: 
-    0 16px 64px var(--glass-shadow),
-    0 4px 16px var(--glass-shadow-light),
-    inset 0 2px 4px var(--glass-shine-strong),
-    0 0 30px rgba(79, 124, 255, 0.1) !important;
+@keyframes unicornTabSparkle {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.3) rotate(180deg);
+    opacity: 0.7;
+  }
 }
 
 body {
@@ -826,8 +993,6 @@ html.theme-unicorn .tab.active {
   text-shadow: 0 2px 8px rgba(var(--card-color-rgb), 0.5);
   color: white;
 }
-
-
 
 .winner .card-avatar {
   transform: scale(1.2);
@@ -1203,4 +1368,6 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
 }
+
+
 

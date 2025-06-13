@@ -333,6 +333,30 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
               <p>Qui va partager ses avancées aujourd'hui ?</p>
             </div>
           </div>
+          
+          {/* Boutons Azure DevOps */}
+          <div className="azure-buttons">
+            <button 
+              className="azure-button dashboard-button"
+              onClick={() => window.open('https://dev.azure.com/bazimo-app/bazimo-app/_dashboards/dashboard/89685afa-83e2-4a48-9c36-2dfce389c5e3', '_blank')}
+              title="Ouvrir le Dashboard Azure DevOps"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M3 3h7l1 1v7l-1 1H3l-1-1V4l1-1zm8 0h7l1 1v7l-1 1h-7l-1-1V4l1-1zm-8 8h7l1 1v7l-1 1H3l-1-1v-7l1-1zm8 0h7l1 1v7l-1 1h-7l-1-1v-7l1-1z" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </button>
+            
+            <button 
+              className="azure-button boards-button"
+              onClick={() => window.open('https://dev.azure.com/bazimo-app/bazimo-app/_boards/board/t/Development%20Team/Stories%20and%20Bugs', '_blank')}
+              title="Ouvrir les Boards Azure DevOps"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v6m0 0v6m0-6h10m-10 6h4a2 2 0 0 0 2-2v-4m-6 6v4a2 2 0 0 0 2 2h4m0-10V9a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          
           <button 
             className="close-button"
             onClick={handleClose}
