@@ -12,6 +12,7 @@ interface AnimatorSelectionModalProps {
   repository: ParticipantRepository;
   weeklyUseCases: WeeklySelectionUseCases;
   currentAnimator?: any;
+  nextWeekAnimator?: any;
 }
 
 export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({

@@ -420,29 +420,47 @@ export const Dashboard: React.FC = () => {
 
         {/* Boutons d'action */}
         <div className="action-buttons">
-          <button 
-            className="action-button primary liquid-glass-button"
-            onClick={() => setShowStandUpModal(true)}
-            disabled={isLoading}
-          >
-            <div className="button-icon">🎯</div>
-            <div className="button-content">
-              <span className="button-title">Démarrer Stand-up</span>
-              <span className="button-subtitle">Sélectionner les speakers</span>
-            </div>
-          </button>
+          {(() => {
+            // Vérifier si on est jeudi (4) ou vendredi (5)
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const isThursdayOrFriday = dayOfWeek === 4 || dayOfWeek === 5;
+            const hasNextWeekAnimator = nextWeekEntry && nextWeekEntry.participant;
+            
+            return (
+              <>
+                <button 
+                  className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'primary highlighted' : 'primary'} liquid-glass-button`}
+                  onClick={() => setShowStandUpModal(true)}
+                  disabled={isLoading}
+                >
+                  <div className="button-icon">🎯</div>
+                  <div className="button-content">
+                    <span className="button-title">Démarrer Stand-up</span>
+                    <span className="button-subtitle">Sélectionner les speakers</span>
+                  </div>
+                </button>
 
-          <button 
-            className="action-button secondary liquid-glass-button"
-            onClick={() => setShowAnimatorModal(true)}
-            disabled={isLoading}
-          >
-            <div className="button-icon">👑</div>
-            <div className="button-content">
-              <span className="button-title">Sélectionner l'animateur</span>
-              <span className="button-subtitle">Pour la semaine prochaine</span>
-            </div>
-          </button>
+                <button 
+                  className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'secondary highlighted-urgent' : 'secondary'} liquid-glass-button`}
+                  onClick={() => setShowAnimatorModal(true)}
+                  disabled={isLoading || Boolean(hasNextWeekAnimator)}
+                >
+                  <div className="button-icon">👑</div>
+                  <div className="button-content">
+                    <span className="button-title">
+                      {hasNextWeekAnimator ? 'Animateur déjà sélectionné' : 'Sélectionner l\'animateur'}
+                      {isThursdayOrFriday && !hasNextWeekAnimator && <span className="urgent-indicator">⚠️</span>}
+                    </span>
+                    <span className="button-subtitle">
+                      {hasNextWeekAnimator ? 'Pour la semaine prochaine' : 
+                       isThursdayOrFriday ? 'URGENT - Fin de semaine !' : 'Pour la semaine prochaine'}
+                    </span>
+                  </div>
+                </button>
+              </>
+            );
+          })()}
         </div>
       </div>
 
@@ -475,6 +493,7 @@ export const Dashboard: React.FC = () => {
           repository={participantRepository}
           weeklyUseCases={weeklyUseCases}
           currentAnimator={currentAnimator}
+          nextWeekAnimator={nextWeekEntry}
         />
       )}
     </div>
