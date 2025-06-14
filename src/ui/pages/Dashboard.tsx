@@ -420,7 +420,7 @@ export const Dashboard: React.FC = () => {
                 <button 
                   className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'secondary highlighted-urgent' : 'secondary'}`}
                   onClick={() => setShowAnimatorModal(true)}
-                  disabled={isLoading || Boolean(!hasNextWeekAnimator)}
+                  disabled={isLoading || Boolean(hasNextWeekAnimator)}
                 >
                   <div className="button-icon">👑</div>
                   <div className="button-content">
