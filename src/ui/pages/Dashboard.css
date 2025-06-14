@@ -50,14 +50,18 @@
 }
 
 .dashboard-container  .current-animator-section {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
+  background: linear-gradient(135deg, 
+    #1e40af 0%, 
+    #7c3aed 50%, 
+    #be185d 100%);
+  border: 3px solid #3b82f6;
   border-radius: 24px;
   padding: 2rem;
   margin: 0;
   box-shadow: 
-    0 16px 40px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 20px 50px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(59, 130, 246, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
   animation: breathe 6s ease-in-out infinite alternate;
@@ -520,8 +524,8 @@
 
 /* Section des speakers */
 .speakers-section {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
+  background: #1e293b;
+  border: 1px solid #475569;
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 
@@ -562,17 +566,23 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: #334155;
+  border: 1px solid #64748b;
   border-radius: 12px;
   transition: all 0.3s ease;
   position: relative;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .speaker-card:hover {
-  background: var(--surface-hover);
+  background: #475569;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: #94a3b8;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .speaker-avatar {
@@ -606,11 +616,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.speaker-status {
-  font-size: 1rem;
-  flex-shrink: 0;
 }
 
 .more-speakers {
@@ -690,15 +695,21 @@
 }
 
 .action-button.primary {
-  background: var(--accent-gradient);
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
   color: white;
-  border: 1px solid var(--accent-primary);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
 }
 
 .action-button.secondary {
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
+  background: linear-gradient(135deg, 
+    #d97706 0%, 
+    #dc2626 100%);
+  color: white;
+  border: 2px solid #f59e0b;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .action-button:hover {
@@ -933,6 +944,183 @@
   
   .button-icon {
     font-size: 1.5rem;
+  }
+}
+
+/* ===== ADAPTATIONS THÈMES Dashboard ===== */
+
+/* Theme White */
+html.theme-white .dashboard {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    rgba(249, 250, 251, 0.02) 100%);
+}
+
+html.theme-white .current-animator-section {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.08) 0%, 
+    rgba(139, 92, 246, 0.08) 100%);
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 20px 50px rgba(59, 130, 246, 0.08),
+    0 0 30px rgba(59, 130, 246, 0.1);
+}
+
+html.theme-white .speakers-section {
+  background: rgba(249, 250, 251, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+html.theme-white .speaker-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: #111827;
+}
+
+html.theme-white .speaker-card:hover {
+  background: rgba(243, 244, 246, 0.9);
+  border-color: #3b82f6;
+  box-shadow: 
+    0 8px 20px rgba(59, 130, 246, 0.15),
+    0 0 0 1px #3b82f6;
+}
+
+html.theme-white .action-button.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  box-shadow: 
+    0 8px 20px rgba(59, 130, 246, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+html.theme-white .action-button.primary:hover {
+  box-shadow: 
+    0 12px 30px rgba(59, 130, 246, 0.4),
+    0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Theme Unicorn */
+html.theme-unicorn .current-animator-section {
+  background: linear-gradient(135deg, 
+    #fbbf24 0%,
+    #ec4899 50%,
+    #a855f7 100%);
+  border: 3px solid #ec4899;
+  box-shadow: 
+    0 25px 60px rgba(236, 72, 153, 0.6),
+    0 0 50px rgba(236, 72, 153, 0.8);
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+html.theme-unicorn .animator-info h3 {
+  color: #ffffff;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.9);
+  font-weight: 800;
+}
+
+html.theme-unicorn .animator-info p {
+  color: #ffffff;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.7);
+  font-weight: 600;
+}
+
+html.theme-unicorn .animator-header h2 {
+  color: #ffffff;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8);
+  font-weight: 700;
+}
+
+html.theme-unicorn .current-animator-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #feca57);
+  opacity: 0.3;
+}
+
+html.theme-unicorn .speakers-section {
+  background: linear-gradient(135deg, 
+    #fbbf24 0%,
+    #ec4899 50%,
+    #a855f7 100%);
+  border: 2px solid #ec4899;
+}
+
+html.theme-unicorn .speaker-card {
+  background: linear-gradient(135deg, 
+    #ff6b6b 0%,
+    #4ecdc4 50%,
+    #feca57 100%);
+  border: 2px solid #ec4899;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+html.theme-unicorn .speaker-name {
+  color: #ffffff;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.9);
+  font-weight: 700;
+}
+
+html.theme-unicorn .speaker-card:hover {
+  background: linear-gradient(135deg, 
+    #ff4757 0%,
+    #2ed573 50%,
+    #ffa502 100%);
+  border-color: #ff4757;
+  box-shadow: 
+    0 12px 30px rgba(236, 72, 153, 0.8),
+    0 0 0 3px rgba(236, 72, 153, 0.6);
+  transform: translateY(-3px) scale(1.05);
+}
+
+html.theme-unicorn .action-button.primary {
+  background: linear-gradient(135deg, #fbbf24 0%, #ec4899 50%, #a855f7 100%);
+  box-shadow: 
+    0 12px 30px rgba(236, 72, 153, 0.4),
+    0 6px 16px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(236, 72, 153, 0.2);
+}
+
+html.theme-unicorn .action-button.primary:hover {
+  box-shadow: 
+    0 16px 40px rgba(236, 72, 153, 0.5),
+    0 8px 20px rgba(0, 0, 0, 0.2),
+    0 0 0 4px rgba(236, 72, 153, 0.3);
+  transform: translateY(-4px) scale(1.05);
+}
+
+/* Animations pour theme unicorn */
+@keyframes unicornShimmer {
+  0% { 
+    opacity: 0.3; 
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #feca57);
+  }
+  50% { 
+    opacity: 0.6; 
+    background: linear-gradient(135deg, #4ecdc4, #feca57, #ff6b6b);
+  }
+  100% { 
+    opacity: 0.3; 
+    background: linear-gradient(135deg, #feca57, #ff6b6b, #4ecdc4);
+  }
+}
+
+@keyframes unicornButtonPulse {
+  0%, 100% { 
+    transform: scale(1);
+    filter: brightness(1); 
+  }
+  50% { 
+    transform: scale(1.02);
+    filter: brightness(1.1); 
   }
 }
 

@@ -86,8 +86,6 @@ export const Dashboard: React.FC = () => {
 
   // Hook pour gérer l'animateur courant
   const {
-    currentAnimator,
-    animatorHistory,
     getCurrentWeekAnimator,
     getNextWeekAnimator
   } = useAnimators(
@@ -172,10 +170,10 @@ export const Dashboard: React.FC = () => {
   // Calculer les statistiques dynamiques
   const getAnimatorStats = (participants: any[]) => {
     const totalParticipants = participants.length;
+    const animatorPassages = getCurrentWeekAnimator()?.participant?.getPassageCount() || 0;
     const participantsSpoken = participants.filter(p => 
       typeof p.hasSpoken === 'function' ? p.hasSpoken() : p.hasSpoken
     ).length;
-    const animatorPassages = currentAnimator?.getPassageCount() || 0;
     return {
       totalParticipants,
       participantsSpoken,
@@ -188,7 +186,8 @@ export const Dashboard: React.FC = () => {
   
   const currentWeekEntry = getCurrentWeekAnimator();
   const nextWeekEntry = getNextWeekAnimator();
-  const debugAnimator = currentWeekEntry?.participant || { 
+
+  const currentAnimator = currentWeekEntry?.participant || { 
     name: { value: 'Aucun animateur' }, 
     id: { value: 'no-animator' },
     getPhotoUrl: () => undefined,
@@ -264,18 +263,18 @@ export const Dashboard: React.FC = () => {
               <h2>Animateur actuel</h2>
             </div>
             <div className="animator-card" style={{ position: 'relative' }}>
-              {debugAnimator ? (
+              {currentAnimator ? (
                 <>
                   <div className="animator-avatar">
                     <img 
-                      src={getPhotoUrl(debugAnimator)}
-                      alt={getNameString(debugAnimator) || 'Animateur'}
+                      src={getPhotoUrl(currentAnimator)}
+                      alt={getNameString(currentAnimator) || 'Animateur'}
                       className="animator-photo"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         const parent = target.parentElement;
                         if (parent) {
-                          const animatorName = getNameString(debugAnimator);
+                          const animatorName = getNameString(currentAnimator);
                           const color = getAvatarColor(animatorName);
                           target.style.display = 'none';
                           parent.style.background = `linear-gradient(135deg, ${color.bg}, ${color.bg}dd)`;
@@ -285,7 +284,7 @@ export const Dashboard: React.FC = () => {
                     />
                   </div>
                   <div className="animator-info" style={{ textAlign: 'center', flex: 1 }}>
-                    <h3 style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 0.3rem 0', letterSpacing: '-0.01em' }}>{getNameString(debugAnimator) || 'Animateur'}</h3>
+                    <h3 style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 0.3rem 0', letterSpacing: '-0.01em' }}>{getNameString(currentAnimator) || 'Animateur'}</h3>
                     <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', margin: 0, opacity: 0.85, fontWeight: 500 }}>En fonction cette semaine</p>
                     <div className="animator-badges" style={{ marginTop: '0.7rem', display: 'flex', justifyContent: 'center' }}>
                       <div className="badge experience-badge">
@@ -374,9 +373,6 @@ export const Dashboard: React.FC = () => {
                     }}
                   />
                   <span className="speaker-name">{participantName}</span>
-                  {(typeof participant.hasSpoken === 'function' ? participant.hasSpoken() : participant.hasSpoken) && (
-                    <div className="speaker-status">✅</div>
-                  )}
                 </div>
                               );
               })
@@ -424,7 +420,7 @@ export const Dashboard: React.FC = () => {
                 <button 
                   className={`action-button ${isThursdayOrFriday && !hasNextWeekAnimator ? 'secondary highlighted-urgent' : 'secondary'}`}
                   onClick={() => setShowAnimatorModal(true)}
-                  disabled={isLoading || Boolean(hasNextWeekAnimator)}
+                  disabled={isLoading || Boolean(!hasNextWeekAnimator)}
                 >
                   <div className="button-icon">👑</div>
                   <div className="button-content">
@@ -465,12 +461,7 @@ export const Dashboard: React.FC = () => {
           isOpen={showAnimatorModal}
           onClose={() => setShowAnimatorModal(false)}
           participants={weeklyParticipants}
-          onSelect={(participant: any) => {
-            // Logique de sélection d'animateur
-            console.log('Animateur sélectionné:', participant);
-            // Modal reste ouverte - l'utilisateur peut la fermer manuellement
-            // setShowAnimatorModal(false);
-          }}
+          onSelect={(participant: any) => {}}
           repository={participantRepository}
           weeklyUseCases={weeklyUseCases}
           currentAnimator={currentAnimator}

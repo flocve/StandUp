@@ -90,7 +90,7 @@ export const useAnimators = (
   repository: AnimatorRepository
 ) => {
   const [animatorHistory, setAnimatorHistory] = useState<AnimatorHistoryEntry[]>([]);
-  const [currentAnimator, setCurrentAnimator] = useState<Participant | null>(null);
+  const [lastAnimator, setLastAnimator] = useState<Participant | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
 
   const loadHistory = useCallback(async () => {
@@ -99,7 +99,7 @@ export const useAnimators = (
       if (history.length === 0) {
         setAnimatorHistory([]);
         if (!hasLoaded) {
-          setCurrentAnimator(null);
+          setLastAnimator(null);
         }
         return;
       }
@@ -117,14 +117,14 @@ export const useAnimators = (
       setAnimatorHistory(historyWithParticipants);
       
       // Ne mettre à jour l'animateur courant que si on n'en a pas déjà un ou si c'est le premier chargement
-      if (!hasLoaded || !currentAnimator) {
-        setCurrentAnimator(historyWithParticipants[0]?.participant || null);
+      if (!hasLoaded || !lastAnimator) {
+        setLastAnimator(historyWithParticipants[0]?.participant || null);
       } else if (historyWithParticipants.length > 0) {
         // Vérifier si l'animateur courant est toujours dans la liste des participants
-        const currentStillExists = participants.find(p => p.id.value === currentAnimator.id.value);
+        const currentStillExists = participants.find(p => p.id.value === lastAnimator.id.value);
         if (!currentStillExists) {
           // L'animateur courant n'existe plus dans la liste, prendre le plus récent de l'historique
-          setCurrentAnimator(historyWithParticipants[0]?.participant || null);
+          setLastAnimator(historyWithParticipants[0]?.participant || null);
         }
       }
       
@@ -132,7 +132,7 @@ export const useAnimators = (
     } catch (error) {
       console.error('Erreur lors du chargement de l\'historique:', error);
     }
-  }, [participants, repository, currentAnimator, hasLoaded]);
+  }, [participants, repository, lastAnimator, hasLoaded]);
 
   useEffect(() => {
     if (participants.length > 0) {
@@ -148,7 +148,7 @@ export const useAnimators = (
       date: nextMonday
     };
     setAnimatorHistory(prev => [newHistoryEntry, ...prev]);
-    setCurrentAnimator(animator);
+    setLastAnimator(animator);
   };
 
   // Fonction pour obtenir le pourcentage de chance d'un participant
@@ -158,7 +158,7 @@ export const useAnimators = (
 
   return {
     animatorHistory,
-    currentAnimator,
+    lastAnimator,
     addAnimator,
     getParticipantChancePercentage,
     getCurrentWeekAnimator: () => getCurrentWeekAnimator(animatorHistory),

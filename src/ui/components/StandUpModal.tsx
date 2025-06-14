@@ -485,9 +485,13 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   const participantName = String(participant.name?.value || participant.name || 'P');
                   const avatarColor = getAvatarColor(participantName);
                   const isCurrentSelected = selectedParticipant?.id === participant.id;
+                  const currentAnimatorId = currentAnimator?.id?.value || currentAnimator?.id;
+                  const participantId = participant.id?.value || participant.id;
+                  const currentAnimatorName = String(currentAnimator?.name?.value || currentAnimator?.name || '');
+                  
                   const isAnimator = currentAnimator && (
-                    (currentAnimator.id?.value || currentAnimator.id) === 
-                    (participant.id?.value || participant.id)
+                    currentAnimatorId === participantId ||
+                    (currentAnimatorName && currentAnimatorName === participantName)
                   );
                   const isShuffling = isSpinning && selectedParticipant?.id === participant.id;
                   const isWinner = isWinnerRevealed && selectedParticipant?.id === participant.id;
@@ -608,12 +612,14 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                             }
                           }}
                         />
-                        <div className="done-badge">✓</div>
+                        {isLatestSpeaker && <div className="latest-badge">✓</div>}
                       </div>
                       
                       <div className="history-info">
                         <h4>{participantName}</h4>
-                        <span className="done-text">Terminé</span>
+                        <div className="history-date">
+                          {isLatestSpeaker ? 'Dernier à avoir parlé' : 'A terminé'}
+                        </div>
                       </div>
                     </div>
                   );

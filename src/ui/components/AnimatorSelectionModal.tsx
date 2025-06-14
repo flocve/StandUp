@@ -23,8 +23,8 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
   participants,
   onSelect,
   repository,
-  weeklyUseCases,
   currentAnimator,
+  nextWeekAnimator,
   theme
 }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -340,7 +340,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                       }}
                     >
                       <div className="selection-icon">👑</div>
-                      <span>Changer</span>
+                      <span>Selectionner le prochain</span>
                     </button>
                   </div>
                 </div>
@@ -381,6 +381,34 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                   </div>
                 </div>
               </>
+            )}
+            
+            {/* Prochain animateur - toujours affiché s'il existe */}
+            {nextWeekAnimator && nextWeekAnimator.participant && (
+              <div className="next-animator-info">
+                <div className="next-animator-avatar">
+                  <img 
+                    src={getPhotoUrl(nextWeekAnimator.participant)}
+                    alt={String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur')}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      const parent = target.parentElement;
+                      if (parent) {
+                        const name = String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur');
+                        const avatarColor = getAvatarColor(name);
+                        target.style.display = 'none';
+                        parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                        parent.innerHTML = `<div style="color: ${avatarColor.text}; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${name.charAt(0).toUpperCase()}</div>`;
+                      }
+                    }}
+                  />
+                </div>
+                <div className="next-animator-text">
+                  <span className="next-label">Prochain animateur</span>
+                  <span className="next-name">{String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur')}</span>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -423,7 +451,6 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                   <div 
                     key={String(participant.id?.value || participant.id)}
                     className={`available-card ${isCurrentAnimator ? 'current-animator' : ''} ${isTopChance ? 'top-chance' : ''}`}
-                    onClick={() => !isCurrentAnimator && handleAnimatorSelect(participant)}
                   >
                     <div className="available-avatar">
                       <img 
@@ -447,7 +474,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                     </div>
                     
                     <div className="chance-percentage">
-                      {chancePercentage}% chance
+                      {chancePercentage}%
                     </div>
                     
                     {isCurrentAnimator && <div className="animator-crown">👑</div>}
