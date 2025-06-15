@@ -421,7 +421,7 @@ export const Dashboard: React.FC = () => {
             const today = new Date();
             const dayOfWeek = today.getDay();
             const isThursdayOrFriday = dayOfWeek === 4 || dayOfWeek === 5;
-            const hasNextWeekAnimator = nextWeekEntry && nextWeekEntry.participant;
+            const hasNextWeekAnimator = !(nextWeekEntry && nextWeekEntry.participant);
             
             return (
               <>

@@ -90,7 +90,7 @@ export const Home: React.FC = () => {
 
   // Hook pour gérer l'animateur courant (seulement si initialisé)
   // On utilise tous les participants weekly qui ne changent pas selon l'onglet
-  const { currentAnimator, animatorHistory } = useAnimators(
+  const { lastAnimator, animatorHistory } = useAnimators(
     allWeeklyParticipants, 
     isInitialized ? participantRepository as any : { getAnimatorHistory: async () => [], addToAnimatorHistory: async () => {} }
   );
@@ -199,7 +199,7 @@ export const Home: React.FC = () => {
   return (
     <div className="home">
       {/* Affichage de l'animateur courant en haut à gauche - seulement dans l'onglet Daily */}
-      {selectionType === 'daily' && <CurrentAnimator currentAnimator={currentAnimator} />}
+      {selectionType === 'daily' && <CurrentAnimator currentAnimator={lastAnimator} />}
       
       <div className="content-wrapper">
         <header className="header">
@@ -236,7 +236,7 @@ export const Home: React.FC = () => {
                 repository={participantRepository}
                 weeklyUseCases={selectionType === 'weekly' ? weeklyUseCases : undefined}
                 dailyUseCases={selectionType === 'daily' ? dailyUseCases : undefined}
-                currentAnimator={currentAnimator}
+                currentAnimator={lastAnimator}
               />
             </div>
 
