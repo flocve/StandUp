@@ -1,16 +1,16 @@
 /* WeekPeriodDisplay - Design moderne 2025 */
 .week-period-display {
   background: var(--surface-primary);
-  
-  -webkit-
-  border: 1px solid var(--border-primary);
+  border: 3px solid var(--border-primary);
   border-radius: 24px;
   padding: 2rem;
   box-shadow: 
     0 16px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .week-period-display::before {
@@ -26,10 +26,16 @@
 .period-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
   position: relative;
   z-index: 1;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.period-header .block-header {
+  margin-bottom: 0;
 }
 
 .period-header h2 {
@@ -234,6 +240,45 @@
 
 .end-date .date-value:hover {
   box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+}
+
+/* Adaptations thèmes - Bordures renforcées */
+html.theme-white .week-period-display {
+  border: 3px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 
+    0 16px 40px rgba(59, 130, 246, 0.1),
+    0 0 0 1px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+html.theme-unicorn .week-period-display {
+  border: 3px solid rgba(236, 72, 153, 0.4);
+  box-shadow: 
+    0 16px 40px rgba(236, 72, 153, 0.2),
+    0 0 0 1px rgba(236, 72, 153, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.week-period-display:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+html.theme-white .week-period-display:hover {
+  box-shadow: 
+    0 20px 50px rgba(59, 130, 246, 0.15),
+    0 0 0 1px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+html.theme-unicorn .week-period-display:hover {
+  box-shadow: 
+    0 20px 50px rgba(236, 72, 153, 0.25),
+    0 0 0 1px rgba(236, 72, 153, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 /* Responsive */

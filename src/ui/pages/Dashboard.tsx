@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { StandUpModal } from '../components/StandUpModal';
 import { AnimatorSelectionModal } from '../components/AnimatorSelectionModal';
 import { WeekPeriodDisplay } from '../components/WeekPeriodDisplay';
+import { RetroCountdown } from '../components/RetroCountdown';
 import { useParticipantSelection } from '../hooks/useParticipantSelection';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
 import { useAnimators } from '../../hooks/useAnimators';
@@ -259,8 +260,9 @@ export const Dashboard: React.FC = () => {
         {/* Bloc principal avec animateur et période */}
         <div className="main-info-block">
           <div className="current-animator-section">
-            <div className="animator-header">
-              <h2>Animateur actuel</h2>
+            <div className="block-header">
+              <span className="block-emoji">👑</span>
+              <h2 className="block-title">Animateur actuel</h2>
             </div>
             <div className="animator-card" style={{ position: 'relative' }}>
               {currentAnimator ? (
@@ -283,7 +285,7 @@ export const Dashboard: React.FC = () => {
                       }}
                     />
                   </div>
-                  <div className="animator-info" style={{ textAlign: 'center', flex: 1 }}>
+                  <div className="animator-info" style={{ textAlign: 'left', flex: 1 }}>
                     <h3 style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 0.3rem 0', letterSpacing: '-0.01em' }}>{getNameString(currentAnimator) || 'Animateur'}</h3>
                     <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', margin: 0, opacity: 0.85, fontWeight: 500 }}>En fonction cette semaine</p>
                     <div className="animator-badges" style={{ marginTop: '0.7rem', display: 'flex', justifyContent: 'center' }}>
@@ -343,35 +345,50 @@ export const Dashboard: React.FC = () => {
           <WeekPeriodDisplay />
         </div>
 
-        {/* Liste des speakers */}
+        {/* Section équipe et rétro */}
+        <div className="team-retro-section">
+          {/* Liste des speakers */}
           <div className="speakers-section">
-            <h2>Équipe</h2>
+            <div className="block-header">
+              <span className="block-emoji">👥</span>
+              <h2 className="block-title">Équipe</h2>
+            </div>
             <div className="speakers-grid">
             {(allParticipants || []).length > 0 ? (
               (allParticipants || []).slice(0, 8).map((participant) => {
               const participantName = getNameString(participant);
               const avatarColor = getAvatarColor(participantName);
+              const isCurrentAnimator = currentAnimator && getNameString(currentAnimator) === participantName;
+              const isNextAnimator = nextWeekEntry && nextWeekEntry.participant && getNameString(nextWeekEntry.participant) === participantName;
+              
+              let cardClass = 'speaker-card';
+              if (isCurrentAnimator) cardClass += ' current-animator';
+              if (isNextAnimator) cardClass += ' next-animator';
               
               return (
-                <div key={String(participant.id?.value || participant.id)} className="speaker-card">
-                  <img 
-                    src={getPhotoUrl(participant)}
-                    alt={participantName}
-                    className="speaker-avatar"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      const parent = target.parentElement;
-                      if (parent) {
-                        target.style.display = 'none';
-                        const fallbackDiv = document.createElement('div');
-                        fallbackDiv.className = 'speaker-avatar-fallback';
-                        fallbackDiv.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                        fallbackDiv.style.color = avatarColor.text;
-                        fallbackDiv.textContent = participantName.charAt(0).toUpperCase();
-                        parent.insertBefore(fallbackDiv, target);
-                      }
-                    }}
-                  />
+                <div key={String(participant.id?.value || participant.id)} className={cardClass}>
+                  <div className="speaker-avatar-container">
+                    {isCurrentAnimator && <div className="speaker-crown">👑</div>}
+                    {isNextAnimator && !isCurrentAnimator && <div className="speaker-silver-crown">👑</div>}
+                    <img 
+                      src={getPhotoUrl(participant)}
+                      alt={participantName}
+                      className="speaker-avatar"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const parent = target.parentElement?.parentElement; // On remonte de 2 niveaux maintenant
+                        if (parent) {
+                          target.style.display = 'none';
+                          const fallbackDiv = document.createElement('div');
+                          fallbackDiv.className = 'speaker-avatar-fallback';
+                          fallbackDiv.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                          fallbackDiv.style.color = avatarColor.text;
+                          fallbackDiv.textContent = participantName.charAt(0).toUpperCase();
+                          target.parentElement?.insertBefore(fallbackDiv, target);
+                        }
+                      }}
+                    />
+                  </div>
                   <span className="speaker-name">{participantName}</span>
                 </div>
                               );
@@ -392,6 +409,9 @@ export const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+
+          <RetroCountdown />
         </div>
 
         {/* Boutons d'action */}

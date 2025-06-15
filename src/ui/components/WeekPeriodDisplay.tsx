@@ -80,7 +80,10 @@ export const WeekPeriodDisplay: React.FC = () => {
   return (
     <div className="week-period-display">
       <div className="period-header">
-        <h2>Période actuelle</h2>
+        <div className="block-header">
+          <span className="block-emoji">📅</span>
+          <h2 className="block-title">Période actuelle</h2>
+        </div>
         <div className="week-badge">
           <span className="week-label">Semaine</span>
           <span className="week-number">{weekNumber}</span>
