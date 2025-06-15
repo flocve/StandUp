@@ -56,11 +56,7 @@ export const RetroCountdown: React.FC = () => {
   };
 
   const getEmoji = () => {
-    if (isToday) return '🎯';
-    if (isTomorrow) return '⏰';
-    if (daysUntil <= 3) return '🔥';
-    if (daysUntil <= 7) return '📅';
-    return '🗓️';
+    return '⭐';
   };
 
   return (
