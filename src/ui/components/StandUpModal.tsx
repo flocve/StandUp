@@ -338,7 +338,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
           <div className="azure-buttons">
             <button 
               className="azure-button dashboard-button"
-              onClick={() => window.open('https://dev.azure.com/bazimo-app/bazimo-app/_dashboards/dashboard/89685afa-83e2-4a48-9c36-2dfce389c5e3', '_blank')}
+              onClick={() => window.open('https://dev.azure.com/bazimo-app/bazimo-app/_dashboards/dashboard/94002b13-ea84-4455-9eb1-71bc99101095', '_blank')}
               title="Ouvrir le Dashboard Azure DevOps"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
