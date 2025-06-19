@@ -467,6 +467,7 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowStandUpModal(false)}
           participants={dailyParticipants}
           allParticipants={allParticipants}
+          allWeeklyParticipants={allWeeklyParticipants}
           onSelect={handleSelection}
           onReset={resetParticipants}
           repository={participantRepository}
