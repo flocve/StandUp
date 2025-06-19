@@ -552,7 +552,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 </h2>
                 
                 <div className="participant-status">
-                  C'est à votre tour de parler !
+                  C'est à ton tour de parler !
                 </div>
               </div>
               
