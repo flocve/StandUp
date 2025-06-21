@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { StandUpModal } from '../components/StandUpModal';
 import { AnimatorSelectionModal } from '../components/AnimatorSelectionModal';
+import { TeamConfigModal } from '../components/TeamConfigModal';
 import { WeekPeriodDisplay } from '../components/WeekPeriodDisplay';
 import { RetroCountdown } from '../components/RetroCountdown';
 import { useParticipantSelection } from '../hooks/useParticipantSelection';
@@ -22,6 +23,7 @@ export const Dashboard: React.FC = () => {
   const { theme } = useTheme();
   const [showStandUpModal, setShowStandUpModal] = useState(false);
   const [showAnimatorModal, setShowAnimatorModal] = useState(false);
+  const [showTeamConfigModal, setShowTeamConfigModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
   const [allWeeklyParticipants, setAllWeeklyParticipants] = useState<any[]>([]);
@@ -350,12 +352,21 @@ export const Dashboard: React.FC = () => {
           {/* Liste des speakers */}
           <div className="speakers-section">
             <div className="block-header">
-              <span className="block-emoji">👥</span>
-              <h2 className="block-title">Équipe</h2>
+              <div className="block-header-left">
+                <span className="block-emoji">👥</span>
+                <h2 className="block-title">Équipe</h2>
+              </div>
+              <button 
+                className="team-config-button"
+                onClick={() => setShowTeamConfigModal(true)}
+                title="Configurer l'équipe"
+              >
+                ⚙️
+              </button>
             </div>
             <div className="speakers-grid">
-            {(allParticipants || []).length > 0 ? (
-              (allParticipants || []).slice(0, 8).map((participant) => {
+            {(allWeeklyParticipants || []).length > 0 ? (
+              (allWeeklyParticipants || []).slice(0, 8).map((participant) => {
               const participantName = getNameString(participant);
               const avatarColor = getAvatarColor(participantName);
               const isCurrentAnimator = currentAnimator && getNameString(currentAnimator) === participantName;
@@ -389,7 +400,20 @@ export const Dashboard: React.FC = () => {
                       }}
                     />
                   </div>
-                  <span className="speaker-name">{participantName}</span>
+                  <div className="speaker-info">
+                    <span className="speaker-name">{participantName}</span>
+                    {/* Badge discret pour le nombre de passages */}
+                    {'getPassageCount' in participant && participant.getPassageCount() > 0 && (
+                      <div className="speaker-passage-badge">
+                        <span 
+                          className="speaker-passage-count"
+                          data-count={participant.getPassageCount()}
+                        >
+                          {participant.getPassageCount()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                               );
               })
@@ -400,10 +424,10 @@ export const Dashboard: React.FC = () => {
                 <p className="no-participants-hint">Les participants apparaîtront ici une fois l'application connectée.</p>
               </div>
             )}
-            {((allParticipants || []).length || 0) > 8 && (
+            {((allWeeklyParticipants || []).length || 0) > 8 && (
               <div className="speaker-card more-speakers">
                 <div className="more-count">
-                  +{((allParticipants || []).length || 0) - 8}
+                  +{((allWeeklyParticipants || []).length || 0) - 8}
                 </div>
                 <span className="speaker-name">autres</span>
               </div>
@@ -488,6 +512,26 @@ export const Dashboard: React.FC = () => {
           currentAnimator={currentAnimator}
           nextWeekAnimator={nextWeekEntry}
           theme={theme}
+        />
+      )}
+
+      {showTeamConfigModal && (
+        <TeamConfigModal
+          isOpen={showTeamConfigModal}
+          onClose={() => setShowTeamConfigModal(false)}
+          repository={participantRepository}
+          onRefresh={() => {
+            loadParticipants();
+            const loadWeeklyParticipants = async () => {
+              try {
+                const weeklyParticipants = await participantRepository.getAllWeeklyParticipants();
+                setAllWeeklyParticipants(weeklyParticipants);
+              } catch (error) {
+                console.error('Erreur lors du rechargement des participants:', error);
+              }
+            };
+            loadWeeklyParticipants();
+          }}
         />
       )}
     </div>
