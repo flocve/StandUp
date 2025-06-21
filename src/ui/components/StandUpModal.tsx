@@ -179,7 +179,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, currentStep, currentParticipantIndex, shuffledOrder.length, isSliding, isEntering]);
+  }, [isOpen, currentStep, currentParticipantIndex, shuffledOrder.length, isSliding, isEntering, selectedParticipants.length]);
 
   const handleClose = () => {
     // Vérifier s'il y a des participants qui ont parlé
