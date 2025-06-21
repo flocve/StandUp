@@ -3,8 +3,6 @@ import { SelectionWheel } from '../components/SelectionWheel';
 import { ParticipantRanking } from '../components/ParticipantRanking';
 import { AnimatorHistory } from '../components/AnimatorHistory';
 import { CurrentAnimator } from '../components/CurrentAnimator';
-import { AppSettings } from '../components/AppSettings';
-import { SettingsButton } from '../components/SettingsButton';
 import { useParticipantSelection } from '../hooks/useParticipantSelection';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
 import { useAnimators } from '../../hooks/useAnimators';
@@ -28,7 +26,6 @@ export const Home: React.FC = () => {
   const [selectionType, setSelectionType] = useState<SelectionType>('daily');
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
   const [allWeeklyParticipants, setAllWeeklyParticipants] = useState<any[]>([]);
 
   // Mises à jour granulaires via la synchronisation temps réel
@@ -259,17 +256,7 @@ export const Home: React.FC = () => {
           </div>
         )}
 
-        {/* Bouton de paramètres flottant */}
-        <SettingsButton onClick={() => setShowSettings(true)} />
 
-        {/* Modal de paramètres */}
-        {showSettings && (
-          <AppSettings 
-            onClose={() => setShowSettings(false)}
-            participants={participants}
-            onUpdateChancePercentage={handleChancePercentageUpdate}
-          />
-        )}
       </div>
 
       {/* Footer */}

@@ -136,11 +136,39 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     };
   }, [isOpen]);
 
-  // Gestion de la touche Échap
+  // Gestion des touches clavier
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
+      if (!isOpen) return;
+      
+      if (event.key === 'Escape') {
         handleClose();
+      } else if (currentStep === 'selection') {
+        // Lancer le stand-up avec la touche Entrée
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (selectedParticipants.length > 0) {
+            handleStartStandUp();
+          }
+        }
+      } else if (currentStep === 'standUp') {
+        // Navigation avec les flèches uniquement pendant le stand-up
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          handlePreviousParticipant();
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          handleNextParticipant();
+        } else if (event.key === 'Enter') {
+          event.preventDefault();
+          // Si on est sur le dernier participant, terminer le stand-up
+          if (currentParticipantIndex === shuffledOrder.length - 1) {
+            handleFinishStandUp();
+          } else {
+            // Sinon, passer au suivant
+            handleNextParticipant();
+          }
+        }
       }
     };
 
@@ -151,7 +179,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, currentStep, currentParticipantIndex, shuffledOrder.length, isSliding, isEntering]);
 
   const handleClose = () => {
     // Vérifier s'il y a des participants qui ont parlé
@@ -173,21 +201,8 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     performClose();
   };
 
-  const performClose = async () => {
-    try {
-      // Remettre tous les participants à hasSpoken = false
-      if (allParticipants) {
-        for (const participant of allParticipants) {
-          if (participant.reset && typeof participant.reset === 'function') {
-            participant.reset();
-            await dailyUseCases.updateParticipant(participant);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors du reset des participants:', error);
-    }
-    
+  const performClose = () => {
+    // Fermer immédiatement la modal
     setIsClosing(true);
     setShowConfirmClose(false);
     setTimeout(() => {
@@ -197,6 +212,25 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
       setCurrentParticipantIndex(0);
       setShuffledOrder([]);
     }, 250);
+    
+    // Faire les opérations de reset en arrière-plan
+    const resetParticipantsInBackground = async () => {
+      try {
+        if (allParticipants) {
+          for (const participant of allParticipants) {
+            if (participant.reset && typeof participant.reset === 'function') {
+              participant.reset();
+              await dailyUseCases.updateParticipant(participant);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du reset des participants:', error);
+      }
+    };
+    
+    // Lancer le reset en arrière-plan sans attendre
+    resetParticipantsInBackground();
   };
 
   const handleCancelClose = () => {
@@ -271,70 +305,82 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
 
   // Passer au participant suivant
   const handleNextParticipant = async () => {
-    if (currentParticipantIndex < shuffledOrder.length - 1) {
-      setNavigationDirection('forward');
+    // Empêcher la navigation si une animation est en cours
+    if (isSliding || isEntering || currentParticipantIndex >= shuffledOrder.length - 1) {
+      return;
+    }
+    
+    setNavigationDirection('forward');
+    setIsSliding(true);
+    
+    setTimeout(() => {
+      setCurrentParticipantIndex(prev => prev + 1);
+      setIsSliding(false);
+      setIsEntering(true);
+      
+      // Retirer l'animation d'entrée après qu'elle soit finie
+      setTimeout(() => setIsEntering(false), 300);
+    }, 300);
+  };
+
+  // Revenir au participant précédent
+  const handlePreviousParticipant = async () => {
+    // Empêcher la navigation si une animation est en cours
+    if (isSliding || isEntering || currentParticipantIndex <= 0) {
+      return;
+    }
+    
+    try {
+      setNavigationDirection('backward');
       setIsSliding(true);
       
+      // Remettre le participant actuel à hasSpoken = false
+      const currentParticipant = shuffledOrder[currentParticipantIndex];
+      if (currentParticipant && currentParticipant.reset && typeof currentParticipant.reset === 'function') {
+        currentParticipant.reset();
+        await dailyUseCases.updateParticipant(currentParticipant);
+      }
+      
       setTimeout(() => {
-        setCurrentParticipantIndex(prev => prev + 1);
+        // Revenir au participant précédent
+        setCurrentParticipantIndex(prev => prev - 1);
         setIsSliding(false);
         setIsEntering(true);
         
         // Retirer l'animation d'entrée après qu'elle soit finie
         setTimeout(() => setIsEntering(false), 300);
       }, 300);
-    }
-  };
-
-  // Revenir au participant précédent
-  const handlePreviousParticipant = async () => {
-    if (currentParticipantIndex > 0) {
-      try {
-        setNavigationDirection('backward');
-        setIsSliding(true);
-        
-        // Remettre le participant actuel à hasSpoken = false
-        const currentParticipant = shuffledOrder[currentParticipantIndex];
-        if (currentParticipant && currentParticipant.reset && typeof currentParticipant.reset === 'function') {
-          currentParticipant.reset();
-          await dailyUseCases.updateParticipant(currentParticipant);
-        }
-        
-        setTimeout(() => {
-          // Revenir au participant précédent
-          setCurrentParticipantIndex(prev => prev - 1);
-          setIsSliding(false);
-          setIsEntering(true);
-          
-          // Retirer l'animation d'entrée après qu'elle soit finie
-          setTimeout(() => setIsEntering(false), 300);
-        }, 300);
-      } catch (error) {
-        console.error('Erreur lors du retour au participant précédent:', error);
-        setIsSliding(false);
-      }
+    } catch (error) {
+      console.error('Erreur lors du retour au participant précédent:', error);
+      setIsSliding(false);
     }
   };
 
   // Terminer le stand-up
-  const handleFinishStandUp = async () => {
-    try {
-      // Remettre tous les participants à hasSpoken = false (ils peuvent reparler)
-      for (const participant of shuffledOrder) {
-        if (participant.reset && typeof participant.reset === 'function') {
-          participant.reset();
-        } else if (participant.hasSpoken && typeof participant.hasSpoken === 'function') {
-          // Si pas de reset, essayer de remettre manuellement le flag
-          participant.hasSpokenFlag = false;
+  const handleFinishStandUp = () => {
+    // Fermer immédiatement la modale
+    performClose();
+    
+    // Faire les opérations de reset en arrière-plan
+    const resetStandUpParticipants = async () => {
+      try {
+        // Remettre tous les participants à hasSpoken = false (ils peuvent reparler)
+        for (const participant of shuffledOrder) {
+          if (participant.reset && typeof participant.reset === 'function') {
+            participant.reset();
+          } else if (participant.hasSpoken && typeof participant.hasSpoken === 'function') {
+            // Si pas de reset, essayer de remettre manuellement le flag
+            participant.hasSpokenFlag = false;
+          }
+          await dailyUseCases.updateParticipant(participant);
         }
-        await dailyUseCases.updateParticipant(participant);
+      } catch (error) {
+        console.error('Erreur lors de la finalisation du stand-up:', error);
       }
-      
-      // Fermer la modale sans confirmation (on vient de terminer le stand-up)
-      performClose();
-    } catch (error) {
-      console.error('Erreur lors de la finalisation du stand-up:', error);
-    }
+    };
+    
+    // Lancer le reset en arrière-plan sans attendre
+    resetStandUpParticipants();
   };
 
   // Reset pour revenir à l'étape de sélection
