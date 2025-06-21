@@ -175,12 +175,6 @@
   font-weight: 600;
 }
 
-.participants-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
 .participant-item {
   background: var(--bg-secondary, #2a2a40);
   border: 2px solid var(--border-color, #3a3a50);

@@ -245,6 +245,7 @@ html.theme-unicorn .modal-header {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   transition: all 0.4s ease;
   border: 3px solid rgba(148, 163, 184, 0.2);
+  overflow: visible;
 }
 
 .standup-modal .participant-card.selected .participant-avatar {
@@ -1082,23 +1083,6 @@ html.theme-unicorn .standup-modal .participant-fallback {
   100% {
     filter: drop-shadow(0 6px 20px rgba(192, 192, 192, 1)) drop-shadow(0 0 16px rgba(192, 192, 192, 0.8)) sepia(0) saturate(0) brightness(1.5);
   }
-}
-
-/* Styles spécifiques pour le thème unicorn */
-html.theme-unicorn .standup-modal .participant-crown {
-  animation: unicornCrownGlow 2s ease-in-out infinite alternate;
-}
-
-html.theme-unicorn .standup-modal .participant-silver-crown {
-  animation: unicornSilverCrownGlow 2s ease-in-out infinite alternate;
-}
-
-html.theme-unicorn .standup-modal .current-participant-crown {
-  animation: unicornCurrentCrownGlow 2s ease-in-out infinite alternate;
-}
-
-html.theme-unicorn .standup-modal .current-participant-silver-crown {
-  animation: unicornCurrentSilverCrownGlow 2s ease-in-out infinite alternate;
 }
 
 @keyframes unicornCrownGlow {
