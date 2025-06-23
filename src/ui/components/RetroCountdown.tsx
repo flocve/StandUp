@@ -63,8 +63,10 @@ export const RetroCountdown: React.FC = () => {
     <div className={`retro-countdown ${getStatusClass()}`}>
       <div className="countdown-content">
         <div className="block-header">
-          <span className="block-emoji">{getEmoji()}</span>
-          <h3 className="block-title">Prochaine Rétro</h3>
+          <div className="block-header-left">
+            <span className="block-emoji" style={{ paddingBottom: '10px' }}>{getEmoji()}</span>
+            <h3 className="block-title">Prochaine Rétro</h3>
+          </div>
         </div>
         
         <div className="countdown-main">

@@ -263,8 +263,11 @@ export const Dashboard: React.FC = () => {
         <div className="main-info-block">
           <div className="current-animator-section">
             <div className="block-header">
-              <span className="block-emoji">👑</span>
+            <div className="block-header-left">
+
+              <span className="block-emoji" style={{ paddingBottom: '10px' }}>👑</span>
               <h2 className="block-title">Animateur actuel</h2>
+              </div>
             </div>
             <div className="animator-card" style={{ position: 'relative' }}>
               {currentAnimator ? (
@@ -353,7 +356,7 @@ export const Dashboard: React.FC = () => {
           <div className="speakers-section">
             <div className="block-header">
               <div className="block-header-left">
-                <span className="block-emoji">👥</span>
+                <span className="block-emoji" style={{ paddingBottom: '10px' }}>👥</span>
                 <h2 className="block-title">Équipe</h2>
               </div>
               <button 
