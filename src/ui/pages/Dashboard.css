@@ -1165,6 +1165,11 @@ position: relative;
   .block-emoji {
     font-size: 1.5rem;
   }
+  
+  /* Masquer le prochain animateur sur mobile */
+  .next-animator-discreet {
+    display: none !important;
+  }
 }
 
 /* ===== ADAPTATIONS THÈMES Dashboard ===== */
