@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import styled, { keyframes, css } from 'styled-components';
 import { DailyParticipant } from '../../domain/participant/entities';
 import type { ParticipantRepository } from '../../domain/participant/repository';
 import type { DailySelectionUseCases } from '../../application/daily/useCases';
@@ -6,7 +7,1418 @@ import { useParticipants } from '../../hooks/useParticipants';
 import { useDailyParticipants } from '../../hooks/useDailyParticipants';
 import { useAnimators } from '../../hooks/useAnimators';
 import { getParticipantPhotoUrlWithTheme } from '../../utils/animalPhotos';
-import './StandUpModal.css';
+
+// Animations communes
+const backgroundPulse = keyframes`
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+`;
+
+const particlesFloat = keyframes`
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(5px) rotate(-1deg); }
+`;
+
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const breathe = keyframes`
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+`;
+
+const overlayFadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+const overlayFadeOut = keyframes`
+  from { opacity: 1; }
+  to { opacity: 0; }
+`;
+
+const modalSlideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+`;
+
+const modalSlideOut = keyframes`
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+`;
+
+const selectedPulse = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.1); }
+`;
+
+const shuffleAnimation = keyframes`
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.05); }
+`;
+
+const shuffleNamePulse = keyframes`
+  0%, 100% { 
+    transform: scale(1); 
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  }
+  50% { 
+    transform: scale(1.1); 
+    text-shadow: 0 6px 30px rgba(59, 130, 246, 0.6);
+  }
+`;
+
+const shuffleDots = keyframes`
+  0%, 20% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+  80%, 100% { opacity: 0.3; transform: scale(1); }
+`;
+
+const slideInFromRight = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const slideInFromLeft = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const crownGlow = keyframes`
+  0%, 100% { 
+    filter: 
+      drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) 
+      drop-shadow(0 0 24px rgba(255, 215, 0, 0.4)) 
+      brightness(1.2) 
+      contrast(1.1); 
+    transform: rotate(-12deg) scale(1);
+  }
+  25% { 
+    filter: 
+      drop-shadow(0 0 16px rgba(255, 215, 0, 1)) 
+      drop-shadow(0 0 32px rgba(255, 215, 0, 0.6)) 
+      brightness(1.4) 
+      contrast(1.2); 
+    transform: rotate(-8deg) scale(1.05);
+  }
+  50% { 
+    filter: 
+      drop-shadow(0 0 20px rgba(255, 215, 0, 1.2)) 
+      drop-shadow(0 0 40px rgba(255, 215, 0, 0.8)) 
+      brightness(1.5) 
+      contrast(1.3); 
+    transform: rotate(-10deg) scale(1.1);
+  }
+  75% { 
+    filter: 
+      drop-shadow(0 0 16px rgba(255, 215, 0, 1)) 
+      drop-shadow(0 0 32px rgba(255, 215, 0, 0.6)) 
+      brightness(1.4) 
+      contrast(1.2); 
+    transform: rotate(-6deg) scale(1.05);
+  }
+`;
+
+const silverCrownGlow = keyframes`
+  0%, 100% { 
+    filter: 
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) 
+      sepia(0) 
+      saturate(0) 
+      brightness(1.3) 
+      drop-shadow(0 0 12px rgba(192, 192, 192, 0.8))
+      drop-shadow(0 0 24px rgba(192, 192, 192, 0.4)); 
+    transform: rotate(-12deg) scale(1);
+  }
+  25% { 
+    filter: 
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) 
+      sepia(0) 
+      saturate(0) 
+      brightness(1.5) 
+      drop-shadow(0 0 16px rgba(192, 192, 192, 1))
+      drop-shadow(0 0 32px rgba(192, 192, 192, 0.6)); 
+    transform: rotate(-8deg) scale(1.05);
+  }
+  50% { 
+    filter: 
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) 
+      sepia(0) 
+      saturate(0) 
+      brightness(1.6) 
+      drop-shadow(0 0 20px rgba(192, 192, 192, 1.2))
+      drop-shadow(0 0 40px rgba(192, 192, 192, 0.8)); 
+    transform: rotate(-10deg) scale(1.1);
+  }
+  75% { 
+    filter: 
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) 
+      sepia(0) 
+      saturate(0) 
+      brightness(1.5) 
+      drop-shadow(0 0 16px rgba(192, 192, 192, 1))
+      drop-shadow(0 0 32px rgba(192, 192, 192, 0.6)); 
+    transform: rotate(-6deg) scale(1.05);
+  }
+`;
+
+// Styled Components
+
+const ModalOverlay = styled.div<{ isClosing?: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  animation: ${overlayFadeIn} 0.3s ease-out;
+  backdrop-filter: blur(8px);
+
+  ${props => props.isClosing && css`
+    animation: ${overlayFadeOut} 0.25s ease-out forwards;
+  `}
+`;
+
+const ModalContainer = styled.div<{ isClosing?: boolean }>`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--background-primary);
+  border: 3px solid var(--accent-primary);
+  border-radius: 32px;
+  width: 90vw;
+  max-width: 1200px;
+  height: 90vh;
+  overflow: hidden;
+  box-shadow: 
+    0 40px 100px rgba(0, 0, 0, 0.5),
+    0 16px 40px var(--accent-primary-rgb, 59, 130, 246),
+    0 0 0 1px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  animation: ${modalSlideIn} 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  
+  // Effet de fond subtil avec particules
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(var(--accent-primary-rgb, 59, 130, 246), 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(var(--accent-primary-rgb, 59, 130, 246), 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(var(--accent-primary-rgb, 59, 130, 246), 0.03) 0%, transparent 50%);
+    animation: ${backgroundPulse} 8s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: 30px;
+  }
+
+  // Particules flottantes
+  &::after {
+    content: '✨ ⭐ 💫 🔥 ⚡ 🌟';
+    position: absolute;
+    inset: 0;
+    font-size: 1.2rem;
+    opacity: 0.06;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 3rem;
+    animation: ${particlesFloat} 6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  ${props => props.isClosing && css`
+    animation: ${modalSlideOut} 0.25s ease-out forwards;
+  `}
+
+  @media (max-width: 768px) {
+    width: 95vw;
+    height: 95vh;
+  }
+`;
+
+const BlockHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 3rem;
+  border-bottom: 3px solid var(--accent-primary);
+  background: linear-gradient(135deg, 
+    var(--accent-primary) 0%, 
+    var(--accent-secondary) 100%);
+  position: relative;
+  z-index: 2;
+  
+  // Effet de brillance subtile
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      transparent 50%, 
+      rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 2rem;
+  }
+`;
+
+const BlockHeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+`;
+
+const BlockEmoji = styled.div`
+  font-size: 2.5rem;
+  animation: ${particlesFloat} 3s ease-in-out infinite;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const BlockHeaderText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const BlockTitle = styled.h2`
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const BlockSubtitle = styled.p`
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+`;
+
+const CloseButton = styled.button`
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+  }
+`;
+
+const ModalContent = styled.div`
+  flex: 1;
+  padding: 3rem;
+  overflow-y: auto;
+  position: relative;
+  z-index: 2;
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+`;
+
+const SelectionStep = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  animation: ${fadeInUp} 0.6s ease-out;
+`;
+
+const StepHeader = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+`;
+
+const StepTitle = styled.h3`
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+`;
+
+const StepDescription = styled.p`
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+`;
+
+const ParticipantsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  flex: 1;
+  align-content: start;
+  justify-content: center;
+  justify-items: center;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+`;
+
+const ParticipantCard = styled.div<{ isSelected: boolean }>`
+  background: linear-gradient(135deg, 
+    rgba(var(--card-background-rgb, 51, 65, 85), 0.6) 0%, 
+    rgba(var(--card-background-rgb, 30, 41, 59), 0.8) 100%);
+  border: 2px solid ${props => props.isSelected ? 'var(--accent-success)' : 'rgba(148, 163, 184, 0.2)'};
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 220px;
+  margin: 0 auto;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      ${props => props.isSelected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)'} 0%, 
+      transparent 100%);
+    opacity: ${props => props.isSelected ? 1 : 0};
+    transition: opacity 0.4s ease;
+    border-radius: 18px;
+  }
+  
+  ${props => props.isSelected && css`
+    background: linear-gradient(135deg, 
+      rgba(16, 185, 129, 0.2) 0%, 
+      rgba(5, 150, 105, 0.3) 100%);
+    border-color: var(--accent-success);
+    box-shadow: 
+      0 12px 40px rgba(16, 185, 129, 0.3),
+      0 0 0 1px rgba(16, 185, 129, 0.2);
+    transform: translateY(-2px);
+    animation: ${selectedPulse} 2s infinite;
+    
+    &::after {
+      content: '✓';
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 24px;
+      height: 24px;
+      background: var(--accent-success);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      animation: ${fadeInUp} 0.3s ease-out;
+    }
+  `}
+  
+  ${props => !props.isSelected && css`
+    opacity: 0.7;
+    transform: scale(0.95);
+  `}
+  
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      0 16px 48px rgba(0, 0, 0, 0.3),
+      0 0 0 2px var(--accent-primary);
+    
+    &::before {
+      opacity: 0.6;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+    max-width: 180px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem 0.8rem;
+    max-width: 160px;
+  }
+`;
+
+const ParticipantAvatar = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  position: relative;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    width: 70px;
+    height: 70px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 60px;
+    height: 60px;
+  }
+`;
+
+const ParticipantPhoto = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  
+  ${ParticipantCard}:hover & {
+    transform: scale(1.1);
+  }
+`;
+
+const ParticipantFallback = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+`;
+
+const ParticipantCrown = styled.div`
+  position: absolute;
+  top: -18px;
+  right: 20px;
+  font-size: 1.8rem;
+  animation: ${crownGlow} 2s ease-in-out infinite;
+  z-index: 3;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    top: -8px;
+    right: -8px;
+  }
+`;
+
+const ParticipantSilverCrown = styled.div`
+  position: absolute;
+  top: -18px;
+  right: 20px;
+  font-size: 1.8rem;
+  animation: ${silverCrownGlow} 2s ease-in-out infinite;
+  z-index: 3;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    top: -8px;
+    right: -8px;
+  }
+`;
+
+const ParticipantName = styled.div`
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  
+  ${ParticipantCard}:hover & {
+    color: var(--accent-primary);
+  }
+`;
+
+const StepActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
+`;
+
+const SelectedCount = styled.div`
+  color: var(--text-secondary);
+  font-size: 1rem;
+`;
+
+const StartStandUpButton = styled.button`
+  background: linear-gradient(135deg, var(--accent-success) 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 1.5rem 3rem;
+  border-radius: 16px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 8px 20px rgba(16, 185, 129, 0.4),
+    0 0 0 3px rgba(16, 185, 129, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: ${breathe} 3s ease-in-out infinite;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      transparent 50%, 
+      rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+  }
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      0 12px 32px rgba(16, 185, 129, 0.5),
+      0 0 0 4px rgba(16, 185, 129, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation: none;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    animation: none;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem 2.5rem;
+    font-size: 1.1rem;
+  }
+`;
+
+// Styled Components pour les autres étapes
+
+const ShuffleStep = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  animation: ${fadeInUp} 0.6s ease-out;
+`;
+
+const ShuffleAnimation = styled.div`
+  text-align: center;
+  animation: ${breathe} 3s ease-in-out infinite;
+`;
+
+const ShuffleTitle = styled.div`
+  margin-bottom: 3rem;
+  
+  h3 {
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+    animation: ${shuffleAnimation} 1s ease-in-out infinite;
+  }
+`;
+
+const ShuffleDisplay = styled.div`
+  margin-bottom: 3rem;
+`;
+
+const ShuffleName = styled.div`
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  animation: ${shuffleNamePulse} 0.5s ease-in-out infinite;
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 4px 20px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 2rem;
+  }
+`;
+
+const ShuffleDots = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+  
+  span {
+    width: 12px;
+    height: 12px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    animation: ${shuffleDots} 1.5s ease-in-out infinite;
+    
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+`;
+
+const ShuffleActions = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const ResetButton = styled.button`
+  background: linear-gradient(135deg, var(--accent-warning) 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+  }
+`;
+
+const StandUpStepContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  animation: ${fadeInUp} 0.6s ease-out;
+`;
+
+const StandUpMainContent = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3rem;
+  width: 100%;
+  min-height: 400px;
+  
+  @media (max-width: 768px) {
+    min-height: 350px;
+  }
+`;
+
+const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: ${props => props.isSliding ? 0 : 1};
+  transition: opacity 0.2s ease-in-out;
+  animation: ${breathe} 4s ease-in-out infinite;
+  z-index: 2;
+  
+  /* Mise en valeur du participant courant */
+  background: linear-gradient(135deg, 
+    rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1) 0%, 
+    rgba(var(--accent-primary-rgb, 59, 130, 246), 0.05) 100%);
+  border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
+  border-radius: 24px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+`;
+
+const ParticipantAvatarLarge = styled.div`
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  margin: 0 auto 2rem;
+  position: relative;
+  border: 5px solid var(--accent-primary);
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+  animation: ${breathe} 3s ease-in-out infinite;
+  
+  @media (max-width: 768px) {
+    width: 120px;
+    height: 120px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 100px;
+    height: 100px;
+  }
+`;
+
+const ParticipantPhotoLarge = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const ParticipantFallbackLarge = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: bold;
+  color: white;
+  
+  @media (max-width: 768px) {
+    font-size: 3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 2.5rem;
+  }
+`;
+
+const CurrentParticipantCrown = styled.div`
+  position: absolute;
+  top: -40px;
+  right: 36px;
+  font-size: 3.5rem;
+  animation: ${crownGlow} 2s ease-in-out infinite;
+  z-index: 3;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    top: -15px;
+    right: -15px;
+  }
+`;
+
+const CurrentParticipantSilverCrown = styled.div`
+  position: absolute;
+  top: -40px;
+  right: 36px;
+  font-size: 3.5rem;
+  animation: ${silverCrownGlow} 2s ease-in-out infinite;
+  z-index: 3;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    top: -15px;
+    right: -15px;
+  }
+`;
+
+const CurrentParticipantName = styled.h2`
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 4px 20px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+  }
+`;
+
+const ParticipantStatus = styled.div`
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  font-weight: 500;
+`;
+
+const NextParticipantPreview = styled.div`
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, 
+    rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.12) 0%, 
+    rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.06) 100%);
+  border: 2px solid rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  transition: all 0.3s ease;
+  z-index: 1;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, 
+      rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.18) 0%, 
+      rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.08) 100%);
+    border-color: rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.3);
+  }
+  
+  @media (max-width: 1024px) {
+    right: 1rem;
+    padding: 0.8rem 1.2rem;
+  }
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const NextParticipantLabel = styled.div`
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+`;
+
+const NextParticipantInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+`;
+
+const NextParticipantAvatar = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+`;
+
+const NextParticipantPhoto = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const NextParticipantName = styled.div`
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+`;
+
+const NextParticipantGoldCrown = styled.div`
+  position: absolute;
+  top: -44px;
+  right: 36px;
+  font-size: 1rem;
+  animation: ${crownGlow} 2s ease-in-out infinite;
+  z-index: 3;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    top: -6px;
+    right: -6px;
+  }
+`;
+
+const NextParticipantSilverCrown = styled.div`
+  position: absolute;
+  top: -44px;
+  right: 36px;
+  font-size: 1rem;
+  animation: ${silverCrownGlow} 2s ease-in-out infinite;
+  z-index: 3;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    top: -6px;
+    right: -6px;
+  }
+`;
+
+const ProgressIndicator = styled.div`
+  width: 100%;
+  margin-bottom: 3rem;
+`;
+
+const ProgressBar = styled.div`
+  width: 100%;
+  height: 8px;
+  background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+`;
+
+const ProgressFill = styled.div<{ width: string }>`
+  height: 100%;
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  width: ${props => props.width};
+`;
+
+const ProgressText = styled.div`
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+`;
+
+const StandUpActions = styled.div`
+  width: 100%;
+`;
+
+const StandUpActionButtons = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+`;
+
+
+
+const PreviousButton = styled.button`
+  background: linear-gradient(135deg, var(--accent-warning) 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2.5rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 6px 16px rgba(245, 158, 11, 0.4),
+    0 0 0 2px rgba(245, 158, 11, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+      0 10px 24px rgba(245, 158, 11, 0.5),
+      0 0 0 3px rgba(245, 158, 11, 0.15);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+`;
+
+const NextParticipantButton = styled.button`
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2.5rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 6px 16px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.4),
+    0 0 0 2px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+      0 10px 24px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.5),
+      0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.15);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+`;
+
+const FinishStandUpButton = styled.button`
+  background: linear-gradient(135deg, var(--accent-success) 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2.5rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 6px 16px rgba(16, 185, 129, 0.4),
+    0 0 0 2px rgba(16, 185, 129, 0.1);
+  animation: ${breathe} 3s ease-in-out infinite;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      transparent 50%, 
+      rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+  }
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+      0 10px 24px rgba(16, 185, 129, 0.5),
+      0 0 0 3px rgba(16, 185, 129, 0.15);
+    animation: none;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+`;
+
+// Styled Components pour la modal de confirmation
+const ConfirmModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ${overlayFadeIn} 0.3s ease-out;
+`;
+
+const ConfirmModal = styled.div`
+  background: var(--background-primary);
+  border: 2px solid var(--accent-warning);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: ${modalSlideIn} 0.3s ease-out;
+  
+  h3 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+  }
+  
+  p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0 0 2rem 0;
+    line-height: 1.5;
+  }
+`;
+
+const ConfirmActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+`;
+
+// Styled Components pour l'étape des liens
+const LinksStep = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  animation: ${fadeInUp} 0.6s ease-out;
+  text-align: center;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    justify-content: flex-start;
+    padding-top: 2rem;
+  }
+`;
+
+const LinksTitle = styled.h2`
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+`;
+
+const LinksDescription = styled.p`
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin: 0 0 3rem 0;
+  max-width: 600px;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const LinksContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 800px;
+  
+  @media (max-width: 768px) {
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+`;
+
+const LinkCard = styled.a`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem;
+  background: linear-gradient(135deg, 
+    rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1) 0%, 
+    rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.05) 100%);
+  border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+  
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      0 16px 48px rgba(0, 0, 0, 0.15),
+      0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+    background: linear-gradient(135deg, 
+      rgba(var(--accent-primary-rgb, 59, 130, 246), 0.15) 0%, 
+      rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.08) 100%);
+    border-color: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.4);
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+`;
+
+const LinkInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    align-items: center;
+  }
+`;
+
+const LinkTitle = styled.h3`
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+`;
+
+const LinkDescription = styled.p`
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.4;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const LinkIcon = styled.div`
+  font-size: 2rem;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  
+  ${LinkCard}:hover & {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+`;
+
+const CloseLinksButton = styled.button`
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 3rem;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 8px 20px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3),
+    0 0 0 2px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      transparent 50%, 
+      rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+  }
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+      0 12px 32px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.4),
+      0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.15);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+  }
+`;
+
+const CancelButton = styled.button`
+  background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
+  color: var(--accent-primary);
+  border: 2px solid var(--accent-primary);
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--accent-primary);
+    color: white;
+  }
+`;
+
+const ConfirmModalButton = styled.button`
+  background: linear-gradient(135deg, var(--accent-error) 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+`;
 
 interface StandUpModalProps {
   isOpen: boolean;
@@ -23,7 +1435,7 @@ interface StandUpModalProps {
 }
 
 // Étapes de la modale
-type StandUpStep = 'selection' | 'shuffle' | 'standUp';
+type StandUpStep = 'selection' | 'shuffle' | 'standUp' | 'links';
 
 // Fonction pour générer une couleur d'avatar basée sur le nom
 const getAvatarColor = (name: string) => {
@@ -306,32 +1718,26 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
   // Passer au participant suivant
   const handleNextParticipant = async () => {
     // Empêcher la navigation si une animation est en cours
-    if (isSliding || isEntering || currentParticipantIndex >= shuffledOrder.length - 1) {
+    if (isSliding || currentParticipantIndex >= shuffledOrder.length - 1) {
       return;
     }
     
-    setNavigationDirection('forward');
     setIsSliding(true);
     
     setTimeout(() => {
       setCurrentParticipantIndex(prev => prev + 1);
       setIsSliding(false);
-      setIsEntering(true);
-      
-      // Retirer l'animation d'entrée après qu'elle soit finie
-      setTimeout(() => setIsEntering(false), 300);
-    }, 300);
+    }, 200);
   };
 
   // Revenir au participant précédent
   const handlePreviousParticipant = async () => {
     // Empêcher la navigation si une animation est en cours
-    if (isSliding || isEntering || currentParticipantIndex <= 0) {
+    if (isSliding || currentParticipantIndex <= 0) {
       return;
     }
     
     try {
-      setNavigationDirection('backward');
       setIsSliding(true);
       
       // Remettre le participant actuel à hasSpoken = false
@@ -342,14 +1748,9 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
       }
       
       setTimeout(() => {
-        // Revenir au participant précédent
         setCurrentParticipantIndex(prev => prev - 1);
         setIsSliding(false);
-        setIsEntering(true);
-        
-        // Retirer l'animation d'entrée après qu'elle soit finie
-        setTimeout(() => setIsEntering(false), 300);
-      }, 300);
+      }, 200);
     } catch (error) {
       console.error('Erreur lors du retour au participant précédent:', error);
       setIsSliding(false);
@@ -358,8 +1759,8 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
 
   // Terminer le stand-up
   const handleFinishStandUp = () => {
-    // Fermer immédiatement la modale
-    performClose();
+    // Passer à l'étape des liens
+    setCurrentStep('links');
     
     // Faire les opérations de reset en arrière-plan
     const resetStandUpParticipants = async () => {
@@ -383,6 +1784,11 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     resetStandUpParticipants();
   };
 
+  // Fermer la modale depuis l'étape des liens
+  const handleCloseFromLinks = () => {
+    performClose();
+  };
+
   // Reset pour revenir à l'étape de sélection
   const handleResetToSelection = () => {
     setCurrentStep('selection');
@@ -404,62 +1810,60 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
   const isLastParticipant = currentParticipantIndex === shuffledOrder.length - 1;
 
   return (
-    <div 
-      className={`standup-modal-overlay ${isClosing ? 'closing' : ''}`}
-      onClick={handleBackdropClick}
-    >
+    <ModalOverlay isClosing={isClosing} onClick={handleBackdropClick}>
       {showConfirmClose && (
-        <div className="confirm-modal-overlay" onClick={(e) => e.stopPropagation()}>
-          <div className="confirm-modal">
+        <ConfirmModalOverlay onClick={(e) => e.stopPropagation()}>
+          <ConfirmModal>
             <h3>Confirmer la fermeture</h3>
             <p>
               Certains participants ont déjà parlé. Fermer la modale va remettre 
               tous les participants à l'état "non parlé". Voulez-vous continuer ?
             </p>
-            <div className="confirm-actions">
-              <button className="cancel-button" onClick={handleCancelClose}>
+            <ConfirmActions>
+              <CancelButton onClick={handleCancelClose}>
                 Annuler
-              </button>
-              <button className="confirm-button" onClick={performClose}>
+              </CancelButton>
+              <ConfirmModalButton onClick={performClose}>
                 Oui, fermer
-              </button>
-            </div>
-          </div>
-        </div>
+              </ConfirmModalButton>
+            </ConfirmActions>
+          </ConfirmModal>
+        </ConfirmModalOverlay>
       )}
       
-      <div className="standup-modal">
+      <ModalContainer isClosing={isClosing}>
         {/* Header */}
-        <div className="modal-header">
-          <div className="header-content">
-            <div className="header-icon">🎯</div>
-            <div className="header-text">
-              <h2>Session Stand-up</h2>
-              <p>
+        <BlockHeader>
+          <BlockHeaderLeft>
+            <BlockEmoji>🎯</BlockEmoji>
+            <BlockHeaderText>
+              <BlockTitle>Session Stand-up</BlockTitle>
+              <BlockSubtitle>
                 {currentStep === 'selection' && 'Sélectionnez les participants'}
                 {currentStep === 'shuffle' && 'Génération de l\'ordre...'}
                 {currentStep === 'standUp' && `Participant ${currentParticipantIndex + 1}/${shuffledOrder.length}`}
-              </p>
-            </div>
-          </div>
+                {currentStep === 'links' && 'Stand-up terminé ! Accédez aux ressources'}
+              </BlockSubtitle>
+            </BlockHeaderText>
+          </BlockHeaderLeft>
           
-          <button className="close-button" onClick={handleClose}>
+          <CloseButton onClick={handleClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-          </button>
-        </div>
+          </CloseButton>
+        </BlockHeader>
 
         {/* Contenu selon l'étape */}
-        <div className="modal-content">
+        <ModalContent>
           {currentStep === 'selection' && (
-            <div className="selection-step">
-              <div className="step-header">
-                <h3>Qui participe au stand-up aujourd'hui ?</h3>
-                <p>Tous les participants sont sélectionnés par défaut. Désélectionnez ceux qui ne participent pas.</p>
-              </div>
+            <SelectionStep>
+              <StepHeader>
+                <StepTitle>Qui participe au stand-up aujourd'hui ?</StepTitle>
+                <StepDescription>Tous les participants sont sélectionnés par défaut. Désélectionnez ceux qui ne participent pas.</StepDescription>
+              </StepHeader>
               
-              <div className="participants-grid">
+              <ParticipantsGrid>
                 {allParticipants?.filter(p => 
                   typeof p.hasSpoken === 'function' ? !p.hasSpoken() : !p.hasSpoken
                 ).map((participant) => {
@@ -472,113 +1876,105 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   const { isCurrentAnimator, isNextAnimator } = getAnimatorStatus(participant);
                   
                   return (
-                    <div 
+                    <ParticipantCard 
                       key={String(participant.id?.value || participant.id)}
-                      className={`participant-card ${isSelected ? 'selected' : 'unselected'}`}
+                      isSelected={isSelected}
                       onClick={() => toggleParticipantSelection(participant)}
                     >
-                      <div className="participant-avatar" style={{ position: 'relative' }}>
-                        {isCurrentAnimator && <div className="participant-crown">👑</div>}
-                        {isNextAnimator && !isCurrentAnimator && <div className="participant-silver-crown">👑</div>}
-                        <img 
+                      <ParticipantAvatar style={{ position: 'relative' }}>
+                        {isCurrentAnimator && <ParticipantCrown>👑</ParticipantCrown>}
+                        {isNextAnimator && !isCurrentAnimator && <ParticipantSilverCrown>👑</ParticipantSilverCrown>}
+                        <ParticipantPhoto 
                           src={getPhotoUrl(participant, theme)}
                           alt={participantName}
-                          className="participant-photo"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             const parent = target.parentElement;
                             if (parent) {
                               target.style.display = 'none';
                               parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                              parent.innerHTML = `<div class="participant-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
+                              parent.innerHTML = `<div style="color: ${avatarColor.text}; font-size: 2rem; font-weight: bold; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${participantName.charAt(0).toUpperCase()}</div>`;
                             }
                           }}
                         />
-                      </div>
-                      <div className="participant-name">{participantName}</div>
-                    </div>
+                      </ParticipantAvatar>
+                      <ParticipantName>{participantName}</ParticipantName>
+                    </ParticipantCard>
                   );
                 })}
-              </div>
+              </ParticipantsGrid>
               
-              <div className="step-actions">
-                <div className="selected-count">
+              <StepActions>
+                <SelectedCount>
                   {selectedParticipants.length} participant{selectedParticipants.length > 1 ? 's' : ''} sélectionné{selectedParticipants.length > 1 ? 's' : ''}
-                </div>
-                <button 
-                  className="start-standup-button"
+                </SelectedCount>
+                <StartStandUpButton 
                   onClick={handleStartStandUp}
                   disabled={selectedParticipants.length === 0}
                 >
                   🚀 Lancer le stand-up
-                </button>
-              </div>
-            </div>
+                </StartStandUpButton>
+              </StepActions>
+            </SelectionStep>
           )}
 
           {currentStep === 'shuffle' && (
-            <div className="shuffle-step">
-              <div className="shuffle-animation">
-                <div className="shuffle-title">
+            <ShuffleStep>
+              <ShuffleAnimation>
+                <ShuffleTitle>
                   <h3>🎲 Génération de l'ordre de passage...</h3>
-                </div>
+                </ShuffleTitle>
                 
-                <div className="shuffle-display">
-                  <div className="shuffle-name">
+                <ShuffleDisplay>
+                  <ShuffleName>
                     {isShuffling ? 
                       selectedParticipants[currentShuffleIndex]?.name?.value || 
                       selectedParticipants[currentShuffleIndex]?.name || 
                       'Participant'
                       : 'Prêt !'
                     }
-                  </div>
-                </div>
+                  </ShuffleName>
+                </ShuffleDisplay>
                 
-                <div className="shuffle-dots">
+                <ShuffleDots>
                   <span></span>
                   <span></span>
                   <span></span>
-                </div>
+                </ShuffleDots>
                 
                 {!isShuffling && (
-                  <div className="shuffle-actions">
-                    <button 
-                      className="reset-button"
+                  <ShuffleActions>
+                    <ResetButton 
                       onClick={handleResetToSelection}
                       title="Revenir à la sélection des participants"
                     >
                       🔄 Revenir à la sélection
-                    </button>
-                  </div>
+                    </ResetButton>
+                  </ShuffleActions>
                 )}
-              </div>
-            </div>
+              </ShuffleAnimation>
+            </ShuffleStep>
           )}
 
           {currentStep === 'standUp' && currentParticipant && (
-            <div className="standup-step">
-              <div 
-                className={`current-participant-display ${isSliding ? `sliding-out ${navigationDirection}` : ''}`}
-                style={{
-                  animation: isEntering ? 
-                    (navigationDirection === 'backward' ? 'slideInFromLeft 0.3s ease-out' : 'slideInFromRight 0.3s ease-out') 
-                    : 'none'
-                }}
-              >
-                <div className="participant-avatar-large" style={{ position: 'relative' }}>
+            <StandUpStepContainer>
+              <StandUpMainContent>
+                <CurrentParticipantDisplay 
+                  isSliding={isSliding}
+                >
+                  <ParticipantAvatarLarge style={{ position: 'relative' }}>
                   {(() => {
                     const { isCurrentAnimator, isNextAnimator } = getAnimatorStatus(currentParticipant);
                     return (
                       <>
-                        {isCurrentAnimator && <div className="current-participant-crown">👑</div>}
-                        {isNextAnimator && !isCurrentAnimator && <div className="current-participant-silver-crown">👑</div>}
+                          {isCurrentAnimator && <CurrentParticipantCrown>👑</CurrentParticipantCrown>}
+                          {isNextAnimator && !isCurrentAnimator && <CurrentParticipantSilverCrown>👑</CurrentParticipantSilverCrown>}
                       </>
                     );
                   })()}
-                  <img 
+                    <ParticipantPhotoLarge 
                     src={getPhotoUrl(currentParticipant, theme)}
                     alt={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
-                    className="participant-photo-large"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       const parent = target.parentElement;
@@ -587,80 +1983,145 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                         const avatarColor = getAvatarColor(participantName);
                         target.style.display = 'none';
                         parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                        parent.innerHTML = `<div class="participant-fallback-large" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
+                          parent.innerHTML = `<div style="color: ${avatarColor.text}; font-size: 4rem; font-weight: bold; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${participantName.charAt(0).toUpperCase()}</div>`;
                       }
                     }}
                   />
-                </div>
+                  </ParticipantAvatarLarge>
                 
-                <h2 className="current-participant-name">
+                  <CurrentParticipantName>
                   {String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
-                </h2>
+                  </CurrentParticipantName>
                 
-                <div className="participant-status">
+                  <ParticipantStatus>
                   C'est à ton tour de parler !
-                </div>
-              </div>
+                  </ParticipantStatus>
+                </CurrentParticipantDisplay>
+
+                {/* Aperçu du participant suivant à droite */}
+                {currentParticipantIndex < shuffledOrder.length - 1 && (
+                  <NextParticipantPreview>
+                    <NextParticipantLabel>Suivant</NextParticipantLabel>
+                    <NextParticipantInfo>
+                      <NextParticipantAvatar style={{ position: 'relative' }}>
+                        {(() => {
+                          const nextParticipant = shuffledOrder[currentParticipantIndex + 1];
+                          const { isCurrentAnimator, isNextAnimator } = getAnimatorStatus(nextParticipant);
+                          return (
+                            <>
+                              {isCurrentAnimator && <NextParticipantGoldCrown>👑</NextParticipantGoldCrown>}
+                              {isNextAnimator && !isCurrentAnimator && <NextParticipantSilverCrown>👑</NextParticipantSilverCrown>}
+                            </>
+                          );
+                        })()}
+                        <NextParticipantPhoto 
+                          src={getPhotoUrl(shuffledOrder[currentParticipantIndex + 1], theme)}
+                          alt={String(shuffledOrder[currentParticipantIndex + 1]?.name?.value || shuffledOrder[currentParticipantIndex + 1]?.name || 'Participant')}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            const parent = target.parentElement;
+                            if (parent) {
+                              const nextParticipant = shuffledOrder[currentParticipantIndex + 1];
+                              const participantName = String(nextParticipant?.name?.value || nextParticipant?.name || 'Participant');
+                              const avatarColor = getAvatarColor(participantName);
+                              target.style.display = 'none';
+                              parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                              parent.innerHTML = `<div style="color: ${avatarColor.text}; font-size: 1.2rem; font-weight: bold; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${participantName.charAt(0).toUpperCase()}</div>`;
+                            }
+                          }}
+                        />
+                      </NextParticipantAvatar>
+                      <NextParticipantName>
+                        {String(shuffledOrder[currentParticipantIndex + 1]?.name?.value || shuffledOrder[currentParticipantIndex + 1]?.name || 'Participant')}
+                      </NextParticipantName>
+                    </NextParticipantInfo>
+                  </NextParticipantPreview>
+                )}
+              </StandUpMainContent>
               
-              <div className="progress-indicator">
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill"
-                    style={{ width: `${((currentParticipantIndex + 1) / shuffledOrder.length) * 100}%` }}
-                  ></div>
-                </div>
-                <div className="progress-text">
+              <ProgressIndicator>
+                <ProgressBar>
+                  <ProgressFill width={`${((currentParticipantIndex + 1) / shuffledOrder.length) * 100}%`} />
+                </ProgressBar>
+                <ProgressText>
                   {currentParticipantIndex + 1} / {shuffledOrder.length}
-                </div>
-              </div>
+                </ProgressText>
+              </ProgressIndicator>
               
-              <div className="standup-actions">
-                {!isLastParticipant ? (
-                  <div className="standup-action-buttons">
+              <StandUpActions>
+                <StandUpActionButtons>
                     {currentParticipantIndex > 0 && (
-                      <button 
-                        className="previous-button"
+                    <PreviousButton 
                         onClick={handlePreviousParticipant}
                         title="Revenir au participant précédent"
                       >
                         ← Précédent
-                      </button>
-                    )}
-                    <div className="standup-action-buttons-right">
-                      <button 
-                        className="next-participant-button"
+                    </PreviousButton>
+                  )}
+                  
+                  {!isLastParticipant ? (
+                    <NextParticipantButton 
                         onClick={handleNextParticipant}
                       >
                         Suivant →
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="standup-action-buttons">
-                    {currentParticipantIndex > 0 && (
-                      <button 
-                        className="previous-button"
-                        onClick={handlePreviousParticipant}
-                        title="Revenir au participant précédent"
-                      >
-                        ← Précédent
-                      </button>
-                    )}
-                    <div className="standup-action-buttons-right">
-                      <button 
-                        className="finish-standup-button"
+                    </NextParticipantButton>
+                  ) : (
+                    <FinishStandUpButton 
                         onClick={handleFinishStandUp}
                       >
                         🎉 Terminer le stand-up !!
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+                    </FinishStandUpButton>
+                  )}
+                </StandUpActionButtons>
+              </StandUpActions>
+            </StandUpStepContainer>
           )}
-        </div>
-      </div>
-    </div>
+
+          {currentStep === 'links' && (
+            <LinksStep>
+              <LinksTitle>🎉 Terminé !</LinksTitle>
+              <LinksDescription>
+                Félicitations ! Votre session stand-up est maintenant terminée. 
+                Accédez aux ressources Azure DevOps pour continuer votre travail.
+              </LinksDescription>
+              
+              <LinksContainer>
+                <LinkCard 
+                  href="https://dev.azure.com/bazimo-app/bazimo-app/_dashboards/dashboard/94002b13-ea84-4455-9eb1-71bc99101095"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <LinkInfo>
+                    <LinkTitle>📊 Dashboard</LinkTitle>
+                    <LinkDescription>
+                      Consultons les métriques et indicateurs de l'équipe
+                    </LinkDescription>
+                  </LinkInfo>
+                  <LinkIcon>📈</LinkIcon>
+                </LinkCard>
+                
+                <LinkCard 
+                  href="https://dev.azure.com/bazimo-app/bazimo-app/_boards/board/t/Development%20Team/Stories%20and%20Bugs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <LinkInfo>
+                    <LinkTitle>📋 Stories & Bugs</LinkTitle>
+                    <LinkDescription>
+                      Alons voir le Board de l'équipe
+                    </LinkDescription>
+                  </LinkInfo>
+                  <LinkIcon>🎯</LinkIcon>
+                </LinkCard>
+              </LinksContainer>
+              
+              <CloseLinksButton onClick={handleCloseFromLinks}>
+                ✅ Fermer
+              </CloseLinksButton>
+            </LinksStep>
+          )}
+        </ModalContent>
+      </ModalContainer>
+    </ModalOverlay>
   );
 }; 
