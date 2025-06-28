@@ -1,6 +1,7 @@
 import React from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { Avatar } from './Avatar';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface CurrentAnimatorBlockProps {
   currentAnimator: any;
@@ -47,17 +48,14 @@ const particlesFloat = keyframes`
 `;
 
 const AnimatorSection = styled.div`
-  background: linear-gradient(135deg, 
-    #1e40af 0%, 
-    #7c3aed 50%, 
-    #be185d 100%);
-  border: 3px solid #3b82f6;
+  background: var(--accent-gradient);
+  border: 3px solid var(--accent-primary);
   border-radius: 24px;
   padding: 2rem;
   margin: 0;
   box-shadow: 
     0 20px 50px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(59, 130, 246, 0.6),
+    0 0 30px var(--shadow-glow),
     inset 0 2px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
@@ -67,9 +65,9 @@ const AnimatorSection = styled.div`
     position: absolute;
     inset: 0;
     background: 
-      radial-gradient(circle at 85% 15%, rgba(79, 124, 255, 0.08) 0%, transparent 30%),
-      radial-gradient(circle at 15% 85%, rgba(124, 58, 237, 0.06) 0%, transparent 30%),
-      linear-gradient(45deg, rgba(6, 182, 212, 0.02) 0%, transparent 50%);
+      radial-gradient(circle at 85% 15%, var(--accent-primary-alpha) 0%, transparent 30%),
+      radial-gradient(circle at 15% 85%, var(--accent-secondary-alpha) 0%, transparent 30%),
+      linear-gradient(45deg, var(--accent-tertiary-alpha) 0%, transparent 50%);
     pointer-events: none;
     animation: ${backgroundPulse} 8s ease-in-out infinite alternate;
   }
@@ -82,9 +80,9 @@ const AnimatorSection = styled.div`
     width: 200px;
     height: 200px;
     background: 
-      radial-gradient(circle at 30% 30%, rgba(79, 124, 255, 0.1) 2px, transparent 2px),
-      radial-gradient(circle at 70% 70%, rgba(124, 58, 237, 0.08) 1px, transparent 1px),
-      radial-gradient(circle at 50% 20%, rgba(6, 182, 212, 0.06) 1.5px, transparent 1.5px);
+      radial-gradient(circle at 30% 30%, var(--accent-primary-alpha) 2px, transparent 2px),
+      radial-gradient(circle at 70% 70%, var(--accent-secondary-alpha) 1px, transparent 1px),
+      radial-gradient(circle at 50% 20%, var(--accent-tertiary-alpha) 1.5px, transparent 1.5px);
     background-size: 40px 40px, 60px 60px, 80px 80px;
     animation: ${particlesFloat} 12s linear infinite;
     pointer-events: none;
@@ -158,14 +156,18 @@ const AnimatorBadges = styled.div`
 `;
 
 const Badge = styled.div`
-  background: rgba(16, 185, 129, 0.1);
-  border: 2px solid rgba(16, 185, 129, 0.3);
+  background: var(--accent-primary-alpha);
+  border: 2px solid var(--accent-primary);
   border-radius: 12px;
   padding: 0.5rem 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   backdrop-filter: blur(8px);
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const BadgeIcon = styled.div`

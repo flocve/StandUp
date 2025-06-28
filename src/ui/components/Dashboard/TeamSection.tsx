@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { ParticipantCard } from './ParticipantCard';
 
 interface TeamSectionProps {
@@ -11,24 +11,87 @@ interface TeamSectionProps {
   className?: string;
 }
 
-const SpeakersSection = styled.div`
-  background: rgba(255, 255, 255, 0.02);
-  border: 2px solid rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  padding: 1.5rem;
-  backdrop-filter: blur(20px);
+const breathe = keyframes`
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+`;
+
+const backgroundPulse = keyframes`
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+`;
+
+const particlesFloat = keyframes`
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) rotate(360deg);
+    opacity: 0.6;
+  }
+`;
+
+const TeamSectionContainer = styled.div`
+  background: linear-gradient(135deg, 
+    rgba(147, 51, 234, 0.1) 0%, 
+    rgba(168, 85, 247, 0.08) 50%, 
+    rgba(59, 130, 246, 0.06) 100%);
+  border: 2px solid rgba(147, 51, 234, 0.2);
+  border-radius: 24px;
+  padding: 2rem;
+  margin: 0;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.15),
+    0 0 15px rgba(147, 51, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(20px);
   
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, 
-      rgba(79, 124, 255, 0.02) 0%, 
-      rgba(124, 58, 237, 0.02) 50%, 
-      rgba(6, 182, 212, 0.02) 100%);
+    background: 
+      radial-gradient(circle at 85% 15%, rgba(147, 51, 234, 0.03) 0%, transparent 30%),
+      radial-gradient(circle at 15% 85%, rgba(59, 130, 246, 0.02) 0%, transparent 30%),
+      linear-gradient(45deg, rgba(16, 185, 129, 0.01) 0%, transparent 50%);
     pointer-events: none;
+    animation: ${backgroundPulse} 12s ease-in-out infinite alternate;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 150px;
+    height: 150px;
+    background: 
+      radial-gradient(circle at 30% 30%, rgba(147, 51, 234, 0.04) 2px, transparent 2px),
+      radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+      radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.02) 1.5px, transparent 1.5px);
+    background-size: 40px 40px, 60px 60px, 80px 80px;
+    animation: ${particlesFloat} 15s linear infinite;
+    pointer-events: none;
+    opacity: 0.4;
   }
 `;
 
@@ -36,41 +99,36 @@ const BlockHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 2;
 `;
 
 const BlockHeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  padding: 5px;
 `;
 
 const BlockEmoji = styled.span`
   font-size: 2rem;
-  
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
 `;
 
 const BlockTitle = styled.h2`
-  font-size: 1.25rem;
+  padding-top: 10px;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-  @media (max-width: 768px) {
-    font-size: 1.125rem;
-  }
 `;
 
 const TeamConfigButton = styled.button`
-  background: rgba(79, 124, 255, 0.1);
-  border: 2px solid rgba(79, 124, 255, 0.2);
+  background: var(--accent-secondary-alpha);
+  border: 2px solid var(--accent-secondary);
   border-radius: 12px;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,12 +138,23 @@ const TeamConfigButton = styled.button`
   backdrop-filter: blur(8px);
   position: relative;
   overflow: hidden;
+  z-index: 2;
   
   &:hover {
-    background: rgba(79, 124, 255, 0.15);
-    border-color: rgba(79, 124, 255, 0.4);
+    background: var(--accent-secondary);
+    color: white;
     transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px var(--shadow-glow);
   }
+  
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+`;
+
+const TeamContent = styled.div`
+  position: relative;
+  z-index: 2;
 `;
 
 const SpeakersGrid = styled.div`
@@ -103,40 +172,58 @@ const SpeakersGrid = styled.div`
 `;
 
 const MoreSpeakers = styled.div`
-  background: rgba(255, 255, 255, 0.03);
-  border: 2px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
   border-radius: 16px;
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
 `;
 
 const MoreCount = styled.div`
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  opacity: 0.7;
+  opacity: 0.9;
 `;
 
 const MoreLabel = styled.span`
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
-  opacity: 0.7;
+  opacity: 0.8;
 `;
 
 const NoParticipants = styled.div`
   text-align: center;
-  padding: 2rem;
+  padding: 3rem 2rem;
   color: var(--text-secondary);
+  position: relative;
+  z-index: 2;
 `;
 
 const NoParticipantsIcon = styled.div`
-  font-size: 3rem;
+  font-size: 4rem;
   margin-bottom: 1rem;
   opacity: 0.5;
+  animation: ${breathe} 2s ease-in-out infinite alternate;
+`;
+
+const NoParticipantsText = styled.p`
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+  opacity: 0.8;
 `;
 
 export const TeamSection: React.FC<TeamSectionProps> = ({
@@ -161,7 +248,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({
   const remainingCount = Math.max(0, participants.length - maxDisplayed);
 
   return (
-    <SpeakersSection className={className}>
+    <TeamSectionContainer className={className}>
       <BlockHeader>
         <BlockHeaderLeft>
           <BlockEmoji>👥</BlockEmoji>
@@ -172,38 +259,40 @@ export const TeamSection: React.FC<TeamSectionProps> = ({
         </TeamConfigButton>
       </BlockHeader>
 
-      {participants.length > 0 ? (
-        <SpeakersGrid>
-          {displayedParticipants.map((participant) => {
-            const participantName = getNameString(participant);
-            const isCurrentAnimator = currentAnimator && getNameString(currentAnimator) === participantName;
-            const isNextAnimator = nextAnimator && getNameString(nextAnimator) === participantName;
+      <TeamContent>
+        {participants.length > 0 ? (
+          <SpeakersGrid>
+            {displayedParticipants.map((participant) => {
+              const participantName = getNameString(participant);
+              const isCurrentAnimator = currentAnimator && getNameString(currentAnimator) === participantName;
+              const isNextAnimator = nextAnimator && getNameString(nextAnimator) === participantName;
 
-            return (
-              <ParticipantCard
-                key={String(participant.id?.value || participant.id)}
-                name={participantName}
-                photoUrl={participant?.getPhotoUrl?.()}
-                passageCount={participant?.getPassageCount?.() || 0}
-                isCurrentAnimator={isCurrentAnimator}
-                isNextAnimator={isNextAnimator}
-              />
-            );
-          })}
+              return (
+                <ParticipantCard
+                  key={String(participant.id?.value || participant.id)}
+                  name={participantName}
+                  photoUrl={participant?.getPhotoUrl?.()}
+                  passageCount={participant?.getPassageCount?.() || 0}
+                  isCurrentAnimator={isCurrentAnimator}
+                  isNextAnimator={isNextAnimator}
+                />
+              );
+            })}
 
-          {remainingCount > 0 && (
-            <MoreSpeakers>
-              <MoreCount>+{remainingCount}</MoreCount>
-              <MoreLabel>autres</MoreLabel>
-            </MoreSpeakers>
-          )}
-        </SpeakersGrid>
-      ) : (
-        <NoParticipants>
-          <NoParticipantsIcon>👥</NoParticipantsIcon>
-          <p>Aucun participant disponible</p>
-        </NoParticipants>
-      )}
-    </SpeakersSection>
+            {remainingCount > 0 && (
+              <MoreSpeakers>
+                <MoreCount>+{remainingCount}</MoreCount>
+                <MoreLabel>autres</MoreLabel>
+              </MoreSpeakers>
+            )}
+          </SpeakersGrid>
+        ) : (
+          <NoParticipants>
+            <NoParticipantsIcon>👥</NoParticipantsIcon>
+            <NoParticipantsText>Aucun participant disponible</NoParticipantsText>
+          </NoParticipants>
+        )}
+      </TeamContent>
+    </TeamSectionContainer>
   );
 }; 

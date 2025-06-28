@@ -239,8 +239,6 @@ export const Dashboard: React.FC = () => {
     };
   }, []);
 
-
-
   // Calculer les statistiques dynamiques
   const getAnimatorStats = (participants: any[]) => {
     const totalParticipants = participants.length;

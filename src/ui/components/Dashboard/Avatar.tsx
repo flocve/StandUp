@@ -64,14 +64,34 @@ const AvatarFallback = styled.div<{ $color: string; $size: string }>`
   }};
 `;
 
-const Crown = styled.div<{ $crownType: 'gold' | 'silver' }>`
+const Crown = styled.div<{ $crownType: 'gold' | 'silver'; $size: string }>`
   position: absolute;
-  top: -28px;
+  top: ${({ $size }) => {
+    switch ($size) {
+      case 'small': return '-16px';
+      case 'medium': return '-20px';
+      case 'large': return '-24px';
+      case 'xlarge': return '-28px';
+      default: return '-20px';
+    }
+  }};
   left: 50%;
   transform: translateX(-50%);
-  font-size: 2rem;
+  font-size: ${({ $size }) => {
+    switch ($size) {
+      case 'small': return '1.2rem';
+      case 'medium': return '1.4rem';
+      case 'large': return '1.6rem';
+      case 'xlarge': return '2rem';
+      default: return '1.4rem';
+    }
+  }};
   z-index: 10;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: ${({ $crownType }) => 
+    $crownType === 'silver' 
+      ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) sepia(0) saturate(0) brightness(1.2)'
+      : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+  };
   
   ${({ $crownType }) => $crownType === 'gold' && `
     animation: crownGlow 2s ease-in-out infinite alternate;
@@ -79,7 +99,7 @@ const Crown = styled.div<{ $crownType: 'gold' | 'silver' }>`
   
   ${({ $crownType }) => $crownType === 'silver' && `
     animation: silverCrownGlow 2s ease-in-out infinite alternate;
-    opacity: 0.8;
+    opacity: 0.9;
   `}
 
   @keyframes crownGlow {
@@ -95,11 +115,11 @@ const Crown = styled.div<{ $crownType: 'gold' | 'silver' }>`
 
   @keyframes silverCrownGlow {
     0% {
-      filter: drop-shadow(0 2px 4px rgba(192, 192, 192, 0.5));
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) sepia(0) saturate(0) brightness(1.2);
       transform: translateX(-50%) scale(1);
     }
     100% {
-      filter: drop-shadow(0 4px 8px rgba(192, 192, 192, 0.8));
+      filter: drop-shadow(0 4px 8px rgba(192, 192, 192, 0.8)) sepia(0) saturate(0) brightness(1.3);
       transform: translateX(-50%) scale(1.05);
     }
   }
@@ -137,7 +157,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <AvatarContainer $size={size} className={className}>
-      {showCrown && <Crown $crownType={crownType}>👑</Crown>}
+      {showCrown && <Crown $crownType={crownType} $size={size}>👑</Crown>}
       
       {!imageError ? (
         <AvatarImage
