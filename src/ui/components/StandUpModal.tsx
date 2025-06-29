@@ -7,6 +7,8 @@ import { useParticipants } from '../../hooks/useParticipants';
 import { useDailyParticipants } from '../../hooks/useDailyParticipants';
 import { useAnimators } from '../../hooks/useAnimators';
 import { getParticipantPhotoUrlWithTheme } from '../../utils/animalPhotos';
+import { getTasksForParticipant } from '../../domain/task/entities';
+import TasksList from './TasksList';
 
 // Animations communes
 const backgroundPulse = keyframes`
@@ -54,6 +56,17 @@ const modalSlideIn = keyframes`
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+  }
+`;
+
+const confirmModalSlideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 `;
 
@@ -197,7 +210,7 @@ const silverCrownGlow = keyframes`
 
 // Styled Components
 
-const ModalOverlay = styled.div<{ isClosing?: boolean }>`
+const ModalOverlay = styled.div<{ $isClosing?: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -208,12 +221,12 @@ const ModalOverlay = styled.div<{ isClosing?: boolean }>`
   animation: ${overlayFadeIn} 0.3s ease-out;
   backdrop-filter: blur(8px);
 
-  ${props => props.isClosing && css`
+  ${props => props.$isClosing && css`
     animation: ${overlayFadeOut} 0.25s ease-out forwards;
   `}
 `;
 
-const ModalContainer = styled.div<{ isClosing?: boolean }>`
+const ModalContainer = styled.div<{ $isClosing?: boolean }>`
   position: fixed;
   top: 50%;
   left: 50%;
@@ -267,7 +280,7 @@ const ModalContainer = styled.div<{ isClosing?: boolean }>`
     z-index: 1;
   }
 
-  ${props => props.isClosing && css`
+  ${props => props.$isClosing && css`
     animation: ${modalSlideOut} 0.25s ease-out forwards;
   `}
 
@@ -429,11 +442,11 @@ const ParticipantsGrid = styled.div`
   }
 `;
 
-const ParticipantCard = styled.div<{ isSelected: boolean }>`
+const ParticipantCard = styled.div<{ $isSelected: boolean }>`
   background: linear-gradient(135deg, 
     rgba(var(--card-background-rgb, 51, 65, 85), 0.6) 0%, 
     rgba(var(--card-background-rgb, 30, 41, 59), 0.8) 100%);
-  border: 2px solid ${props => props.isSelected ? 'var(--accent-success)' : 'rgba(148, 163, 184, 0.2)'};
+  border: 2px solid ${props => props.$isSelected ? 'var(--accent-success)' : 'rgba(148, 163, 184, 0.2)'};
   border-radius: 20px;
   padding: 2rem 1.5rem;
   cursor: pointer;
@@ -455,14 +468,14 @@ const ParticipantCard = styled.div<{ isSelected: boolean }>`
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, 
-      ${props => props.isSelected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)'} 0%, 
+      ${props => props.$isSelected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)'} 0%, 
       transparent 100%);
-    opacity: ${props => props.isSelected ? 1 : 0};
+    opacity: ${props => props.$isSelected ? 1 : 0};
     transition: opacity 0.4s ease;
     border-radius: 18px;
   }
   
-  ${props => props.isSelected && css`
+  ${props => props.$isSelected && css`
     background: linear-gradient(135deg, 
       rgba(16, 185, 129, 0.2) 0%, 
       rgba(5, 150, 105, 0.3) 100%);
@@ -492,7 +505,7 @@ const ParticipantCard = styled.div<{ isSelected: boolean }>`
     }
   `}
   
-  ${props => !props.isSelected && css`
+  ${props => !props.$isSelected && css`
     opacity: 0.7;
     transform: scale(0.95);
   `}
@@ -779,21 +792,19 @@ const StandUpMainContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 3rem;
   width: 100%;
-  min-height: 400px;
+  min-height: 280px;
+  margin-bottom: 2rem;
   
   @media (max-width: 768px) {
-    min-height: 350px;
+    min-height: 250px;
   }
 `;
 
 const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
-  transform: translate(-50%, -50%);
   text-align: center;
   opacity: ${props => props.isSliding ? 0 : 1};
   transition: opacity 0.2s ease-in-out;
-  animation: ${breathe} 4s ease-in-out infinite;
   z-index: 2;
   
   /* Mise en valeur du participant courant */
@@ -801,8 +812,8 @@ const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
     rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1) 0%, 
     rgba(var(--accent-primary-rgb, 59, 130, 246), 0.05) 100%);
   border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
-  border-radius: 24px;
-  padding: 2rem;
+  border-radius: 20px;
+  padding: 1.25rem;
   backdrop-filter: blur(10px);
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.1),
@@ -815,25 +826,25 @@ const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
 `;
 
 const ParticipantAvatarLarge = styled.div`
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.5rem;
   position: relative;
-  border: 5px solid var(--accent-primary);
+  border: 4px solid var(--accent-primary);
   box-shadow: 
-    0 16px 40px rgba(0, 0, 0, 0.2),
-    0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
-  animation: ${breathe} 3s ease-in-out infinite;
+    0 12px 30px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
   
   @media (max-width: 768px) {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1rem;
   }
   
   @media (max-width: 480px) {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
   }
 `;
 
@@ -865,7 +876,7 @@ const ParticipantFallbackLarge = styled.div`
 const CurrentParticipantCrown = styled.div`
   position: absolute;
   top: -40px;
-  right: 36px;
+  right: 22px;
   font-size: 3.5rem;
   animation: ${crownGlow} 2s ease-in-out infinite;
   z-index: 3;
@@ -880,7 +891,7 @@ const CurrentParticipantCrown = styled.div`
 const CurrentParticipantSilverCrown = styled.div`
   position: absolute;
   top: -40px;
-  right: 36px;
+  right: 22px;
   font-size: 3.5rem;
   animation: ${silverCrownGlow} 2s ease-in-out infinite;
   z-index: 3;
@@ -894,17 +905,17 @@ const CurrentParticipantSilverCrown = styled.div`
 
 const CurrentParticipantName = styled.h2`
   color: var(--text-primary);
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   text-shadow: 0 4px 20px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
   
   @media (max-width: 768px) {
-    font-size: 2rem;
+    font-size: 1.7rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 `;
 
@@ -1182,7 +1193,7 @@ const ConfirmModal = styled.div`
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: ${modalSlideIn} 0.3s ease-out;
+  animation: ${confirmModalSlideIn} 0.3s ease-out;
   
   h3 {
     color: var(--text-primary);
@@ -1554,7 +1565,12 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
       if (!isOpen) return;
       
       if (event.key === 'Escape') {
-        handleClose();
+        // Si la confirmation est déjà affichée, l'annuler au lieu de fermer
+        if (showConfirmClose) {
+          setShowConfirmClose(false);
+        } else {
+          handleClose();
+        }
       } else if (currentStep === 'selection') {
         // Lancer le stand-up avec la touche Entrée
         if (event.key === 'Enter') {
@@ -1591,9 +1607,15 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, currentStep, currentParticipantIndex, shuffledOrder.length, isSliding, isEntering, selectedParticipants.length]);
+  }, [isOpen, currentStep, currentParticipantIndex, shuffledOrder.length, isSliding, isEntering, selectedParticipants.length, showConfirmClose]);
 
   const handleClose = () => {
+    // Si on est dans un stand-up en cours, demander confirmation
+    if (currentStep === 'standUp') {
+      setShowConfirmClose(true);
+      return;
+    }
+    
     // Vérifier s'il y a des participants qui ont parlé
     const participantsWhoSpoke = allParticipants?.filter(p => 
       typeof p.hasSpoken === 'function' ? p.hasSpoken() : p.hasSpoken
@@ -1810,28 +1832,32 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
   const isLastParticipant = currentParticipantIndex === shuffledOrder.length - 1;
 
   return (
-    <ModalOverlay isClosing={isClosing} onClick={handleBackdropClick}>
+    <ModalOverlay $isClosing={isClosing} onClick={handleBackdropClick}>
       {showConfirmClose && (
         <ConfirmModalOverlay onClick={(e) => e.stopPropagation()}>
           <ConfirmModal>
-            <h3>Confirmer la fermeture</h3>
+            <h3>
+              {currentStep === 'standUp' ? 'Stand-up en cours' : 'Confirmer la fermeture'}
+            </h3>
             <p>
-              Certains participants ont déjà parlé. Fermer la modale va remettre 
-              tous les participants à l'état "non parlé". Voulez-vous continuer ?
+              {currentStep === 'standUp' 
+                ? 'Vous êtes actuellement en plein stand-up. Êtes-vous sûr de vouloir fermer et interrompre la session ?'
+                : 'Certains participants ont déjà parlé. Fermer la modale va remettre tous les participants à l\'état "non parlé". Voulez-vous continuer ?'
+              }
             </p>
             <ConfirmActions>
               <CancelButton onClick={handleCancelClose}>
-                Annuler
+                {currentStep === 'standUp' ? 'Continuer le stand-up' : 'Annuler'}
               </CancelButton>
               <ConfirmModalButton onClick={performClose}>
-                Oui, fermer
+                {currentStep === 'standUp' ? 'Oui, interrompre' : 'Oui, fermer'}
               </ConfirmModalButton>
             </ConfirmActions>
           </ConfirmModal>
         </ConfirmModalOverlay>
       )}
       
-      <ModalContainer isClosing={isClosing}>
+      <ModalContainer $isClosing={isClosing}>
         {/* Header */}
         <BlockHeader>
           <BlockHeaderLeft>
@@ -1878,7 +1904,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   return (
                     <ParticipantCard 
                       key={String(participant.id?.value || participant.id)}
-                      isSelected={isSelected}
+                      $isSelected={isSelected}
                       onClick={() => toggleParticipantSelection(participant)}
                     >
                       <ParticipantAvatar style={{ position: 'relative' }}>
@@ -2038,6 +2064,14 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   </NextParticipantPreview>
                 )}
               </StandUpMainContent>
+
+              {/* Affichage des tâches du participant actuel - Pleine largeur */}
+              <TasksList 
+                tasks={getTasksForParticipant(String(currentParticipant.name?.value || currentParticipant.name || 'Participant'))}
+                participantName={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
+                useAzureDevOps={['florian', 'simon', 'kevin', 'lewis', 'gregory', 'luciano', 'rachid'].includes(String(currentParticipant.name?.value || currentParticipant.name || '').toLowerCase())}
+                allParticipants={allParticipants || allWeeklyParticipants}
+              />
               
               <ProgressIndicator>
                 <ProgressBar>

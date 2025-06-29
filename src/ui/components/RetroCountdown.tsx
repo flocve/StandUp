@@ -247,7 +247,7 @@ const ProgressBar = styled.div`
   position: relative;
 `;
 
-const ProgressFill = styled.div<{ progress: number; $status: string }>`
+const ProgressFill = styled.div<{ $progress: number; $status: string }>`
   height: 100%;
   background: ${({ $status }) => {
     switch ($status) {
@@ -260,7 +260,7 @@ const ProgressFill = styled.div<{ progress: number; $status: string }>`
   border-radius: 3px;
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  width: ${props => props.progress}%;
+  width: ${props => props.$progress}%;
   overflow: hidden;
   
   &::after {
@@ -353,7 +353,7 @@ export const RetroCountdown: React.FC = () => {
           <CountdownProgress>
             <ProgressBar>
               <ProgressFill 
-                progress={getProgress()} 
+                $progress={getProgress()} 
                 $status={status}
               />
             </ProgressBar>
