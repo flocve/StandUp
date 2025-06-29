@@ -180,14 +180,14 @@ const DateLabel = styled.span`
   opacity: 0.8;
 `;
 
-const DateValue = styled.span<{ variant: 'start' | 'end' }>`
+const DateValue = styled.span<{ $variant: 'start' | 'end' }>`
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
-  background: ${props => props.variant === 'start' 
+  background: ${props => props.$variant === 'start' 
     ? 'var(--accent-tertiary-alpha)' 
     : 'var(--accent-primary-alpha)'};
-  border: ${props => props.variant === 'start' 
+  border: ${props => props.$variant === 'start' 
     ? '1px solid var(--accent-tertiary)' 
     : '1px solid var(--accent-primary)'};
   padding: 0.75rem 1rem;
@@ -199,7 +199,7 @@ const DateValue = styled.span<{ variant: 'start' | 'end' }>`
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: ${props => props.variant === 'start' 
+    box-shadow: ${props => props.$variant === 'start' 
       ? '0 8px 20px var(--success-glow)' 
       : '0 8px 20px var(--shadow-glow)'};
   }
@@ -274,13 +274,13 @@ const ProgressBar = styled.div`
   margin-bottom: 0.5rem;
 `;
 
-const ProgressFill = styled.div<{ progress: number }>`
+const ProgressFill = styled.div<{ $progress: number }>`
   height: 100%;
   background: linear-gradient(90deg, var(--accent-tertiary), var(--accent-primary));
   border-radius: 3px;
   transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
-  width: ${props => props.progress}%;
+  width: ${props => props.$progress}%;
   
   &::after {
     content: '';
@@ -397,7 +397,7 @@ export const WeekPeriodDisplay: React.FC = () => {
         <DateRange>
           <DateItem>
             <DateLabel>Du</DateLabel>
-            <DateValue variant="start">{formatDate(start)}</DateValue>
+                            <DateValue $variant="start">{formatDate(start)}</DateValue>
           </DateItem>
           
           <DateSeparator>
@@ -407,7 +407,7 @@ export const WeekPeriodDisplay: React.FC = () => {
           
           <DateItem>
             <DateLabel>Au</DateLabel>
-            <DateValue variant="end">{formatDate(end)}</DateValue>
+                            <DateValue $variant="end">{formatDate(end)}</DateValue>
           </DateItem>
         </DateRange>
         
@@ -418,7 +418,7 @@ export const WeekPeriodDisplay: React.FC = () => {
       
       <PeriodProgress>
         <ProgressBar>
-          <ProgressFill progress={progress} />
+                          <ProgressFill $progress={progress} />
         </ProgressBar>
         <ProgressLabel>
           {getWorkdayLabel()}

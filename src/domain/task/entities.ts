@@ -6,18 +6,53 @@ export interface Task {
   id: string;
   title: string;
   type: TaskType;
+  subType?: string; // Type original d'Azure DevOps (Task, Feature, Epic, etc.)
   status: TaskStatus;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   assignee: string;
   url?: string;
   description?: string;
   tags?: string[];
+  parentId?: string; // ID du parent pour la hiérarchie
+  children?: Task[]; // Sous-tâches (enfants)
+  storyPoints?: number; // Story points pour l'estimation
 }
 
 export interface ParticipantTasks {
   participantName: string;
   tasks: Task[];
 }
+
+export interface HierarchicalTask extends Task {
+  children: Task[];
+}
+
+// Fonction utilitaire pour organiser les tâches en hiérarchie
+export const organizeTasksHierarchy = (tasks: Task[]): HierarchicalTask[] => {
+  const taskMap = new Map<string, HierarchicalTask>();
+  const parentTasks: HierarchicalTask[] = [];
+
+  // Créer une map de toutes les tâches avec children initialisé
+  tasks.forEach(task => {
+    taskMap.set(task.id, { ...task, children: [] });
+  });
+
+  // Organiser en hiérarchie
+  tasks.forEach(task => {
+    const taskWithChildren = taskMap.get(task.id)!;
+    
+    if (task.parentId && taskMap.has(task.parentId)) {
+      // C'est un enfant, l'ajouter à son parent
+      const parent = taskMap.get(task.parentId)!;
+      parent.children.push(taskWithChildren);
+    } else {
+      // C'est un parent ou une tâche racine
+      parentTasks.push(taskWithChildren);
+    }
+  });
+
+  return parentTasks;
+};
 
 // Données de démonstration - à remplacer par une vraie intégration Azure DevOps
 export const DEMO_TASKS: ParticipantTasks[] = [
@@ -28,12 +63,14 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         id: 'US-001',
         title: 'Implémenter la fonctionnalité de notification push',
         type: 'US',
+        subType: 'User Story',
         status: 'IN_PROGRESS',
         priority: 'HIGH',
         assignee: 'Alice',
         url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12345',
         description: 'Développer le système de notifications push pour les utilisateurs mobiles',
-        tags: ['frontend', 'mobile', 'notifications']
+        tags: ['frontend', 'mobile', 'notifications'],
+        storyPoints: 5
       },
       {
         id: 'BUG-042',
@@ -44,12 +81,14 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         assignee: 'Alice',
         url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12346',
         description: 'Les photos ne s\'affichent pas correctement sur les écrans mobiles',
-        tags: ['mobile', 'ui', 'css']
+        tags: ['mobile', 'ui', 'css'],
+        storyPoints: 3
       },
       {
         id: 'US-007',
         title: 'Création du système de thèmes personnalisés',
         type: 'US',
+        subType: 'Task',
         status: 'TODO',
         priority: 'LOW',
         assignee: 'Alice',
@@ -125,12 +164,42 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         id: 'US-005',
         title: 'Développement de l\'API de gestion des participants',
         type: 'US',
+        subType: 'Feature',
         status: 'IN_PROGRESS',
         priority: 'HIGH',
         assignee: 'Lewis',
         url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12351',
         description: 'Créer les endpoints REST pour la gestion CRUD des participants',
-        tags: ['backend', 'api', 'rest', 'crud']
+        tags: ['backend', 'api', 'rest', 'crud'],
+        storyPoints: 8
+      },
+      {
+        id: 'TASK-1001',
+        title: 'Créer endpoint POST /participants',
+        type: 'US',
+        subType: 'Task',
+        status: 'IN_PROGRESS',
+        priority: 'HIGH',
+        assignee: 'Lewis',
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/1001',
+        description: 'Implémenter l\'endpoint pour créer de nouveaux participants',
+        tags: ['backend', 'api', 'post'],
+        parentId: 'US-005',
+        storyPoints: 3
+      },
+      {
+        id: 'TASK-1002',
+        title: 'Ajouter validation des données',
+        type: 'US',
+        subType: 'Task',
+        status: 'TODO',
+        priority: 'MEDIUM',
+        assignee: 'Lewis',
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/1002',
+        description: 'Valider les données d\'entrée pour l\'API',
+        tags: ['backend', 'validation'],
+        parentId: 'US-005',
+        storyPoints: 2
       },
       {
         id: 'BUG-044',
@@ -141,30 +210,23 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         assignee: 'Lewis',
         url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12352',
         description: 'Les mises à jour en temps réel ne se synchronisent pas correctement entre les clients',
-        tags: ['realtime', 'websocket', 'synchronization']
+        tags: ['realtime', 'websocket', 'synchronization'],
+        storyPoints: 5
       },
       {
-        id: 'US-006',
-        title: 'Optimisation des requêtes de base de données',
-        type: 'US',
-        status: 'REVIEW',
-        priority: 'MEDIUM',
-        assignee: 'Lewis',
-        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12353',
-        description: 'Améliorer les performances des requêtes sur les grandes tables',
-        tags: ['database', 'performance', 'optimization', 'sql']
-      },
-      {
-        id: 'BUG-045',
-        title: 'Erreur de validation des données utilisateur',
+        id: 'TASK-1003',
+        title: 'Débugger les événements WebSocket',
         type: 'BUG',
+        subType: 'Task',
         status: 'IN_PROGRESS',
-        priority: 'HIGH',
+        priority: 'CRITICAL',
         assignee: 'Lewis',
-        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12354',
-        description: 'Les validations côté serveur ne fonctionnent pas pour certains champs',
-        tags: ['validation', 'security', 'backend']
-             }
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/1003',
+        description: 'Identifier pourquoi les WebSocket ne se synchronisent pas',
+        tags: ['debug', 'websocket'],
+        parentId: 'BUG-044',
+        storyPoints: 2
+      }
      ]
   },
   {
@@ -197,6 +259,44 @@ export const DEMO_TASKS: ParticipantTasks[] = [
   {
     participantName: 'Emma',
     tasks: []
+  },
+  {
+    participantName: 'Florian',
+    tasks: [
+      {
+        id: 'US-201',
+        title: 'Amélioration de l\'interface utilisateur du dashboard',
+        type: 'US',
+        status: 'IN_PROGRESS',
+        priority: 'HIGH',
+        assignee: 'Florian',
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/201',
+        description: 'Refonte complète de l\'interface du dashboard',
+        tags: ['ui', 'dashboard', 'frontend']
+      },
+      {
+        id: 'BUG-202',
+        title: 'Problème de performance sur la page des rapports',
+        type: 'BUG',
+        status: 'TODO',
+        priority: 'CRITICAL',
+        assignee: 'Florian',
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/202',
+        description: 'La page met trop de temps à se charger',
+        tags: ['performance', 'rapports']
+      },
+      {
+        id: 'US-203',
+        title: 'Intégration Azure DevOps API',
+        type: 'US',
+        status: 'REVIEW',
+        priority: 'MEDIUM',
+        assignee: 'Florian',
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/203',
+        description: 'Connecter l\'app avec Azure DevOps',
+        tags: ['api', 'integration', 'azure']
+      }
+    ]
   }
 ];
 

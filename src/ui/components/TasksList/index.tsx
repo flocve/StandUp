@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { type Task, type TaskType, type TaskStatus, getTaskStatusColor, getTaskTypeColor, getPriorityColor } from '../../../domain/task/entities';
+import { 
+  type Task, 
+  type TaskType, 
+  type TaskStatus, 
+  type HierarchicalTask, 
+  getTaskStatusColor, 
+  getTaskTypeColor, 
+  getPriorityColor,
+  organizeTasksHierarchy
+} from '../../../domain/task/entities';
+import { getTasksForParticipantFromAzure } from '../../../services/azureDevOpsService';
 
 const fadeInScale = keyframes`
   from {
@@ -95,19 +105,43 @@ const TasksCount = styled.span`
   font-weight: 600;
   padding: 0.25rem 0.5rem;
   border-radius: 10px;
-  margin-left: auto;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
+const TasksMetrics = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+  align-items: center;
+`;
+
+const StoryPointsTotal = styled.span`
+  background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
+  color: var(--accent-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
 const TasksList = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
   position: relative;
   z-index: 1;
 
+  @media (min-width: 1200px) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 0.75rem;
+  }
+
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
     gap: 0.5rem;
   }
 `;
@@ -184,7 +218,14 @@ const TaskBadges = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.5rem;
+  gap: 0.25rem;
+`;
+
+const TaskTypeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
 `;
 
 const TaskTypeComponent = styled.span<{ type: TaskType }>`
@@ -198,6 +239,46 @@ const TaskTypeComponent = styled.span<{ type: TaskType }>`
   letter-spacing: 0.5px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const TaskSubType = styled.span`
+  color: var(--text-secondary);
+  font-size: 0.6rem;
+  font-weight: 400;
+  opacity: 0.7;
+  text-transform: capitalize;
+  font-style: italic;
+`;
+
+const SubTasksList = styled.div`
+  margin-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.5rem;
+`;
+
+const SubTaskItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  opacity: 0.8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--text-primary);
+    opacity: 1;
+    transform: translateX(2px);
+  }
+
+  &::before {
+    content: '↳';
+    color: var(--accent-primary);
+    font-weight: bold;
+    opacity: 0.6;
+  }
 `;
 
 const TaskStatusComponent = styled.span<{ status: TaskStatus }>`
@@ -254,6 +335,19 @@ const PriorityDot = styled.div<{ priority: string }>`
   box-shadow: 0 0 8px ${props => getPriorityColor(props.priority)}66;
 `;
 
+const StoryPoints = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--accent-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
+  padding: 0.15rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
+`;
+
 const EmptyState = styled.div`
   text-align: center;
   padding: 2rem 1rem;
@@ -275,8 +369,9 @@ const EmptyText = styled.p`
 `;
 
 interface TasksListProps {
-  tasks: Task[];
+  tasks?: Task[];
   participantName: string;
+  useAzureDevOps?: boolean;
 }
 
 const formatStatus = (status: string): string => {
@@ -309,63 +404,203 @@ const formatPriority = (priority: string): string => {
   }
 };
 
-const TasksListComponent: React.FC<TasksListProps> = ({ tasks, participantName }) => {
+const TasksListComponent: React.FC<TasksListProps> = ({ 
+  tasks: initialTasks, 
+  participantName, 
+  useAzureDevOps = false 
+}) => {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
+  const [hierarchicalTasks, setHierarchicalTasks] = useState<HierarchicalTask[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      if (useAzureDevOps) {
+        setLoading(true);
+        setError(null);
+        try {
+          const azureTasks = await getTasksForParticipantFromAzure(participantName);
+          setTasks(azureTasks);
+          setHierarchicalTasks(organizeTasksHierarchy(azureTasks));
+        } catch (err) {
+          console.error('Erreur lors du chargement des tâches:', err);
+          setError('Erreur lors du chargement des tâches Azure DevOps');
+          // Utiliser les tâches initiales en cas d'erreur
+          const fallbackTasks = initialTasks || [];
+          setTasks(fallbackTasks);
+          setHierarchicalTasks(organizeTasksHierarchy(fallbackTasks));
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        const taskList = initialTasks || [];
+        setTasks(taskList);
+        setHierarchicalTasks(organizeTasksHierarchy(taskList));
+      }
+    };
+
+    loadTasks();
+  }, [participantName, useAzureDevOps, initialTasks]);
+
   const handleTaskClick = (task: Task) => {
     if (task.url) {
       window.open(task.url, '_blank', 'noopener,noreferrer');
     }
   };
 
+  const handleSubTaskClick = (subTask: Task, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (subTask.url) {
+      window.open(subTask.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const calculateTotalStoryPoints = (task: HierarchicalTask): number => {
+    const parentPoints = task.storyPoints || 0;
+    const childrenPoints = task.children?.reduce((sum, child) => sum + (child.storyPoints || 0), 0) || 0;
+    return parentPoints + childrenPoints;
+  };
+
+  const calculateGlobalStoryPoints = (): number => {
+    return hierarchicalTasks.reduce((total, task) => total + calculateTotalStoryPoints(task), 0);
+  };
+
+  const getComplexityIcon = (storyPoints: number): string => {
+    if (storyPoints === 0) return '😄'; // Super simple - tête très contente
+    if (storyPoints <= 1) return '😄'; // Très facile
+    if (storyPoints <= 2) return '😊'; // Facile
+    if (storyPoints <= 3) return '🙂'; // Simple
+    if (storyPoints <= 5) return '😐'; // Moyen
+    if (storyPoints <= 8) return '😬'; // Difficile
+    if (storyPoints <= 13) return '😰'; // Très difficile
+    return '🤯'; // Super HARD (21+)
+  };
+
+  const renderHierarchicalTask = (hierarchicalTask: HierarchicalTask) => (
+    <TaskItem
+      key={hierarchicalTask.id}
+      priority={hierarchicalTask.priority}
+      onClick={() => handleTaskClick(hierarchicalTask)}
+    >
+      <TaskHeader>
+        <TaskInfo>
+          <TaskTitle>{hierarchicalTask.title}</TaskTitle>
+          <TaskId>{hierarchicalTask.id}</TaskId>
+        </TaskInfo>
+        <TaskBadges>
+          <TaskTypeContainer>
+            <TaskTypeComponent type={hierarchicalTask.type}>{hierarchicalTask.type}</TaskTypeComponent>
+            {hierarchicalTask.subType && hierarchicalTask.subType !== hierarchicalTask.type && (
+              <TaskSubType>{hierarchicalTask.subType}</TaskSubType>
+            )}
+          </TaskTypeContainer>
+          <TaskStatusComponent status={hierarchicalTask.status}>
+            {formatStatus(hierarchicalTask.status)}
+          </TaskStatusComponent>
+        </TaskBadges>
+      </TaskHeader>
+
+      <TaskMeta>
+        <TaskTags>
+          {hierarchicalTask.tags?.slice(0, 3).map((tag) => (
+            <TaskTag key={tag}>{tag}</TaskTag>
+          ))}
+          {hierarchicalTask.tags && hierarchicalTask.tags.length > 3 && (
+            <TaskTag>+{hierarchicalTask.tags.length - 3}</TaskTag>
+          )}
+        </TaskTags>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {calculateTotalStoryPoints(hierarchicalTask) > 0 && (
+            <StoryPoints>
+              <span style={{ fontSize: '0.8rem' }}>
+                {getComplexityIcon(calculateTotalStoryPoints(hierarchicalTask))}
+              </span>
+              {calculateTotalStoryPoints(hierarchicalTask)}
+            </StoryPoints>
+          )}
+          <TaskPriority priority={hierarchicalTask.priority}>
+            <PriorityDot priority={hierarchicalTask.priority} />
+            {formatPriority(hierarchicalTask.priority)}
+          </TaskPriority>
+        </div>
+      </TaskMeta>
+
+      {/* Affichage des sous-tâches intégrées */}
+      {hierarchicalTask.children && hierarchicalTask.children.length > 0 && (
+        <SubTasksList>
+          {hierarchicalTask.children.map((subTask) => (
+            <SubTaskItem
+              key={subTask.id}
+              onClick={(e) => handleSubTaskClick(subTask, e)}
+              title={`${subTask.id} - ${formatStatus(subTask.status)}`}
+            >
+              {subTask.title}
+            </SubTaskItem>
+          ))}
+        </SubTasksList>
+      )}
+    </TaskItem>
+  );
+
+  if (loading) {
+    return (
+      <TasksContainer>
+        <TasksHeader>
+          <TasksIcon>📋</TasksIcon>
+          <TasksTitle>Tâches en cours</TasksTitle>
+          <TasksCount>...</TasksCount>
+        </TasksHeader>
+        <EmptyState>
+          <EmptyIcon>⏳</EmptyIcon>
+          <EmptyText>Chargement des tâches...</EmptyText>
+        </EmptyState>
+      </TasksContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <TasksContainer>
+        <TasksHeader>
+          <TasksIcon>📋</TasksIcon>
+          <TasksTitle>Tâches en cours</TasksTitle>
+          <TasksCount>!</TasksCount>
+        </TasksHeader>
+        <EmptyState>
+          <EmptyIcon>⚠️</EmptyIcon>
+          <EmptyText>{error}</EmptyText>
+        </EmptyState>
+      </TasksContainer>
+    );
+  }
+
   return (
     <TasksContainer>
       <TasksHeader>
         <TasksIcon>📋</TasksIcon>
         <TasksTitle>Tâches en cours</TasksTitle>
-        <TasksCount>{tasks.length}</TasksCount>
+        <TasksMetrics>
+          {calculateGlobalStoryPoints() > 0 && (
+            <StoryPointsTotal>
+              <span style={{ fontSize: '0.8rem' }}>
+                {getComplexityIcon(calculateGlobalStoryPoints())}
+              </span>
+              {calculateGlobalStoryPoints()}
+            </StoryPointsTotal>
+          )}
+          <TasksCount>{hierarchicalTasks.length}</TasksCount>
+        </TasksMetrics>
       </TasksHeader>
 
-      {tasks.length === 0 ? (
+      {hierarchicalTasks.length === 0 ? (
         <EmptyState>
           <EmptyIcon>🎉</EmptyIcon>
           <EmptyText>Aucune tâche en cours !</EmptyText>
         </EmptyState>
       ) : (
         <TasksList>
-          {tasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              priority={task.priority}
-              onClick={() => handleTaskClick(task)}
-            >
-              <TaskHeader>
-                <TaskInfo>
-                  <TaskTitle>{task.title}</TaskTitle>
-                  <TaskId>{task.id}</TaskId>
-                </TaskInfo>
-                <TaskBadges>
-                  <TaskTypeComponent type={task.type}>{task.type}</TaskTypeComponent>
-                  <TaskStatusComponent status={task.status}>
-                    {formatStatus(task.status)}
-                  </TaskStatusComponent>
-                </TaskBadges>
-              </TaskHeader>
-
-              <TaskMeta>
-                <TaskTags>
-                  {task.tags?.slice(0, 3).map((tag) => (
-                    <TaskTag key={tag}>{tag}</TaskTag>
-                  ))}
-                  {task.tags && task.tags.length > 3 && (
-                    <TaskTag>+{task.tags.length - 3}</TaskTag>
-                  )}
-                </TaskTags>
-                <TaskPriority priority={task.priority}>
-                  <PriorityDot priority={task.priority} />
-                  {formatPriority(task.priority)}
-                </TaskPriority>
-              </TaskMeta>
-            </TaskItem>
-          ))}
+          {hierarchicalTasks.map(renderHierarchicalTask)}
         </TasksList>
       )}
     </TasksContainer>

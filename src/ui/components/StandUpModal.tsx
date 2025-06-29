@@ -199,7 +199,7 @@ const silverCrownGlow = keyframes`
 
 // Styled Components
 
-const ModalOverlay = styled.div<{ isClosing?: boolean }>`
+const ModalOverlay = styled.div<{ $isClosing?: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -210,12 +210,12 @@ const ModalOverlay = styled.div<{ isClosing?: boolean }>`
   animation: ${overlayFadeIn} 0.3s ease-out;
   backdrop-filter: blur(8px);
 
-  ${props => props.isClosing && css`
+  ${props => props.$isClosing && css`
     animation: ${overlayFadeOut} 0.25s ease-out forwards;
   `}
 `;
 
-const ModalContainer = styled.div<{ isClosing?: boolean }>`
+const ModalContainer = styled.div<{ $isClosing?: boolean }>`
   position: fixed;
   top: 50%;
   left: 50%;
@@ -269,7 +269,7 @@ const ModalContainer = styled.div<{ isClosing?: boolean }>`
     z-index: 1;
   }
 
-  ${props => props.isClosing && css`
+  ${props => props.$isClosing && css`
     animation: ${modalSlideOut} 0.25s ease-out forwards;
   `}
 
@@ -431,11 +431,11 @@ const ParticipantsGrid = styled.div`
   }
 `;
 
-const ParticipantCard = styled.div<{ isSelected: boolean }>`
+const ParticipantCard = styled.div<{ $isSelected: boolean }>`
   background: linear-gradient(135deg, 
     rgba(var(--card-background-rgb, 51, 65, 85), 0.6) 0%, 
     rgba(var(--card-background-rgb, 30, 41, 59), 0.8) 100%);
-  border: 2px solid ${props => props.isSelected ? 'var(--accent-success)' : 'rgba(148, 163, 184, 0.2)'};
+  border: 2px solid ${props => props.$isSelected ? 'var(--accent-success)' : 'rgba(148, 163, 184, 0.2)'};
   border-radius: 20px;
   padding: 2rem 1.5rem;
   cursor: pointer;
@@ -457,14 +457,14 @@ const ParticipantCard = styled.div<{ isSelected: boolean }>`
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, 
-      ${props => props.isSelected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)'} 0%, 
+      ${props => props.$isSelected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)'} 0%, 
       transparent 100%);
-    opacity: ${props => props.isSelected ? 1 : 0};
+    opacity: ${props => props.$isSelected ? 1 : 0};
     transition: opacity 0.4s ease;
     border-radius: 18px;
   }
   
-  ${props => props.isSelected && css`
+  ${props => props.$isSelected && css`
     background: linear-gradient(135deg, 
       rgba(16, 185, 129, 0.2) 0%, 
       rgba(5, 150, 105, 0.3) 100%);
@@ -494,7 +494,7 @@ const ParticipantCard = styled.div<{ isSelected: boolean }>`
     }
   `}
   
-  ${props => !props.isSelected && css`
+  ${props => !props.$isSelected && css`
     opacity: 0.7;
     transform: scale(0.95);
   `}
@@ -1811,7 +1811,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
   const isLastParticipant = currentParticipantIndex === shuffledOrder.length - 1;
 
   return (
-    <ModalOverlay isClosing={isClosing} onClick={handleBackdropClick}>
+    <ModalOverlay $isClosing={isClosing} onClick={handleBackdropClick}>
       {showConfirmClose && (
         <ConfirmModalOverlay onClick={(e) => e.stopPropagation()}>
           <ConfirmModal>
@@ -1832,7 +1832,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
         </ConfirmModalOverlay>
       )}
       
-      <ModalContainer isClosing={isClosing}>
+      <ModalContainer $isClosing={isClosing}>
         {/* Header */}
         <BlockHeader>
           <BlockHeaderLeft>
@@ -1879,7 +1879,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   return (
                     <ParticipantCard 
                       key={String(participant.id?.value || participant.id)}
-                      isSelected={isSelected}
+                      $isSelected={isSelected}
                       onClick={() => toggleParticipantSelection(participant)}
                     >
                       <ParticipantAvatar style={{ position: 'relative' }}>
@@ -2044,6 +2044,7 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
               <TasksList 
                 tasks={getTasksForParticipant(String(currentParticipant.name?.value || currentParticipant.name || 'Participant'))}
                 participantName={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
+                useAzureDevOps={String(currentParticipant.name?.value || currentParticipant.name || '').toLowerCase() === 'florian'}
               />
               
               <ProgressIndicator>
