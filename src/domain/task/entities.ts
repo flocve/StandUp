@@ -16,6 +16,8 @@ export interface Task {
   parentId?: string; // ID du parent pour la hiérarchie
   children?: Task[]; // Sous-tâches (enfants)
   storyPoints?: number; // Story points pour l'estimation
+  devBack?: string; // Nom du développeur backend
+  devFront?: string; // Nom du développeur frontend
 }
 
 export interface ParticipantTasks {
@@ -70,7 +72,9 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12345',
         description: 'Développer le système de notifications push pour les utilisateurs mobiles',
         tags: ['frontend', 'mobile', 'notifications'],
-        storyPoints: 5
+        storyPoints: 5,
+        devBack: 'Charlie Brown',
+        devFront: 'Alice Thompson'
       },
       {
         id: 'BUG-042',
@@ -171,7 +175,9 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12351',
         description: 'Créer les endpoints REST pour la gestion CRUD des participants',
         tags: ['backend', 'api', 'rest', 'crud'],
-        storyPoints: 8
+        storyPoints: 8,
+        devBack: 'Lewis Martin',
+        devFront: 'Alice Thompson'
       },
       {
         id: 'TASK-1001',
@@ -211,7 +217,9 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12352',
         description: 'Les mises à jour en temps réel ne se synchronisent pas correctement entre les clients',
         tags: ['realtime', 'websocket', 'synchronization'],
-        storyPoints: 5
+        storyPoints: 5,
+        devBack: 'Lewis Martin',
+        devFront: 'Simon Clark'
       },
       {
         id: 'TASK-1003',
@@ -227,33 +235,6 @@ export const DEMO_TASKS: ParticipantTasks[] = [
         parentId: 'BUG-044',
         storyPoints: 2
       }
-     ]
-  },
-  {
-    participantName: 'Simon',
-    tasks: [
-      {
-        id: 'US-008',
-        title: 'Intégration des tests unitaires automatisés',
-        type: 'US',
-        status: 'IN_PROGRESS',
-        priority: 'MEDIUM',
-        assignee: 'Simon',
-        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12356',
-        description: 'Mettre en place une suite de tests unitaires pour améliorer la qualité du code',
-        tags: ['testing', 'quality', 'automation', 'jest']
-      },
-      {
-        id: 'BUG-046',
-        title: 'Memory leak détecté dans le composant wheel',
-        type: 'BUG',
-        status: 'TODO',
-        priority: 'HIGH',
-        assignee: 'Simon',
-        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12357',
-        description: 'Fuite mémoire dans l\'animation de la roue qui ralentit l\'application',
-        tags: ['performance', 'memory', 'animation', 'optimization']
-             }
      ]
   },
   {

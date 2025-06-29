@@ -782,19 +782,18 @@ const StandUpMainContent = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 400px;
+  min-height: 280px;
+  margin-bottom: 2rem;
   
   @media (max-width: 768px) {
-    min-height: 350px;
+    min-height: 250px;
   }
 `;
 
 const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
-  transform: translate(-50%, -50%);
   text-align: center;
   opacity: ${props => props.isSliding ? 0 : 1};
   transition: opacity 0.2s ease-in-out;
-  animation: ${breathe} 4s ease-in-out infinite;
   z-index: 2;
   
   /* Mise en valeur du participant courant */
@@ -802,8 +801,8 @@ const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
     rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1) 0%, 
     rgba(var(--accent-primary-rgb, 59, 130, 246), 0.05) 100%);
   border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
-  border-radius: 24px;
-  padding: 2rem;
+  border-radius: 20px;
+  padding: 1.25rem;
   backdrop-filter: blur(10px);
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.1),
@@ -816,25 +815,25 @@ const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
 `;
 
 const ParticipantAvatarLarge = styled.div`
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.5rem;
   position: relative;
-  border: 5px solid var(--accent-primary);
+  border: 4px solid var(--accent-primary);
   box-shadow: 
-    0 16px 40px rgba(0, 0, 0, 0.2),
-    0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
-  animation: ${breathe} 3s ease-in-out infinite;
+    0 12px 30px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
   
   @media (max-width: 768px) {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1rem;
   }
   
   @media (max-width: 480px) {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
   }
 `;
 
@@ -866,7 +865,7 @@ const ParticipantFallbackLarge = styled.div`
 const CurrentParticipantCrown = styled.div`
   position: absolute;
   top: -40px;
-  right: 36px;
+  right: 22px;
   font-size: 3.5rem;
   animation: ${crownGlow} 2s ease-in-out infinite;
   z-index: 3;
@@ -881,7 +880,7 @@ const CurrentParticipantCrown = styled.div`
 const CurrentParticipantSilverCrown = styled.div`
   position: absolute;
   top: -40px;
-  right: 36px;
+  right: 22px;
   font-size: 3.5rem;
   animation: ${silverCrownGlow} 2s ease-in-out infinite;
   z-index: 3;
@@ -895,17 +894,17 @@ const CurrentParticipantSilverCrown = styled.div`
 
 const CurrentParticipantName = styled.h2`
   color: var(--text-primary);
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   text-shadow: 0 4px 20px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
   
   @media (max-width: 768px) {
-    font-size: 2rem;
+    font-size: 1.7rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 `;
 
@@ -2044,7 +2043,8 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
               <TasksList 
                 tasks={getTasksForParticipant(String(currentParticipant.name?.value || currentParticipant.name || 'Participant'))}
                 participantName={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
-                useAzureDevOps={String(currentParticipant.name?.value || currentParticipant.name || '').toLowerCase() === 'florian'}
+                useAzureDevOps={['florian', 'simon', 'kevin', 'lewis', 'gregory', 'luciano', 'rachid'].includes(String(currentParticipant.name?.value || currentParticipant.name || '').toLowerCase())}
+                allParticipants={allParticipants || allWeeklyParticipants}
               />
               
               <ProgressIndicator>

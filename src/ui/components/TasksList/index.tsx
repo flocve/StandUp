@@ -11,6 +11,8 @@ import {
   organizeTasksHierarchy
 } from '../../../domain/task/entities';
 import { getTasksForParticipantFromAzure } from '../../../services/azureDevOpsService';
+import { getParticipantPhotoUrlWithTheme } from '../../../utils/animalPhotos';
+import { Participant, DailyParticipant } from '../../../domain/participant/entities';
 
 const fadeInScale = keyframes`
   from {
@@ -29,19 +31,17 @@ const pulseGlow = keyframes`
 `;
 
 const TasksContainer = styled.div`
-  background: linear-gradient(135deg, 
-    rgba(var(--card-background-rgb, 51, 65, 85), 0.8) 0%, 
-    rgba(var(--card-background-rgb, 30, 41, 59), 0.9) 100%);
-  border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+  background: var(--card-background);
+  border: 2px solid var(--border-primary);
   border-radius: 20px;
-  padding: 1rem;
-  margin: 0.5rem 0 0.75rem 0;
+  padding: 0.75rem;
+  margin: 0.25rem 0 0.5rem 0;
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
   animation: ${fadeInScale} 0.6s ease-out;
   width: 100%;
-  max-height: 320px;
+  max-height: 600px;
   overflow-y: auto;
 
   /* Scrollbar personnalisée */
@@ -50,27 +50,24 @@ const TasksContainer = styled.div`
   }
 
   &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--scrollbar-track);
     border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+    background: var(--scrollbar-thumb-hover);
   }
 
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, 
-      rgba(var(--accent-primary-rgb, 59, 130, 246), 0.05) 0%, 
-      transparent 50%, 
-      rgba(var(--accent-primary-rgb, 59, 130, 246), 0.03) 100%);
+    background: var(--surface-overlay);
     pointer-events: none;
     border-radius: 18px;
   }
@@ -79,8 +76,8 @@ const TasksContainer = styled.div`
 const TasksHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
   position: relative;
   z-index: 1;
 `;
@@ -92,7 +89,7 @@ const TasksIcon = styled.div`
 
 const TasksTitle = styled.h4`
   color: var(--text-primary);
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -116,54 +113,106 @@ const TasksMetrics = styled.div`
 `;
 
 const StoryPointsTotal = styled.span`
-  background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
-  color: var(--accent-primary);
+  background: var(--badge-background);
+  color: var(--badge-text);
   font-size: 0.7rem;
   font-weight: 600;
   padding: 0.2rem 0.4rem;
   border-radius: 8px;
-  border: 1px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+  border: 1px solid var(--badge-border);
   display: flex;
   align-items: center;
   gap: 0.25rem;
 `;
 
+const DevelopersSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-secondary);
+`;
+
+const DeveloperAvatar = styled.div<{ $type: 'front' | 'back' }>`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: ${props => props.$type === 'front' 
+    ? 'var(--dev-front-bg)' 
+    : 'var(--dev-back-bg)'};
+  border: 1px solid ${props => props.$type === 'front' 
+    ? 'var(--dev-front-border)' 
+    : 'var(--dev-back-border)'};
+  color: ${props => props.$type === 'front' 
+    ? 'var(--dev-front-text)' 
+    : 'var(--dev-back-text)'};
+  padding: 0.15rem 0.4rem;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 500;
+
+  &::before {
+    content: ${props => props.$type === 'front' ? "'🎨'" : "'⚙️'"};
+    font-size: 0.7rem;
+  }
+`;
+
+const DeveloperPhoto = styled.img`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-photo);
+`;
+
+const DeveloperInitial = styled.div<{ $color: string; $bg: string }>`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: ${props => props.$bg};
+  color: ${props => props.$color};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: bold;
+  border: 1px solid var(--border-photo);
+`;
+
 const TasksList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   position: relative;
   z-index: 1;
 
-  @media (min-width: 1200px) {
+  @media (min-width: 900px) {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
   }
 
   @media (max-width: 768px) {
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 `;
 
 const TaskItem = styled.div<{ priority: string }>`
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.08) 0%, 
-    rgba(255, 255, 255, 0.04) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-left: 4px solid ${props => getPriorityColor(props.priority)};
-  border-radius: 12px;
-  padding: 0.75rem;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-secondary);
+  border-left: 3px solid ${props => getPriorityColor(props.priority)};
+  border-radius: 10px;
+  padding: 0.6rem;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  min-height: fit-content;
 
   &:hover {
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.12) 0%, 
-      rgba(255, 255, 255, 0.08) 100%);
-    border-color: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.5);
+    background: var(--surface-hover);
+    border-color: var(--accent-primary);
     transform: translateY(-2px);
     animation: ${pulseGlow} 2s ease-in-out infinite;
   }
@@ -186,8 +235,8 @@ const TaskHeader = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
-  gap: 0.75rem;
+  margin-bottom: 0.3rem;
+  gap: 0.5rem;
 `;
 
 const TaskInfo = styled.div`
@@ -197,14 +246,26 @@ const TaskInfo = styled.div`
 
 const TaskTitle = styled.div`
   color: var(--text-primary);
-  font-size: 0.85rem;
-  font-weight: 500;
-  line-height: 1.3;
-  margin-bottom: 0.2rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+  max-height: calc(1.4em * 2);
   overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.02em;
+  word-wrap: break-word;
+  text-align: left;
+`;
+
+const TaskTitleHighlight = styled.span`
+  color: var(--accent-secondary);
+  font-weight: 700;
+  padding: 0.1rem 0.3rem;
+  white-space: nowrap;
+  background: var(--accent-secondary-bg);
+  border-radius: 4px;
+  border: 1px solid var(--accent-secondary-border);
 `;
 
 const TaskId = styled.div`
@@ -251,9 +312,9 @@ const TaskSubType = styled.span`
 `;
 
 const SubTasksList = styled.div`
-  margin-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-secondary);
+  padding-top: 0.35rem;
 `;
 
 const SubTaskItem = styled.div`
@@ -281,6 +342,66 @@ const SubTaskItem = styled.div`
   }
 `;
 
+const SubTaskContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+`;
+
+const SubTaskTitle = styled.span`
+  flex: 1;
+  text-align: left;
+  line-height: 1.2;
+  display: inline;
+`;
+
+const SubTaskStatus = styled.span<{ status: TaskStatus }>`
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  ${({ status }) => {
+    switch (status) {
+      case 'TODO':
+        return `
+          background: var(--status-todo-bg);
+          color: var(--status-todo-text);
+          border: 1px solid var(--status-todo-border);
+        `;
+      case 'IN_PROGRESS':
+        return `
+          background: var(--status-progress-bg);
+          color: var(--status-progress-text);
+          border: 1px solid var(--status-progress-border);
+        `;
+      case 'REVIEW':
+        return `
+          background: var(--status-review-bg);
+          color: var(--status-review-text);
+          border: 1px solid var(--status-review-border);
+        `;
+      case 'DONE':
+        return `
+          background: var(--status-done-bg);
+          color: var(--status-done-text);
+          border: 1px solid var(--status-done-border);
+        `;
+      default:
+        return `
+          background: var(--status-todo-bg);
+          color: var(--status-todo-text);
+          border: 1px solid var(--status-todo-border);
+        `;
+    }
+  }}
+`;
+
 const TaskStatusComponent = styled.span<{ status: TaskStatus }>`
   background: ${props => getTaskStatusColor(props.status)};
   color: white;
@@ -297,8 +418,8 @@ const TaskMeta = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.5rem;
-  gap: 0.5rem;
+  margin-top: 0.35rem;
+  gap: 0.4rem;
 `;
 
 const TaskTags = styled.div`
@@ -309,13 +430,13 @@ const TaskTags = styled.div`
 `;
 
 const TaskTag = styled.span`
-  background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
-  color: var(--accent-primary);
+  background: var(--tag-background);
+  color: var(--tag-text);
   font-size: 0.65rem;
   font-weight: 500;
   padding: 0.15rem 0.35rem;
   border-radius: 4px;
-  border: 1px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+  border: 1px solid var(--tag-border);
 `;
 
 const TaskPriority = styled.div<{ priority: string }>`
@@ -372,6 +493,7 @@ interface TasksListProps {
   tasks?: Task[];
   participantName: string;
   useAzureDevOps?: boolean;
+  allParticipants?: (Participant | DailyParticipant)[];
 }
 
 const formatStatus = (status: string): string => {
@@ -407,7 +529,8 @@ const formatPriority = (priority: string): string => {
 const TasksListComponent: React.FC<TasksListProps> = ({ 
   tasks: initialTasks, 
   participantName, 
-  useAzureDevOps = false 
+  useAzureDevOps = false,
+  allParticipants = []
 }) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
   const [hierarchicalTasks, setHierarchicalTasks] = useState<HierarchicalTask[]>([]);
@@ -477,6 +600,111 @@ const TasksListComponent: React.FC<TasksListProps> = ({
     return '🤯'; // Super HARD (21+)
   };
 
+  // Définir l'ordre de priorité des statuts (réutilisable)
+  const statusPriority: Record<TaskStatus, number> = {
+    'DONE': 0,      // Terminé - priorité la plus haute
+    'REVIEW': 1,    // En revue 
+    'IN_PROGRESS': 2, // En cours
+    'TODO': 3       // À faire - priorité la plus basse
+  };
+
+  const sortSubTasksByStatus = (subTasks: Task[]): Task[] => {
+    const sorted = [...subTasks].sort((a, b) => {
+      const priorityA = statusPriority[a.status] ?? 999;
+      const priorityB = statusPriority[b.status] ?? 999;
+      return priorityA - priorityB;
+    });
+    return sorted;
+  };
+
+  const getTaskPriorities = (task: HierarchicalTask): { best: number; worst: number } => {
+    // Récupérer le statut de la tâche principale
+    let bestPriority = statusPriority[task.status] ?? 999;
+    let worstPriority = statusPriority[task.status] ?? 999;
+    
+    // Vérifier les sous-tâches
+    if (task.children && task.children.length > 0) {
+      task.children.forEach(child => {
+        const childPriority = statusPriority[child.status] ?? 999;
+        if (childPriority < bestPriority) {
+          bestPriority = childPriority;
+        }
+        if (childPriority > worstPriority) {
+          worstPriority = childPriority;
+        }
+      });
+    }
+    
+    return { best: bestPriority, worst: worstPriority };
+  };
+
+  const getHighestPriorityStatus = (task: HierarchicalTask): number => {
+    return getTaskPriorities(task).best;
+  };
+
+  const sortHierarchicalTasksByStatus = (tasks: HierarchicalTask[]): HierarchicalTask[] => {
+    return [...tasks].sort((a, b) => {
+      const prioritiesA = getTaskPriorities(a);
+      const prioritiesB = getTaskPriorities(b);
+      
+      // 1er critère : meilleure priorité (plus important)
+      if (prioritiesA.best !== prioritiesB.best) {
+        return prioritiesA.best - prioritiesB.best;
+      }
+      
+      // 2ème critère : pire priorité (départage les égalités)
+      if (prioritiesA.worst !== prioritiesB.worst) {
+        return prioritiesA.worst - prioritiesB.worst;
+      }
+      
+      // 3ème critère : ordre alphabétique (stabilité)
+      return a.title.localeCompare(b.title);
+    });
+  };
+
+  const parseTaskTitle = (title: string) => {
+    const parts = title.split(/(\[.*?\])/);
+    return parts.map((part, index) => {
+      if (part.startsWith('[') && part.endsWith(']')) {
+        return (
+          <TaskTitleHighlight key={index}>
+            {part}
+          </TaskTitleHighlight>
+        );
+      }
+      return part;
+    });
+  };
+
+  const getDeveloperAvatar = (developerName: string): { photo: string; initial: string; colors: { bg: string; color: string } } => {
+    // Extraire le prénom du displayName (premier mot)
+    const firstName = developerName.split(' ')[0];
+    
+    // Chercher le participant correspondant par prénom
+    const matchedParticipant = allParticipants.find(participant => {
+      const participantName = participant.name.value;
+      const participantFirstName = participantName.split(' ')[0];
+      return participantFirstName.toLowerCase() === firstName.toLowerCase();
+    });
+    
+
+    
+    // Utiliser la vraie photo du participant s'il est trouvé, sinon générer un avatar
+    const photo = matchedParticipant?.getPhotoUrl() || getParticipantPhotoUrlWithTheme(firstName);
+    
+    // Générer des couleurs pour l'initial basées sur le prénom
+    const colors = {
+      bg: `hsl(${firstName.charCodeAt(0) * 7 % 360}, 70%, 50%)`,
+      color: 'white'
+    };
+    
+    return {
+      photo,
+      initial: firstName.charAt(0).toUpperCase(),
+      colors
+    };
+  };
+
   const renderHierarchicalTask = (hierarchicalTask: HierarchicalTask) => (
     <TaskItem
       key={hierarchicalTask.id}
@@ -485,7 +713,7 @@ const TasksListComponent: React.FC<TasksListProps> = ({
     >
       <TaskHeader>
         <TaskInfo>
-          <TaskTitle>{hierarchicalTask.title}</TaskTitle>
+          <TaskTitle>{parseTaskTitle(hierarchicalTask.title)}</TaskTitle>
           <TaskId>{hierarchicalTask.id}</TaskId>
         </TaskInfo>
         <TaskBadges>
@@ -529,16 +757,72 @@ const TasksListComponent: React.FC<TasksListProps> = ({
       {/* Affichage des sous-tâches intégrées */}
       {hierarchicalTask.children && hierarchicalTask.children.length > 0 && (
         <SubTasksList>
-          {hierarchicalTask.children.map((subTask) => (
+          {sortSubTasksByStatus(hierarchicalTask.children).map((subTask) => (
             <SubTaskItem
               key={subTask.id}
               onClick={(e) => handleSubTaskClick(subTask, e)}
               title={`${subTask.id} - ${formatStatus(subTask.status)}`}
             >
-              {subTask.title}
+              <SubTaskContent>
+                <SubTaskTitle>{parseTaskTitle(subTask.title)}</SubTaskTitle>
+                <SubTaskStatus status={subTask.status}>
+                  {formatStatus(subTask.status)}
+                </SubTaskStatus>
+              </SubTaskContent>
             </SubTaskItem>
           ))}
         </SubTasksList>
+      )}
+
+      {/* Affichage des avatars des développeurs */}
+      {(hierarchicalTask.devBack || hierarchicalTask.devFront) && (
+        <DevelopersSection>
+          {hierarchicalTask.devBack && (
+            <DeveloperAvatar $type="back">
+              <DeveloperPhoto 
+                src={getDeveloperAvatar(hierarchicalTask.devBack).photo}
+                alt={hierarchicalTask.devBack}
+                onError={(e) => {
+                  // Fallback vers l'initiale en cas d'erreur de chargement de l'image
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling?.removeAttribute('style');
+                }}
+              />
+              <DeveloperInitial 
+                $color={getDeveloperAvatar(hierarchicalTask.devBack).colors.color}
+                $bg={getDeveloperAvatar(hierarchicalTask.devBack).colors.bg}
+                style={{ display: 'none' }}
+              >
+                {getDeveloperAvatar(hierarchicalTask.devBack).initial}
+              </DeveloperInitial>
+              {hierarchicalTask.devBack.split(' ')[0]}
+            </DeveloperAvatar>
+          )}
+          
+          {hierarchicalTask.devFront && (
+            <DeveloperAvatar $type="front">
+              <DeveloperPhoto 
+                src={getDeveloperAvatar(hierarchicalTask.devFront).photo}
+                alt={hierarchicalTask.devFront}
+                onError={(e) => {
+                  // Fallback vers l'initiale en cas d'erreur de chargement de l'image
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling?.removeAttribute('style');
+                }}
+              />
+              <DeveloperInitial 
+                $color={getDeveloperAvatar(hierarchicalTask.devFront).colors.color}
+                $bg={getDeveloperAvatar(hierarchicalTask.devFront).colors.bg}
+                style={{ display: 'none' }}
+              >
+                {getDeveloperAvatar(hierarchicalTask.devFront).initial}
+              </DeveloperInitial>
+              {hierarchicalTask.devFront.split(' ')[0]}
+            </DeveloperAvatar>
+          )}
+        </DevelopersSection>
       )}
     </TaskItem>
   );
@@ -600,7 +884,7 @@ const TasksListComponent: React.FC<TasksListProps> = ({
         </EmptyState>
       ) : (
         <TasksList>
-          {hierarchicalTasks.map(renderHierarchicalTask)}
+          {sortHierarchicalTasksByStatus(hierarchicalTasks).map(renderHierarchicalTask)}
         </TasksList>
       )}
     </TasksContainer>

@@ -24,6 +24,14 @@ interface AzureDevOpsWorkItem {
     'System.Tags'?: string;
     'System.Description'?: string;
     'Microsoft.VSTS.Scheduling.StoryPoints'?: number;
+    'Custom.DevBack'?: {
+      displayName: string;
+      uniqueName: string;
+    };
+    'Custom.DevFront'?: {
+      displayName: string;
+      uniqueName: string;
+    };
   };
   url: string;
 }
@@ -46,13 +54,14 @@ interface AzureDevOpsQueryResult {
 // Mapping des statuts Azure DevOps vers nos types
 const mapStatusToTaskStatus = (state: string): TaskStatus => {
   const lowerState = state.toLowerCase();
+  
   if (lowerState.includes('new') || lowerState.includes('to do') || lowerState.includes('proposed')) {
     return 'TODO';
   }
   if (lowerState.includes('active') || lowerState.includes('in progress') || lowerState.includes('doing')) {
     return 'IN_PROGRESS';
   }
-  if (lowerState.includes('review') || lowerState.includes('resolved')) {
+  if (lowerState.includes('review') || lowerState.includes('resolved') || lowerState === 'pr') {
     return 'REVIEW';
   }
   if (lowerState.includes('done') || lowerState.includes('closed')) {
@@ -201,7 +210,9 @@ export const getWorkItemsFromQuery = async (queryId: string): Promise<Task[]> =>
         description: workItem.fields['System.Description'] || '',
         tags: tags.filter(tag => tag.length > 0),
         parentId: parentId,
-        storyPoints: workItem.fields['Microsoft.VSTS.Scheduling.StoryPoints']
+        storyPoints: workItem.fields['Microsoft.VSTS.Scheduling.StoryPoints'],
+        devBack: workItem.fields['Custom.DevBack']?.displayName,
+        devFront: workItem.fields['Custom.DevFront']?.displayName
       };
 
       return task;
@@ -222,15 +233,26 @@ export const getTasksForParticipantFromAzure = async (participantName: string): 
   if (participantName.toLowerCase() === 'florian') {
     return await getWorkItemsFromQuery('3837546e-b531-4cbe-b8bb-b45ff30c1158');
   }
-  
-  // Pour les autres participants, vous pouvez :
-  // 1. Créer des queries spécifiques pour chaque personne
-  // 2. Utiliser une query générale et filtrer par assigné
-  // 3. Utiliser les données mockées
-  
-  // Pour l'instant, utilisons les données mockées pour les autres
-  const { getTasksForParticipant } = await import('../domain/task/entities');
-  return getTasksForParticipant(participantName);
+  if (participantName.toLowerCase() === 'simon') {
+    return await getWorkItemsFromQuery('3398fd2b-917d-48a0-8b5e-cbd4a0e4df81');
+  }
+  if (participantName.toLowerCase() === 'kevin') {
+    return await getWorkItemsFromQuery('12fd40f1-7881-4d6c-9601-ba4b724b923b');
+  }
+  if (participantName.toLowerCase() === 'lewis') {
+    return await getWorkItemsFromQuery('57d9135b-c604-4404-858c-7cc743af8e17');
+  }
+  if (participantName.toLowerCase() === 'gregory') {
+    return await getWorkItemsFromQuery('53b907a0-cbad-44cf-918c-cc20c650eb3c');
+  }
+  if (participantName.toLowerCase() === 'luciano') {
+    return await getWorkItemsFromQuery('fccc3f39-b8f9-4df3-bacc-1ea50743e18b');
+  }
+  if (participantName.toLowerCase() === 'rachid') {
+    return await getWorkItemsFromQuery('c76c05ed-1757-4098-a24f-05572a14aaa8');
+  }
+
+  return [];
 };
 
 // Données de démonstration pour les tests
