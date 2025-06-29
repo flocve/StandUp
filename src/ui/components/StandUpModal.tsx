@@ -7,6 +7,8 @@ import { useParticipants } from '../../hooks/useParticipants';
 import { useDailyParticipants } from '../../hooks/useDailyParticipants';
 import { useAnimators } from '../../hooks/useAnimators';
 import { getParticipantPhotoUrlWithTheme } from '../../utils/animalPhotos';
+import { getTasksForParticipant } from '../../domain/task/entities';
+import TasksList from './TasksList';
 
 // Animations communes
 const backgroundPulse = keyframes`
@@ -779,7 +781,6 @@ const StandUpMainContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 3rem;
   width: 100%;
   min-height: 400px;
   
@@ -2038,6 +2039,12 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                   </NextParticipantPreview>
                 )}
               </StandUpMainContent>
+
+              {/* Affichage des tâches du participant actuel - Pleine largeur */}
+              <TasksList 
+                tasks={getTasksForParticipant(String(currentParticipant.name?.value || currentParticipant.name || 'Participant'))}
+                participantName={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
+              />
               
               <ProgressIndicator>
                 <ProgressBar>
