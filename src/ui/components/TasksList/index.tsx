@@ -413,6 +413,35 @@ const SubTasksList = styled.div`
   margin-top: 0.5rem;
   border-top: 1px solid var(--border-secondary);
   padding-top: 0.35rem;
+  position: relative;
+  padding-left: 1rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.35rem;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, 
+      var(--accent-primary) 0%, 
+      var(--accent-secondary) 50%, 
+      var(--accent-primary) 100%);
+    border-radius: 2px;
+    box-shadow: 0 0 8px var(--accent-primary-rgb, 59, 130, 246)33;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 0.35rem;
+    width: 7px;
+    height: 7px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent-primary);
+  }
 `;
 
 const SubTaskItem = styled.div`
