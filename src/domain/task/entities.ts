@@ -1,4 +1,4 @@
-export type TaskType = 'BUG' | 'US';
+export type TaskType = 'BUG' | 'US' | 'TECHNICAL' | 'TASK' | 'FEATURE' | 'EPIC';
 
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE';
 
@@ -238,6 +238,33 @@ export const DEMO_TASKS: ParticipantTasks[] = [
      ]
   },
   {
+    participantName: 'Simon',
+    tasks: [
+      {
+        id: 'US-008',
+        title: 'Intégration des tests unitaires automatisés',
+        type: 'US',
+        status: 'IN_PROGRESS',
+        priority: 'MEDIUM',
+        assignee: 'Simon',
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12356',
+        description: 'Mettre en place une suite de tests unitaires pour améliorer la qualité du code',
+        tags: ['testing', 'quality', 'automation', 'jest']
+      },
+      {
+        id: 'BUG-046',
+        title: 'Memory leak détecté dans le composant wheel',
+        type: 'BUG',
+        status: 'TODO',
+        priority: 'HIGH',
+        assignee: 'Simon',
+        url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/12357',
+        description: 'Fuite mémoire dans l\'animation de la roue qui ralentit l\'application',
+        tags: ['performance', 'memory', 'animation', 'optimization']
+             }
+     ]
+  },
+  {
     participantName: 'Emma',
     tasks: []
   },
@@ -309,6 +336,14 @@ export const getTaskTypeColor = (type: TaskType): string => {
       return '#ef4444'; // Rouge
     case 'US':
       return '#8b5cf6'; // Violet
+    case 'TECHNICAL':
+      return '#06b6d4'; // Cyan
+    case 'TASK':
+      return '#10b981'; // Vert
+    case 'FEATURE':
+      return '#f59e0b'; // Orange
+    case 'EPIC':
+      return '#7c3aed'; // Violet foncé
     default:
       return '#64748b';
   }

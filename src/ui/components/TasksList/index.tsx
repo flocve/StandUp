@@ -6,7 +6,6 @@ import {
   type TaskStatus, 
   type HierarchicalTask, 
   getTaskStatusColor, 
-  getTaskTypeColor, 
   getPriorityColor,
   organizeTasksHierarchy
 } from '../../../domain/task/entities';
@@ -26,8 +25,36 @@ const fadeInScale = keyframes`
 `;
 
 const pulseGlow = keyframes`
-  0%, 100% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+  from { 
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3), 0 0 0 0 rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px) scale(1);
+  }
+  to { 
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.5), 0 0 0 4px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px) scale(1.01);
+  }
+`;
+
+const slideInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+`;
+
+const taskAppear = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 `;
 
 const TasksContainer = styled.div`
@@ -43,6 +70,7 @@ const TasksContainer = styled.div`
   width: 100%;
   max-height: 600px;
   overflow-y: auto;
+  transition: opacity 0.2s ease-in-out;
 
   /* Scrollbar personnalisée */
   &::-webkit-scrollbar {
@@ -80,6 +108,7 @@ const TasksHeader = styled.div`
   margin-bottom: 0.5rem;
   position: relative;
   z-index: 1;
+  animation: ${slideInUp} 0.5s ease-out;
 `;
 
 const TasksIcon = styled.div`
@@ -180,12 +209,14 @@ const DeveloperInitial = styled.div<{ $color: string; $bg: string }>`
   border: 1px solid var(--border-photo);
 `;
 
-const TasksList = styled.div`
+const TasksList = styled.div<{ $visible?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   position: relative;
   z-index: 1;
+  transition: opacity 0.15s ease-in-out;
+  opacity: ${props => props.$visible ? 1 : 0};
 
   @media (min-width: 900px) {
     display: grid;
@@ -198,23 +229,24 @@ const TasksList = styled.div`
   }
 `;
 
-const TaskItem = styled.div<{ priority: string }>`
+const TaskItem = styled.div<{ priority: string; $animationDelay?: number }>`
   background: var(--surface-secondary);
   border: 1px solid var(--border-secondary);
   border-left: 3px solid ${props => getPriorityColor(props.priority)};
   border-radius: 10px;
   padding: 0.6rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   min-height: fit-content;
+  animation: ${taskAppear} 0.6s ease-out both;
+  animation-delay: ${props => props.$animationDelay || 0}ms;
 
   &:hover {
     background: var(--surface-hover);
     border-color: var(--accent-primary);
-    transform: translateY(-2px);
-    animation: ${pulseGlow} 2s ease-in-out infinite;
+    animation: ${pulseGlow} 0.6s ease-out forwards;
   }
 
   &::before {
@@ -290,16 +322,82 @@ const TaskTypeContainer = styled.div`
 `;
 
 const TaskTypeComponent = styled.span<{ type: TaskType }>`
-  background: ${props => getTaskTypeColor(props.type)};
+  background: ${props => {
+    switch (props.type) {
+      case 'BUG':
+        return 'linear-gradient(135deg, #ff416c 0%, #ff4757 100%)';
+      case 'US':
+        return 'linear-gradient(135deg, #a55eea 0%, #8b5cf6 100%)';
+      case 'TECHNICAL':
+        return 'linear-gradient(135deg, #26d0ce 0%, #1dd1a1 100%)';
+      case 'TASK':
+        return 'linear-gradient(135deg, #feca57 0%, #ff9ff3 100%)';
+      case 'FEATURE':
+        return 'linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%)';
+      case 'EPIC':
+        return 'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)';
+      default:
+        return 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)';
+    }
+  }};
   color: white;
   font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &::after {
+    content: ${props => {
+      switch (props.type) {
+        case 'BUG':
+          return "'🐛'";
+        case 'US':
+          return "'👤'";
+        case 'TECHNICAL':
+          return "'⚙️'";
+        case 'TASK':
+          return "'📌'";
+        case 'FEATURE':
+          return "'✨'";
+        case 'EPIC':
+          return "'🎯'";
+        default:
+          return "'📋'";
+      }
+    }};
+    font-size: 0.7rem;
+    opacity: 0.9;
+  }
 `;
 
 const TaskSubType = styled.span`
@@ -358,60 +456,148 @@ const SubTaskTitle = styled.span`
 `;
 
 const SubTaskStatus = styled.span<{ status: TaskStatus }>`
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 0.1rem 0.3rem;
-  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 10px;
   flex-shrink: 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
   
-  ${({ status }) => {
-    switch (status) {
+  background: ${props => {
+    switch (props.status) {
       case 'TODO':
-        return `
-          background: var(--status-todo-bg);
-          color: var(--status-todo-text);
-          border: 1px solid var(--status-todo-border);
-        `;
+        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
       case 'IN_PROGRESS':
-        return `
-          background: var(--status-progress-bg);
-          color: var(--status-progress-text);
-          border: 1px solid var(--status-progress-border);
-        `;
+        return 'linear-gradient(135deg, #4834d4 0%, #686de0 100%)';
       case 'REVIEW':
-        return `
-          background: var(--status-review-bg);
-          color: var(--status-review-text);
-          border: 1px solid var(--status-review-border);
-        `;
+        return 'linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%)';
       case 'DONE':
-        return `
-          background: var(--status-done-bg);
-          color: var(--status-done-text);
-          border: 1px solid var(--status-done-border);
-        `;
+        return 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%)';
       default:
-        return `
-          background: var(--status-todo-bg);
-          color: var(--status-todo-text);
-          border: 1px solid var(--status-todo-border);
-        `;
+        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
     }
-  }}
+  }};
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.4s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &::after {
+    content: ${props => {
+      switch (props.status) {
+        case 'TODO':
+          return "'📋'";
+        case 'IN_PROGRESS':
+          return "'⚡'";
+        case 'REVIEW':
+          return "'👀'";
+        case 'DONE':
+          return "'✅'";
+        default:
+          return "'📋'";
+      }
+    }};
+    font-size: 0.5rem;
+    opacity: 0.8;
+  }
 `;
 
 const TaskStatusComponent = styled.span<{ status: TaskStatus }>`
-  background: ${props => getTaskStatusColor(props.status)};
+  background: ${props => {
+    switch (props.status) {
+      case 'TODO':
+        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
+      case 'IN_PROGRESS':
+        return 'linear-gradient(135deg, #4834d4 0%, #686de0 100%)';
+      case 'REVIEW':
+        return 'linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%)';
+      case 'DONE':
+        return 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%)';
+      default:
+        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
+    }
+  }};
   color: white;
-  font-size: 0.7rem;
-  font-weight: 500;
-  padding: 0.2rem 0.4rem;
-  border-radius: 6px;
-  text-transform: capitalize;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: 15px;
+  text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &::after {
+    content: ${props => {
+      switch (props.status) {
+        case 'TODO':
+          return "'📋'";
+        case 'IN_PROGRESS':
+          return "'⚡'";
+        case 'REVIEW':
+          return "'👀'";
+        case 'DONE':
+          return "'✅'";
+        default:
+          return "'📋'";
+      }
+    }};
+    font-size: 0.7rem;
+    opacity: 0.9;
+  }
 `;
 
 const TaskMeta = styled.div`
@@ -429,14 +615,60 @@ const TaskTags = styled.div`
   flex: 1;
 `;
 
-const TaskTag = styled.span`
-  background: var(--tag-background);
-  color: var(--tag-text);
+const TaskTag = styled.span<{ $index?: number }>`
+  background: ${props => {
+    const colors = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+      'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+    ];
+    return colors[(props.$index || 0) % colors.length];
+  }};
+  color: white;
   font-size: 0.65rem;
-  font-weight: 500;
-  padding: 0.15rem 0.35rem;
-  border-radius: 4px;
-  border: 1px solid var(--tag-border);
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  border: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &::after {
+    content: '🏷️';
+    font-size: 0.5rem;
+    opacity: 0.8;
+  }
 `;
 
 const TaskPriority = styled.div<{ priority: string }>`
@@ -475,6 +707,7 @@ const EmptyState = styled.div`
   color: var(--text-secondary);
   position: relative;
   z-index: 1;
+  animation: ${slideInUp} 0.5s ease-out;
 `;
 
 const EmptyIcon = styled.div`
@@ -526,6 +759,9 @@ const formatPriority = (priority: string): string => {
   }
 };
 
+// Cache pour les tâches Azure DevOps
+const tasksCache = new Map<string, Task[]>();
+
 const TasksListComponent: React.FC<TasksListProps> = ({ 
   tasks: initialTasks, 
   participantName, 
@@ -536,16 +772,39 @@ const TasksListComponent: React.FC<TasksListProps> = ({
   const [hierarchicalTasks, setHierarchicalTasks] = useState<HierarchicalTask[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTasks, setShowTasks] = useState(false);
 
   useEffect(() => {
     const loadTasks = async () => {
+      setShowTasks(false); // Reset de l'animation
+      
       if (useAzureDevOps) {
+        // Vérifier le cache d'abord
+        const cacheKey = participantName.toLowerCase();
+        const cachedTasks = tasksCache.get(cacheKey);
+        
+        if (cachedTasks) {
+          // Utiliser les tâches en cache sans loading
+          setTasks(cachedTasks);
+          setHierarchicalTasks(organizeTasksHierarchy(cachedTasks));
+          setError(null);
+          setShowTasks(true);
+          return;
+        }
+
         setLoading(true);
         setError(null);
         try {
           const azureTasks = await getTasksForParticipantFromAzure(participantName);
+          // Mettre en cache les tâches
+          tasksCache.set(cacheKey, azureTasks);
           setTasks(azureTasks);
           setHierarchicalTasks(organizeTasksHierarchy(azureTasks));
+          
+          // Déclencher l'animation d'apparition après un court délai
+          setTimeout(() => {
+            setShowTasks(true);
+          }, 100);
         } catch (err) {
           console.error('Erreur lors du chargement des tâches:', err);
           setError('Erreur lors du chargement des tâches Azure DevOps');
@@ -553,6 +812,11 @@ const TasksListComponent: React.FC<TasksListProps> = ({
           const fallbackTasks = initialTasks || [];
           setTasks(fallbackTasks);
           setHierarchicalTasks(organizeTasksHierarchy(fallbackTasks));
+          
+          // Animation même en cas d'erreur
+          setTimeout(() => {
+            setShowTasks(true);
+          }, 100);
         } finally {
           setLoading(false);
         }
@@ -560,6 +824,11 @@ const TasksListComponent: React.FC<TasksListProps> = ({
         const taskList = initialTasks || [];
         setTasks(taskList);
         setHierarchicalTasks(organizeTasksHierarchy(taskList));
+        
+        // Animation pour les tâches locales aussi
+        setTimeout(() => {
+          setShowTasks(true);
+        }, 50);
       }
     };
 
@@ -705,10 +974,11 @@ const TasksListComponent: React.FC<TasksListProps> = ({
     };
   };
 
-  const renderHierarchicalTask = (hierarchicalTask: HierarchicalTask) => (
+  const renderHierarchicalTask = (hierarchicalTask: HierarchicalTask, index: number) => (
     <TaskItem
       key={hierarchicalTask.id}
       priority={hierarchicalTask.priority}
+      $animationDelay={showTasks ? index * 80 : 0}
       onClick={() => handleTaskClick(hierarchicalTask)}
     >
       <TaskHeader>
@@ -731,12 +1001,12 @@ const TasksListComponent: React.FC<TasksListProps> = ({
 
       <TaskMeta>
         <TaskTags>
-          {hierarchicalTask.tags?.slice(0, 3).map((tag) => (
-            <TaskTag key={tag}>{tag}</TaskTag>
-          ))}
-          {hierarchicalTask.tags && hierarchicalTask.tags.length > 3 && (
-            <TaskTag>+{hierarchicalTask.tags.length - 3}</TaskTag>
-          )}
+                     {hierarchicalTask.tags?.slice(0, 3).map((tag, index) => (
+             <TaskTag key={tag} $index={index}>{tag}</TaskTag>
+           ))}
+           {hierarchicalTask.tags && hierarchicalTask.tags.length > 3 && (
+             <TaskTag $index={3}>+{hierarchicalTask.tags.length - 3}</TaskTag>
+           )}
         </TaskTags>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           {calculateTotalStoryPoints(hierarchicalTask) > 0 && (
@@ -882,11 +1152,11 @@ const TasksListComponent: React.FC<TasksListProps> = ({
           <EmptyIcon>🎉</EmptyIcon>
           <EmptyText>Aucune tâche en cours !</EmptyText>
         </EmptyState>
-      ) : (
-        <TasksList>
-          {sortHierarchicalTasksByStatus(hierarchicalTasks).map(renderHierarchicalTask)}
-        </TasksList>
-      )}
+              ) : (
+          <TasksList $visible={showTasks}>
+            {sortHierarchicalTasksByStatus(hierarchicalTasks).map((task, index) => renderHierarchicalTask(task, index))}
+          </TasksList>
+        )}
     </TasksContainer>
   );
 };

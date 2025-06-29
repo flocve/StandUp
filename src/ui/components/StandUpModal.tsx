@@ -59,6 +59,17 @@ const modalSlideIn = keyframes`
   }
 `;
 
+const confirmModalSlideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
 const modalSlideOut = keyframes`
   from {
     opacity: 1;
@@ -1182,7 +1193,7 @@ const ConfirmModal = styled.div`
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: ${modalSlideIn} 0.3s ease-out;
+  animation: ${confirmModalSlideIn} 0.3s ease-out;
   
   h3 {
     color: var(--text-primary);
@@ -1554,7 +1565,12 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
       if (!isOpen) return;
       
       if (event.key === 'Escape') {
-        handleClose();
+        // Si la confirmation est déjà affichée, l'annuler au lieu de fermer
+        if (showConfirmClose) {
+          setShowConfirmClose(false);
+        } else {
+          handleClose();
+        }
       } else if (currentStep === 'selection') {
         // Lancer le stand-up avec la touche Entrée
         if (event.key === 'Enter') {
@@ -1591,9 +1607,15 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, currentStep, currentParticipantIndex, shuffledOrder.length, isSliding, isEntering, selectedParticipants.length]);
+  }, [isOpen, currentStep, currentParticipantIndex, shuffledOrder.length, isSliding, isEntering, selectedParticipants.length, showConfirmClose]);
 
   const handleClose = () => {
+    // Si on est dans un stand-up en cours, demander confirmation
+    if (currentStep === 'standUp') {
+      setShowConfirmClose(true);
+      return;
+    }
+    
     // Vérifier s'il y a des participants qui ont parlé
     const participantsWhoSpoke = allParticipants?.filter(p => 
       typeof p.hasSpoken === 'function' ? p.hasSpoken() : p.hasSpoken
@@ -1814,17 +1836,21 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
       {showConfirmClose && (
         <ConfirmModalOverlay onClick={(e) => e.stopPropagation()}>
           <ConfirmModal>
-            <h3>Confirmer la fermeture</h3>
+            <h3>
+              {currentStep === 'standUp' ? 'Stand-up en cours' : 'Confirmer la fermeture'}
+            </h3>
             <p>
-              Certains participants ont déjà parlé. Fermer la modale va remettre 
-              tous les participants à l'état "non parlé". Voulez-vous continuer ?
+              {currentStep === 'standUp' 
+                ? 'Vous êtes actuellement en plein stand-up. Êtes-vous sûr de vouloir fermer et interrompre la session ?'
+                : 'Certains participants ont déjà parlé. Fermer la modale va remettre tous les participants à l\'état "non parlé". Voulez-vous continuer ?'
+              }
             </p>
             <ConfirmActions>
               <CancelButton onClick={handleCancelClose}>
-                Annuler
+                {currentStep === 'standUp' ? 'Continuer le stand-up' : 'Annuler'}
               </CancelButton>
               <ConfirmModalButton onClick={performClose}>
-                Oui, fermer
+                {currentStep === 'standUp' ? 'Oui, interrompre' : 'Oui, fermer'}
               </ConfirmModalButton>
             </ConfirmActions>
           </ConfirmModal>

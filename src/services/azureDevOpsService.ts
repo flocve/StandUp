@@ -73,10 +73,28 @@ const mapStatusToTaskStatus = (state: string): TaskStatus => {
 // Mapping des types Azure DevOps vers nos types
 const mapWorkItemTypeToTaskType = (workItemType: string): TaskType => {
   const lowerType = workItemType.toLowerCase();
+  
   if (lowerType.includes('bug')) {
     return 'BUG';
   }
-  return 'US'; // Par défaut, tout le reste est considéré comme User Story
+  if (lowerType.includes('technical')) {
+    return 'TECHNICAL';
+  }
+  if (lowerType.includes('task')) {
+    return 'TASK';
+  }
+  if (lowerType.includes('feature')) {
+    return 'FEATURE';
+  }
+  if (lowerType.includes('epic')) {
+    return 'EPIC';
+  }
+  if (lowerType.includes('user story') || lowerType.includes('story')) {
+    return 'US';
+  }
+  
+  // Pour les types non reconnus, on regarde le préfixe dans l'ID
+  return 'US'; // Par défaut, considérer comme User Story
 };
 
 // Mapping de la priorité
