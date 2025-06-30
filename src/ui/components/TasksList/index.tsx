@@ -68,7 +68,7 @@ const TasksContainer = styled.div`
   overflow: hidden;
   animation: ${fadeInScale} 0.6s ease-out;
   width: 100%;
-  max-height: 600px;
+  height: 100%;
   overflow-y: auto;
   transition: opacity 0.2s ease-in-out;
 
@@ -217,11 +217,12 @@ const TasksList = styled.div<{ $visible?: boolean }>`
   z-index: 1;
   transition: opacity 0.15s ease-in-out;
   opacity: ${props => props.$visible ? 1 : 0};
+  flex: 1;
 
   @media (min-width: 900px) {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
   }
 
   @media (max-width: 768px) {
@@ -229,13 +230,64 @@ const TasksList = styled.div<{ $visible?: boolean }>`
   }
 `;
 
-const TaskItem = styled.div<{ priority: string; $animationDelay?: number }>`
+const StatusColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+`;
+
+const StatusColumnHeader = styled.div<{ $status: string }>`
+  background: ${props => {
+    switch (props.$status.toLowerCase()) {
+      case 'go mep':
+        return 'linear-gradient(135deg, #10b981, #059669)';
+      case 'test':
+        return 'linear-gradient(135deg, #f59e0b, #d97706)';
+      case 'en cours':
+        return 'linear-gradient(135deg, #3b82f6, #2563eb)';
+      case 'todo':
+        return 'linear-gradient(135deg, #6b7280, #4b5563)';
+      default:
+        return 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+    }
+  }};
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+`;
+
+const StatusColumnTasks = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+`;
+
+const EmptyColumnMessage = styled.div`
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  opacity: 0.7;
+  font-size: 0.85rem;
+`;
+
+const TaskItem = styled.div<{ priority: string; $animationDelay?: number; $isRecentlyChanged?: boolean; $columnStatus?: string }>`
   background: var(--surface-secondary);
   border: 1px solid var(--border-secondary);
   border-left: 3px solid ${props => getPriorityColor(props.priority)};
   border-radius: 10px;
   padding: 0.6rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -243,10 +295,124 @@ const TaskItem = styled.div<{ priority: string; $animationDelay?: number }>`
   animation: ${taskAppear} 0.6s ease-out both;
   animation-delay: ${props => props.$animationDelay || 0}ms;
 
+  /* Style pour les tâches récemment modifiées avec couleurs par colonne adaptées aux thèmes */
+  ${props => props.$isRecentlyChanged && (() => {
+    const getColumnColors = (status: string) => {
+      switch (status) {
+        case 'GO MEP':
+          return {
+            // Vert - Success
+            bg: 'linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.06) 100%)',
+            border: '#22c55e',
+            boxShadow: '0 0 0 1px rgba(34, 197, 94, 0.25), 0 4px 12px rgba(34, 197, 94, 0.18)',
+            hoverBg: 'linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0.10) 100%)',
+            emoji: '✅'
+          };
+        case 'Test':
+          return {
+            // Orange - Warning/Test
+            bg: 'linear-gradient(135deg, rgba(251, 146, 60, 0.12) 0%, rgba(251, 146, 60, 0.06) 100%)',
+            border: '#fb923c',
+            boxShadow: '0 0 0 1px rgba(251, 146, 60, 0.25), 0 4px 12px rgba(251, 146, 60, 0.18)',
+            hoverBg: 'linear-gradient(135deg, rgba(251, 146, 60, 0.18) 0%, rgba(251, 146, 60, 0.10) 100%)',
+            emoji: '🧪'
+          };
+        case 'En Cours':
+          return {
+            // Utilise la couleur d'accent principale du thème
+            bg: 'linear-gradient(135deg, var(--accent-primary-alpha) 0%, var(--accent-primary-alpha) 100%)',
+            border: 'var(--accent-primary)',
+            boxShadow: '0 0 0 1px var(--accent-primary-alpha), 0 4px 12px var(--accent-primary-alpha)',
+            hoverBg: 'linear-gradient(135deg, var(--accent-primary-alpha) 0%, var(--accent-primary-alpha) 100%)',
+            emoji: '⚡'
+          };
+        case 'TODO':
+          return {
+            // Violet - Todo
+            bg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.06) 100%)',
+            border: '#8b5cf6',
+            boxShadow: '0 0 0 1px rgba(139, 92, 246, 0.25), 0 4px 12px rgba(139, 92, 246, 0.18)',
+            hoverBg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.10) 100%)',
+            emoji: '📋'
+          };
+        default:
+          return {
+            // Fallback utilisant l'accent du thème
+            bg: 'linear-gradient(135deg, var(--accent-primary-alpha) 0%, var(--accent-primary-alpha) 100%)',
+            border: 'var(--accent-primary)',
+            boxShadow: '0 0 0 1px var(--accent-primary-alpha), 0 4px 12px var(--accent-primary-alpha)',
+            hoverBg: 'linear-gradient(135deg, var(--accent-primary-alpha) 0%, var(--accent-primary-alpha) 100%)',
+            emoji: '🆕'
+          };
+      }
+    };
+    
+    const colors = getColumnColors(props.$columnStatus || '');
+    
+    return `
+      background: ${colors.bg};
+      border: 2px solid ${colors.border};
+      box-shadow: ${colors.boxShadow};
+      
+      &::before {
+        content: '${colors.emoji}';
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        font-size: 1rem;
+        z-index: 10;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+      }
+    `;
+  })()}
+
   &:hover {
-    background: var(--surface-hover);
-    border-color: var(--accent-primary);
-    animation: ${pulseGlow} 0.6s ease-out forwards;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    ${props => !props.$isRecentlyChanged && `
+      background: var(--surface-hover);
+      border-color: var(--accent-primary);
+    `}
+    
+    ${props => props.$isRecentlyChanged && (() => {
+      const getColumnColors = (status: string) => {
+        switch (status) {
+          case 'GO MEP':
+            return { 
+              hoverBg: 'linear-gradient(135deg, rgba(34, 197, 94, 0.20) 0%, rgba(34, 197, 94, 0.12) 100%)', 
+              border: '#22c55e' 
+            };
+          case 'Test':
+            return { 
+              hoverBg: 'linear-gradient(135deg, rgba(251, 146, 60, 0.20) 0%, rgba(251, 146, 60, 0.12) 100%)', 
+              border: '#fb923c' 
+            };
+          case 'En Cours':
+            return { 
+              hoverBg: 'linear-gradient(135deg, var(--accent-primary-alpha) 0%, var(--accent-primary-alpha) 100%)', 
+              border: 'var(--accent-primary)' 
+            };
+          case 'TODO':
+            return { 
+              hoverBg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.20) 0%, rgba(139, 92, 246, 0.12) 100%)', 
+              border: '#8b5cf6' 
+            };
+          default:
+            return { 
+              hoverBg: 'linear-gradient(135deg, var(--accent-primary-alpha) 0%, var(--accent-primary-alpha) 100%)', 
+              border: 'var(--accent-primary)' 
+            };
+        }
+      };
+      
+      const colors = getColumnColors(props.$columnStatus || '');
+      
+      return `
+        background: ${colors.hoverBg};
+        border-color: ${colors.border};
+      `;
+    })()}
   }
 
   &::before {
@@ -734,7 +900,27 @@ interface TasksListProps {
   allParticipants?: (Participant | DailyParticipant)[];
 }
 
-const formatStatus = (status: string): string => {
+const formatStatus = (status: string, kanbanColumn?: string): string => {
+  // Si on a une colonne Kanban spécifique, l'utiliser en priorité
+  if (kanbanColumn) {
+    switch (kanbanColumn) {
+      case 'Test OK':
+        return 'Test OK';
+      case 'Test KO':
+        return 'Test KO';
+      case 'Test en cours':
+        return 'Test en cours';
+      case 'A TESTER':
+        return 'À tester';
+      case 'GO MEP':
+        return 'GO MEP';
+      case 'Dev':
+        return 'En développement';
+      // Si la colonne Kanban n'est pas spécifique, fallback sur le statut
+    }
+  }
+  
+  // Fallback sur le mapping des statuts standards
   switch (status) {
     case 'TODO':
       return 'À faire';
@@ -778,6 +964,17 @@ const TasksListComponent: React.FC<TasksListProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTasks, setShowTasks] = useState(false);
+
+  // Fonction pour vérifier si une tâche a été modifiée dans les dernières 24h
+  const isRecentlyChanged = (task: HierarchicalTask): boolean => {
+    if (!task.changedDate) return false;
+    
+    const changedDate = new Date(task.changedDate);
+    const now = new Date();
+    const diffInHours = (now.getTime() - changedDate.getTime()) / (1000 * 60 * 60);
+    
+    return diffInHours <= 24;
+  };
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -950,6 +1147,11 @@ const TasksListComponent: React.FC<TasksListProps> = ({
     });
   };
 
+  // Fonction pour normaliser les noms (supprimer les accents)
+  const normalizeString = (str: string): string => {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  };
+
   const getDeveloperAvatar = (developerName: string): { photo: string; initial: string; colors: { bg: string; color: string } } => {
     // Extraire le prénom du displayName (premier mot)
     const firstName = developerName.split(' ')[0];
@@ -958,7 +1160,7 @@ const TasksListComponent: React.FC<TasksListProps> = ({
     const matchedParticipant = allParticipants.find(participant => {
       const participantName = participant.name.value;
       const participantFirstName = participantName.split(' ')[0];
-      return participantFirstName.toLowerCase() === firstName.toLowerCase();
+      return normalizeString(participantFirstName) === normalizeString(firstName);
     });
     
 
@@ -979,11 +1181,148 @@ const TasksListComponent: React.FC<TasksListProps> = ({
     };
   };
 
-  const renderHierarchicalTask = (hierarchicalTask: HierarchicalTask, index: number) => (
+    // Fonction pour grouper les tâches par statut basé sur les colonnes Kanban Azure DevOps
+  const groupTasksByStatus = (tasks: HierarchicalTask[]) => {
+    const statusGroups = {
+      'GO MEP': [] as HierarchicalTask[],
+      'Test': [] as HierarchicalTask[],
+      'En Cours': [] as HierarchicalTask[],
+      'TODO': [] as HierarchicalTask[]
+    };
+
+    // Fonction pour déterminer le statut d'une sous-tâche
+    const getSubTaskStatus = (subTask: Task): 'GO MEP' | 'Test' | 'En Cours' | 'TODO' => {
+      const kanbanColumn = subTask.kanbanColumn;
+      const status = subTask.status;
+      
+      if (kanbanColumn) {
+        switch (kanbanColumn) {
+          case 'GO MEP': 
+            return 'GO MEP';
+          case 'Test':
+          case 'Test OK':
+          case 'Test KO': 
+          case 'Test en cours':
+          case 'A TESTER': 
+            return 'Test';
+          case 'Dev': 
+            return 'En Cours';
+          default: 
+            return 'TODO';
+        }
+      } else {
+        // Fallback sur les statuts System.State
+        switch (status) {
+          case 'DONE':
+            return 'GO MEP';
+          case 'REVIEW':
+            return 'Test';
+          case 'IN_PROGRESS':
+            return 'En Cours';
+          case 'TODO':
+          default:
+            return 'TODO';
+        }
+      }
+    };
+
+    tasks.forEach(task => {
+      // Déterminer le statut de base de la tâche
+      const kanbanColumn = task.kanbanColumn;
+      const status = task.status;
+      let finalStatus: 'GO MEP' | 'Test' | 'En Cours' | 'TODO';
+      
+      // Mapper les colonnes Kanban et statuts vers nos colonnes
+      if (kanbanColumn) {
+        switch (kanbanColumn) {
+          case 'GO MEP':
+            finalStatus = 'GO MEP';
+            break;
+          case 'Test':
+          case 'Test OK':
+          case 'Test KO': 
+          case 'Test en cours':
+          case 'A TESTER':
+            finalStatus = 'Test';
+            break;
+          case 'Dev':
+            finalStatus = 'En Cours';
+            break;
+          default:
+            finalStatus = 'TODO';
+            break;
+        }
+      } else {
+        // Fallback sur System.State si pas de colonne Kanban
+        switch (status) {
+          case 'DONE':
+            // Pour les tâches DONE, vérifier s'il y a un indicateur de GO MEP
+            finalStatus = 'GO MEP';
+            break;
+          case 'REVIEW':
+            finalStatus = 'Test';
+            break;
+          case 'IN_PROGRESS':
+            finalStatus = 'En Cours';
+            break;
+          case 'TODO':
+          default:
+            finalStatus = 'TODO';
+            break;
+        }
+      }
+
+      // Appliquer les règles de priorité basées sur les sous-tâches
+      // Ces règles ne s'appliquent pas si la tâche est déjà en Test ou GO MEP
+      if (finalStatus !== 'Test' && finalStatus !== 'GO MEP' && task.children && task.children.length > 0) {
+        const subTaskStatuses = task.children.map(getSubTaskStatus);
+        
+        // Règle 1: S'il y a au moins une sous-tâche "En cours" → tâche va en "En cours"
+        if (subTaskStatuses.includes('En Cours')) {
+          finalStatus = 'En Cours';
+        }
+        // Règle 2: Sinon, s'il y a au moins une sous-tâche "TODO" → tâche va en "TODO"
+        else if (subTaskStatuses.includes('TODO')) {
+          finalStatus = 'TODO';
+        }
+      }
+
+      // Ajouter la tâche dans la bonne colonne
+      statusGroups[finalStatus].push(task);
+    });
+
+    // Trier chaque colonne pour mettre les tâches récentes en haut
+    Object.keys(statusGroups).forEach(status => {
+      const column = statusGroups[status as keyof typeof statusGroups];
+      column.sort((a, b) => {
+        const aIsRecent = isRecentlyChanged(a);
+        const bIsRecent = isRecentlyChanged(b);
+        
+        // Les tâches récentes en premier
+        if (aIsRecent && !bIsRecent) return -1;
+        if (!aIsRecent && bIsRecent) return 1;
+        
+        // Pour les tâches de même "récence", trier par priorité puis par titre
+        const priorityOrder = { 'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'LOW': 3 };
+        const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] ?? 4;
+        const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] ?? 4;
+        
+        if (aPriority !== bPriority) return aPriority - bPriority;
+        
+        return a.title.localeCompare(b.title);
+      });
+    });
+
+    return statusGroups;
+  };
+
+  const renderHierarchicalTask = (hierarchicalTask: HierarchicalTask, index: number, isInGoMepColumn: boolean = false, columnStatus?: string) => (
     <TaskItem
       key={hierarchicalTask.id}
       priority={hierarchicalTask.priority}
       $animationDelay={showTasks ? index * 80 : 0}
+      $isRecentlyChanged={isRecentlyChanged(hierarchicalTask)}
+      $columnStatus={columnStatus}
       onClick={() => handleTaskClick(hierarchicalTask)}
     >
       <TaskHeader>
@@ -996,7 +1335,7 @@ const TasksListComponent: React.FC<TasksListProps> = ({
             <TaskTypeComponent type={hierarchicalTask.type}>{hierarchicalTask.type}</TaskTypeComponent>
           </TaskTypeContainer>
           <TaskStatusComponent status={hierarchicalTask.status}>
-            {formatStatus(hierarchicalTask.status)}
+            {formatStatus(hierarchicalTask.status, hierarchicalTask.kanbanColumn)}
           </TaskStatusComponent>
         </TaskBadges>
       </TaskHeader>
@@ -1026,19 +1365,19 @@ const TasksListComponent: React.FC<TasksListProps> = ({
         </div>
       </TaskMeta>
 
-      {/* Affichage des sous-tâches intégrées */}
-      {hierarchicalTask.children && hierarchicalTask.children.length > 0 && (
+      {/* Affichage des sous-tâches intégrées - masquées pour les tâches en GO MEP */}
+      {!isInGoMepColumn && hierarchicalTask.children && hierarchicalTask.children.length > 0 && (
         <SubTasksList>
           {sortSubTasksByStatus(hierarchicalTask.children).map((subTask) => (
             <SubTaskItem
               key={subTask.id}
               onClick={(e) => handleSubTaskClick(subTask, e)}
-              title={`${subTask.id} - ${formatStatus(subTask.status)}`}
+              title={`${subTask.id} - ${formatStatus(subTask.status, subTask.kanbanColumn)}`}
             >
               <SubTaskContent>
                 <SubTaskTitle>{parseTaskTitle(subTask.title)}</SubTaskTitle>
                 <SubTaskStatus status={subTask.status}>
-                  {formatStatus(subTask.status)}
+                  {formatStatus(subTask.status, subTask.kanbanColumn)}
                 </SubTaskStatus>
               </SubTaskContent>
             </SubTaskItem>
@@ -1154,11 +1493,36 @@ const TasksListComponent: React.FC<TasksListProps> = ({
           <EmptyIcon>🎉</EmptyIcon>
           <EmptyText>Aucune tâche en cours !</EmptyText>
         </EmptyState>
-              ) : (
-          <TasksList $visible={showTasks}>
-            {sortHierarchicalTasksByStatus(hierarchicalTasks).map((task, index) => renderHierarchicalTask(task, index))}
-          </TasksList>
-        )}
+      ) : (
+        <TasksList $visible={showTasks}>
+          {(() => {
+            const statusGroups = groupTasksByStatus(hierarchicalTasks);
+            const statusOrder = ['GO MEP', 'Test', 'En Cours', 'TODO'];
+            
+            return statusOrder.map((status) => (
+              <StatusColumn key={status}>
+                <StatusColumnHeader $status={status}>
+                  {status}
+                  <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem' }}>
+                    ({statusGroups[status as keyof typeof statusGroups].length})
+                  </span>
+                </StatusColumnHeader>
+                <StatusColumnTasks>
+                  {statusGroups[status as keyof typeof statusGroups].length === 0 ? (
+                    <EmptyColumnMessage>
+                      Aucune tâche {status.toLowerCase()}
+                    </EmptyColumnMessage>
+                  ) : (
+                    statusGroups[status as keyof typeof statusGroups].map((task, index) => 
+                      renderHierarchicalTask(task, index, status === 'GO MEP', status)
+                    )
+                  )}
+                </StatusColumnTasks>
+              </StatusColumn>
+            ));
+          })()}
+        </TasksList>
+      )}
     </TasksContainer>
   );
 };

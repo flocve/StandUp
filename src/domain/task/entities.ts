@@ -18,6 +18,8 @@ export interface Task {
   storyPoints?: number; // Story points pour l'estimation
   devBack?: string; // Nom du développeur backend
   devFront?: string; // Nom du développeur frontend
+  kanbanColumn?: string; // Colonne Kanban Azure DevOps (Dev, Test, GO MEP, etc.)
+  changedDate?: string; // Date de dernière modification (System.ChangedDate)
 }
 
 export interface ParticipantTasks {

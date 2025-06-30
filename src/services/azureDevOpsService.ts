@@ -16,6 +16,7 @@ interface AzureDevOpsWorkItem {
     'System.Title': string;
     'System.WorkItemType': string;
     'System.State': string;
+    'System.ChangedDate': string;
     'System.AssignedTo'?: {
       displayName: string;
       uniqueName: string;
@@ -32,6 +33,8 @@ interface AzureDevOpsWorkItem {
       displayName: string;
       uniqueName: string;
     };
+    'WEF_D183F706FE5B456192451588A0D416E0_Kanban.Column'?: string;
+    'WEF_A3BDA26DE94A4B178A86C8AFBD1BCF21_Kanban.Column'?: string;
   };
   url: string;
 }
@@ -61,10 +64,10 @@ const mapStatusToTaskStatus = (state: string): TaskStatus => {
   if (lowerState.includes('active') || lowerState.includes('in progress') || lowerState.includes('doing')) {
     return 'IN_PROGRESS';
   }
-  if (lowerState.includes('review') || lowerState.includes('resolved') || lowerState === 'pr') {
+  if (lowerState.includes('in test') || lowerState.includes('review') || lowerState.includes('resolved') || lowerState === 'pr') {
     return 'REVIEW';
   }
-  if (lowerState.includes('done') || lowerState.includes('closed')) {
+  if (lowerState.includes('ready for prod') || lowerState.includes('done') || lowerState.includes('closed')) {
     return 'DONE';
   }
   return 'TODO';
@@ -216,6 +219,20 @@ export const getWorkItemsFromQuery = async (queryId: string): Promise<Task[]> =>
         parentId = `${parentType.toUpperCase()}-${parentWorkItemId}`;
       }
       
+      // Extraire la colonne Kanban avec priorité aux colonnes spécifiques
+      const kanbanColumn1 = workItem.fields['WEF_D183F706FE5B456192451588A0D416E0_Kanban.Column'];
+      const kanbanColumn2 = workItem.fields['WEF_A3BDA26DE94A4B178A86C8AFBD1BCF21_Kanban.Column'];
+      
+      // Priorité : si une des colonnes est GO MEP ou Test, l'utiliser, sinon prendre la première
+      let kanbanColumn: string | undefined;
+      if (kanbanColumn2 === 'GO MEP' || kanbanColumn2 === 'A TESTER') {
+        kanbanColumn = kanbanColumn2;
+      } else if (kanbanColumn1) {
+        kanbanColumn = kanbanColumn1;
+      } else {
+        kanbanColumn = kanbanColumn2;
+      }
+
       const task: Task = {
         id: `${originalType.toUpperCase()}-${workItem.id}`,
         title: workItem.fields['System.Title'],
@@ -230,7 +247,9 @@ export const getWorkItemsFromQuery = async (queryId: string): Promise<Task[]> =>
         parentId: parentId,
         storyPoints: workItem.fields['Microsoft.VSTS.Scheduling.StoryPoints'],
         devBack: workItem.fields['Custom.DevBack']?.displayName,
-        devFront: workItem.fields['Custom.DevFront']?.displayName
+        devFront: workItem.fields['Custom.DevFront']?.displayName,
+        kanbanColumn: kanbanColumn,
+        changedDate: workItem.fields['System.ChangedDate']
       };
 
       return task;
@@ -245,29 +264,37 @@ export const getWorkItemsFromQuery = async (queryId: string): Promise<Task[]> =>
   }
 };
 
+// Fonction pour normaliser les noms (supprimer les accents)
+const normalizeString = (str: string): string => {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+};
+
 // Fonction pour récupérer les tâches d'un participant spécifique
 export const getTasksForParticipantFromAzure = async (participantName: string): Promise<Task[]> => {
+  // Normaliser le nom pour la comparaison
+  const normalizedName = normalizeString(participantName);
+  
   // Pour Florian, utiliser sa query spécifique
-  if (participantName.toLowerCase() === 'florian') {
-    return await getWorkItemsFromQuery('3837546e-b531-4cbe-b8bb-b45ff30c1158');
+  if (normalizedName === 'florian') {
+    return await getWorkItemsFromQuery('c9e09490-3cd4-4432-b327-a54f67381bda');
   }
-  if (participantName.toLowerCase() === 'simon') {
-    return await getWorkItemsFromQuery('3398fd2b-917d-48a0-8b5e-cbd4a0e4df81');
+  if (normalizedName === 'simon') {
+    return await getWorkItemsFromQuery('58aeb9cb-8779-4c2f-8ad8-decd0d286690');
   }
-  if (participantName.toLowerCase() === 'kevin') {
-    return await getWorkItemsFromQuery('12fd40f1-7881-4d6c-9601-ba4b724b923b');
+  if (normalizedName === 'kevin') {
+    return await getWorkItemsFromQuery('3c8fb73a-ad5f-4bdc-9508-d08b610b2ef2');
   }
-  if (participantName.toLowerCase() === 'lewis') {
-    return await getWorkItemsFromQuery('57d9135b-c604-4404-858c-7cc743af8e17');
+  if (normalizedName === 'lewis') {
+    return await getWorkItemsFromQuery('9f3b3e37-269a-47bd-9400-a9b890c7a627');
   }
-  if (participantName.toLowerCase() === 'gregory') {
-    return await getWorkItemsFromQuery('53b907a0-cbad-44cf-918c-cc20c650eb3c');
+  if (normalizedName === 'gregory') {
+    return await getWorkItemsFromQuery('abb22c69-a1ab-4f1f-bfd2-6d4f99409d0c');
   }
-  if (participantName.toLowerCase() === 'luciano') {
-    return await getWorkItemsFromQuery('fccc3f39-b8f9-4df3-bacc-1ea50743e18b');
+  if (normalizedName === 'luciano') {
+    return await getWorkItemsFromQuery('5941b933-2c60-44a3-827a-ef57580693cb');
   }
-  if (participantName.toLowerCase() === 'rachid') {
-    return await getWorkItemsFromQuery('c76c05ed-1757-4098-a24f-05572a14aaa8');
+  if (normalizedName === 'rachid') {
+    return await getWorkItemsFromQuery('46238f91-2de3-416e-854f-e93b152dc1a8');
   }
 
   return [];
@@ -275,6 +302,10 @@ export const getTasksForParticipantFromAzure = async (participantName: string): 
 
 // Données de démonstration pour les tests
 const getDemoTasksForCurrentUser = (): Task[] => {
+  const now = new Date();
+  const recentDate = new Date(now.getTime() - 2 * 60 * 60 * 1000); // Il y a 2 heures
+  const oldDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000); // Il y a 3 jours
+
   return [
     {
       id: 'US-101',
@@ -285,7 +316,8 @@ const getDemoTasksForCurrentUser = (): Task[] => {
       assignee: 'Florian',
       url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/101',
       description: 'Refonte complète de l\'interface du dashboard pour améliorer l\'expérience utilisateur',
-      tags: ['ui', 'dashboard', 'frontend', 'design']
+      tags: ['ui', 'dashboard', 'frontend', 'design'],
+      changedDate: recentDate.toISOString() // Tâche récente
     },
     {
       id: 'BUG-102',
@@ -296,7 +328,8 @@ const getDemoTasksForCurrentUser = (): Task[] => {
       assignee: 'Florian',
       url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/102',
       description: 'La page des rapports met trop de temps à se charger avec beaucoup de données',
-      tags: ['performance', 'rapports', 'optimization']
+      tags: ['performance', 'rapports', 'optimization'],
+      changedDate: oldDate.toISOString() // Tâche ancienne
     },
     {
       id: 'US-103',
@@ -307,7 +340,8 @@ const getDemoTasksForCurrentUser = (): Task[] => {
       assignee: 'Florian',
       url: 'https://dev.azure.com/bazimo-app/bazimo-app/_workitems/edit/103',
       description: 'Connecter l\'application avec le service de notifications externe',
-      tags: ['api', 'notifications', 'integration']
+      tags: ['api', 'notifications', 'integration'],
+      changedDate: recentDate.toISOString() // Tâche récente
     }
   ];
 };

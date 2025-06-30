@@ -130,6 +130,17 @@ const slideInFromLeft = keyframes`
   }
 `;
 
+const avatarFadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+`;
+
 const crownGlow = keyframes`
   0%, 100% { 
     filter: 
@@ -235,7 +246,7 @@ const ModalContainer = styled.div<{ $isClosing?: boolean }>`
   border: 3px solid var(--accent-primary);
   border-radius: 32px;
   width: 90vw;
-  max-width: 1200px;
+  max-width: 1600px;
   height: 90vh;
   overflow: hidden;
   box-shadow: 
@@ -389,6 +400,8 @@ const ModalContent = styled.div`
   overflow-y: auto;
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
   
   @media (max-width: 768px) {
     padding: 2rem;
@@ -785,6 +798,7 @@ const StandUpStepContainer = styled.div`
   align-items: center;
   height: 100%;
   animation: ${fadeInUp} 0.6s ease-out;
+  position: relative;
 `;
 
 const StandUpMainContent = styled.div`
@@ -793,76 +807,135 @@ const StandUpMainContent = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 280px;
-  margin-bottom: 2rem;
+  min-height: 80px;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
   
   @media (max-width: 768px) {
-    min-height: 250px;
+    min-height: 70px;
+    margin-bottom: 0.25rem;
   }
 `;
 
 const CurrentParticipantDisplay = styled.div<{ isSliding?: boolean }>`
-  text-align: center;
   opacity: ${props => props.isSliding ? 0 : 1};
-  transition: opacity 0.2s ease-in-out;
-  z-index: 2;
-  
-  /* Mise en valeur du participant courant */
-  background: linear-gradient(135deg, 
-    rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1) 0%, 
-    rgba(var(--accent-primary-rgb, 59, 130, 246), 0.05) 100%);
-  border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
-  border-radius: 20px;
-  padding: 1.25rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
-  
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-    border-radius: 20px;
-  }
-`;
-
-const ParticipantAvatarLarge = styled.div`
-  width: 120px;
-  height: 120px;
+  transition: ${props => props.isSliding ? 'opacity 0.2s ease-in-out' : 'none'};
+  animation: ${avatarFadeIn} 0.4s ease-out;
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
-  margin: 0 auto 1.5rem;
-  position: relative;
-  border: 4px solid var(--accent-primary);
+  background: linear-gradient(135deg, 
+    var(--accent-primary) 0%, 
+    var(--accent-secondary) 100%);
+  border: 6px solid rgba(255, 255, 255, 0.9);
   box-shadow: 
-    0 12px 30px rgba(0, 0, 0, 0.2),
-    0 0 0 2px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
+    0 30px 60px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3),
+    0 0 40px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
+  backdrop-filter: blur(20px);
+  z-index: 1002;
   
-  @media (max-width: 768px) {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 1rem;
-  }
-  
-  @media (max-width: 480px) {
-    width: 80px;
-    height: 80px;
-  }
-`;
-
-const ParticipantPhotoLarge = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
-const ParticipantFallbackLarge = styled.div`
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 4rem;
-  font-weight: bold;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    width: 140px;
+    height: 140px;
+    top: 20px;
+    border: 4px solid rgba(255, 255, 255, 0.9);
+  }
+  
+  @media (max-width: 480px) {
+    width: 120px;
+    height: 120px;
+    top: 30px;
+  }
+`;
+
+const AvatarContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+  padding-bottom: 15px;
+  
+  @media (max-width: 768px) {
+    padding-bottom: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding-bottom: 10px;
+  }
+`;
+
+const AvatarImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+
+const AvatarOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, 
+    rgba(0, 0, 0, 0.1) 0%, 
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.7) 100%);
+  border-radius: 50%;
+  z-index: 1;
+`;
+
+const AvatarName = styled.div`
+  position: relative;
+  z-index: 2;
   color: white;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 90%;
+  word-wrap: break-word;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
+`;
+
+const AvatarFallback = styled.div`
+  position: relative;
+  z-index: 1;
+  color: white;
+  font-size: 4rem;
+  font-weight: 700;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(0, 0, 0, 0.5);
   
   @media (max-width: 768px) {
     font-size: 3rem;
@@ -875,61 +948,85 @@ const ParticipantFallbackLarge = styled.div`
 
 const CurrentParticipantCrown = styled.div`
   position: absolute;
-  top: -40px;
-  right: 22px;
-  font-size: 3.5rem;
+  top: -69px;
+  right: 68px;
+  font-size: 5rem;
   animation: ${crownGlow} 2s ease-in-out infinite;
-  z-index: 3;
+  z-index: 10001;
   
   @media (max-width: 768px) {
+    font-size: 2.5rem;
+    top: -10px;
+    right: 15px;
+  }
+  
+  @media (max-width: 480px) {
     font-size: 2rem;
-    top: -15px;
-    right: -15px;
+    top: -8px;
+    right: 10px;
   }
 `;
 
 const CurrentParticipantSilverCrown = styled.div`
   position: absolute;
-  top: -40px;
-  right: 22px;
-  font-size: 3.5rem;
+  top: -69px;
+  right: 68px;
+  font-size: 5rem;
   animation: ${silverCrownGlow} 2s ease-in-out infinite;
-  z-index: 3;
+  z-index: 10001;
   
   @media (max-width: 768px) {
-    font-size: 2rem;
-    top: -15px;
-    right: -15px;
-  }
-`;
-
-const CurrentParticipantName = styled.h2`
-  color: var(--text-primary);
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 0.75rem 0;
-  text-shadow: 0 4px 20px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3);
-  
-  @media (max-width: 768px) {
-    font-size: 1.7rem;
+    font-size: 2.5rem;
+    top: -10px;
+    right: 15px;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.5rem;
+    font-size: 2rem;
+    top: -8px;
+    right: 10px;
   }
 `;
 
 const ParticipantStatus = styled.div`
-  color: var(--text-secondary);
-  font-size: 1.2rem;
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 0.85rem;
   font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 10000;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    bottom: -20px;
+  }
+`;
+
+const TasksWrapper = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  height: 100%;
 `;
 
 const NextParticipantPreview = styled.div`
   position: absolute;
-  top: 2rem;
+  top: -2rem;
   right: 2rem;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem 2rem;
   background: linear-gradient(135deg, 
     rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.12) 0%, 
     rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.06) 100%);
@@ -940,6 +1037,7 @@ const NextParticipantPreview = styled.div`
   text-align: center;
   transition: all 0.3s ease;
   z-index: 1;
+  min-height: 120px;
   
   &:hover {
     transform: translateY(-4px);
@@ -952,7 +1050,8 @@ const NextParticipantPreview = styled.div`
   
   @media (max-width: 1024px) {
     right: 1rem;
-    padding: 0.8rem 1.2rem;
+    padding: 1.2rem 1.6rem;
+    min-height: 100px;
   }
   
   @media (max-width: 768px) {
@@ -962,8 +1061,9 @@ const NextParticipantPreview = styled.div`
 
 const NextParticipantLabel = styled.div`
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  font-weight: 500;
 `;
 
 const NextParticipantInfo = styled.div`
@@ -974,8 +1074,8 @@ const NextParticipantInfo = styled.div`
 `;
 
 const NextParticipantAvatar = styled.div`
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
   position: relative;
@@ -990,8 +1090,8 @@ const NextParticipantPhoto = styled.img`
 
 const NextParticipantName = styled.div`
   color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 600;
 `;
 
 const NextParticipantGoldCrown = styled.div`
@@ -1026,16 +1126,17 @@ const NextParticipantSilverCrown = styled.div`
 
 const ProgressIndicator = styled.div`
   width: 100%;
-  margin-bottom: 3rem;
+  margin: 0.5rem 0;
+  flex-shrink: 0;
 `;
 
 const ProgressBar = styled.div`
   width: 100%;
-  height: 8px;
+  height: 6px;
   background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `;
 
 const ProgressFill = styled.div<{ width: string }>`
@@ -1049,12 +1150,13 @@ const ProgressFill = styled.div<{ width: string }>`
 const ProgressText = styled.div`
   text-align: center;
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 500;
 `;
 
 const StandUpActions = styled.div`
   width: 100%;
+  flex-shrink: 0;
 `;
 
 const StandUpActionButtons = styled.div`
@@ -1074,27 +1176,27 @@ const PreviousButton = styled.button`
   background: linear-gradient(135deg, var(--accent-warning) 0%, #d97706 100%);
   color: white;
   border: none;
-  padding: 1.2rem 2.5rem;
-  border-radius: 14px;
-  font-size: 1.1rem;
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 
-    0 6px 16px rgba(245, 158, 11, 0.4),
-    0 0 0 2px rgba(245, 158, 11, 0.1);
+    0 4px 12px rgba(245, 158, 11, 0.3),
+    0 0 0 1px rgba(245, 158, 11, 0.1);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   
   &:hover {
-    transform: translateY(-3px) scale(1.02);
+    transform: translateY(-2px) scale(1.02);
     box-shadow: 
-      0 10px 24px rgba(245, 158, 11, 0.5),
-      0 0 0 3px rgba(245, 158, 11, 0.15);
+      0 6px 16px rgba(245, 158, 11, 0.4),
+      0 0 0 2px rgba(245, 158, 11, 0.15);
   }
   
   @media (max-width: 768px) {
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -1102,27 +1204,27 @@ const NextParticipantButton = styled.button`
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   color: white;
   border: none;
-  padding: 1.2rem 2.5rem;
-  border-radius: 14px;
-  font-size: 1.1rem;
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 
-    0 6px 16px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.4),
-    0 0 0 2px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
+    0 4px 12px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.3),
+    0 0 0 1px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   
   &:hover {
-    transform: translateY(-3px) scale(1.02);
+    transform: translateY(-2px) scale(1.02);
     box-shadow: 
-      0 10px 24px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.5),
-      0 0 0 3px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.15);
+      0 6px 16px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.4),
+      0 0 0 2px rgba(var(--accent-primary-rgb, 59, 130, 246), 0.15);
   }
   
   @media (max-width: 768px) {
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -1130,15 +1232,15 @@ const FinishStandUpButton = styled.button`
   background: linear-gradient(135deg, var(--accent-success) 0%, #059669 100%);
   color: white;
   border: none;
-  padding: 1.2rem 2.5rem;
-  border-radius: 14px;
-  font-size: 1.1rem;
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 
-    0 6px 16px rgba(16, 185, 129, 0.4),
-    0 0 0 2px rgba(16, 185, 129, 0.1);
+    0 4px 12px rgba(16, 185, 129, 0.3),
+    0 0 0 1px rgba(16, 185, 129, 0.1);
   animation: ${breathe} 3s ease-in-out infinite;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -1156,16 +1258,16 @@ const FinishStandUpButton = styled.button`
   }
   
   &:hover {
-    transform: translateY(-3px) scale(1.02);
+    transform: translateY(-2px) scale(1.02);
     box-shadow: 
-      0 10px 24px rgba(16, 185, 129, 0.5),
-      0 0 0 3px rgba(16, 185, 129, 0.15);
+      0 6px 16px rgba(16, 185, 129, 0.4),
+      0 0 0 2px rgba(16, 185, 129, 0.15);
     animation: none;
   }
   
   @media (max-width: 768px) {
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -1856,6 +1958,41 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
           </ConfirmModal>
         </ConfirmModalOverlay>
       )}
+
+      {/* Avatar du participant actuel - en dehors de ModalContainer pour éviter l'animation */}
+      {currentStep === 'standUp' && currentParticipant && (
+        <CurrentParticipantDisplay 
+          isSliding={isSliding}
+        >
+          {(() => {
+            const { isCurrentAnimator, isNextAnimator } = getAnimatorStatus(currentParticipant);
+            return (
+              <>
+                {isCurrentAnimator && <CurrentParticipantCrown>👑</CurrentParticipantCrown>}
+                {isNextAnimator && !isCurrentAnimator && <CurrentParticipantSilverCrown>👑</CurrentParticipantSilverCrown>}
+              </>
+            );
+          })()}
+          <AvatarContent>
+            <AvatarImage 
+              src={getPhotoUrl(currentParticipant, theme)}
+              alt={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
+              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+            />
+            <AvatarOverlay />
+            <AvatarName>
+              {String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
+            </AvatarName>
+          </AvatarContent>
+          
+          <ParticipantStatus>
+            C'est à ton tour de parler !
+          </ParticipantStatus>
+        </CurrentParticipantDisplay>
+      )}
       
       <ModalContainer $isClosing={isClosing}>
         {/* Header */}
@@ -1985,44 +2122,6 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
           {currentStep === 'standUp' && currentParticipant && (
             <StandUpStepContainer>
               <StandUpMainContent>
-                <CurrentParticipantDisplay 
-                  isSliding={isSliding}
-                >
-                  <ParticipantAvatarLarge style={{ position: 'relative' }}>
-                  {(() => {
-                    const { isCurrentAnimator, isNextAnimator } = getAnimatorStatus(currentParticipant);
-                    return (
-                      <>
-                          {isCurrentAnimator && <CurrentParticipantCrown>👑</CurrentParticipantCrown>}
-                          {isNextAnimator && !isCurrentAnimator && <CurrentParticipantSilverCrown>👑</CurrentParticipantSilverCrown>}
-                      </>
-                    );
-                  })()}
-                    <ParticipantPhotoLarge 
-                    src={getPhotoUrl(currentParticipant, theme)}
-                    alt={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      const parent = target.parentElement;
-                      if (parent) {
-                        const participantName = String(currentParticipant.name?.value || currentParticipant.name || 'Participant');
-                        const avatarColor = getAvatarColor(participantName);
-                        target.style.display = 'none';
-                        parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                          parent.innerHTML = `<div style="color: ${avatarColor.text}; font-size: 4rem; font-weight: bold; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${participantName.charAt(0).toUpperCase()}</div>`;
-                      }
-                    }}
-                  />
-                  </ParticipantAvatarLarge>
-                
-                  <CurrentParticipantName>
-                  {String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
-                  </CurrentParticipantName>
-                
-                  <ParticipantStatus>
-                  C'est à ton tour de parler !
-                  </ParticipantStatus>
-                </CurrentParticipantDisplay>
 
                 {/* Aperçu du participant suivant à droite */}
                 {currentParticipantIndex < shuffledOrder.length - 1 && (
@@ -2065,13 +2164,19 @@ export const StandUpModal: React.FC<StandUpModalProps> = ({
                 )}
               </StandUpMainContent>
 
-              {/* Affichage des tâches du participant actuel - Pleine largeur */}
-              <TasksList 
-                tasks={getTasksForParticipant(String(currentParticipant.name?.value || currentParticipant.name || 'Participant'))}
-                participantName={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
-                useAzureDevOps={['florian', 'simon', 'kevin', 'lewis', 'gregory', 'luciano', 'rachid'].includes(String(currentParticipant.name?.value || currentParticipant.name || '').toLowerCase())}
-                allParticipants={allParticipants || allWeeklyParticipants}
-              />
+              {/* Affichage des tâches du participant actuel - Prend 2/3 de l'espace */}
+              <TasksWrapper>
+                <TasksList 
+                  tasks={getTasksForParticipant(String(currentParticipant.name?.value || currentParticipant.name || 'Participant'))}
+                  participantName={String(currentParticipant.name?.value || currentParticipant.name || 'Participant')}
+                  useAzureDevOps={(() => {
+                    const participantName = String(currentParticipant.name?.value || currentParticipant.name || '');
+                    const normalizedName = participantName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                    return ['florian', 'simon', 'kevin', 'lewis', 'gregory', 'luciano', 'rachid'].includes(normalizedName);
+                  })()}
+                  allParticipants={allParticipants || allWeeklyParticipants}
+                />
+              </TasksWrapper>
               
               <ProgressIndicator>
                 <ProgressBar>
