@@ -411,7 +411,7 @@ const TaskSubType = styled.span`
 
 const SubTasksList = styled.div`
   margin-top: 0.5rem;
-  border-top: 1px solid var(--border-secondary);
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
   padding-top: 0.35rem;
   position: relative;
   padding-left: 1rem;
@@ -422,25 +422,25 @@ const SubTasksList = styled.div`
     left: 0;
     top: 0.35rem;
     bottom: 0;
-    width: 3px;
+    width: 2px;
     background: linear-gradient(180deg, 
       var(--accent-primary) 0%, 
       var(--accent-secondary) 50%, 
       var(--accent-primary) 100%);
-    border-radius: 2px;
-    box-shadow: 0 0 8px var(--accent-primary-rgb, 59, 130, 246)33;
+    border-radius: 1px;
+    opacity: 0.3;
   }
 
   &::after {
     content: '';
     position: absolute;
-    left: -2px;
+    left: -1px;
     top: 0.35rem;
-    width: 7px;
-    height: 7px;
+    width: 4px;
+    height: 4px;
     background: var(--accent-primary);
     border-radius: 50%;
-    box-shadow: 0 0 6px var(--accent-primary);
+    opacity: 0.4;
   }
 `;
 
@@ -485,74 +485,62 @@ const SubTaskTitle = styled.span`
 `;
 
 const SubTaskStatus = styled.span<{ status: TaskStatus }>`
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 0.15rem 0.4rem;
-  border-radius: 10px;
+  background: ${props => {
+    switch (props.status) {
+      case 'TODO':
+        return '#f3f4f6';
+      case 'IN_PROGRESS':
+        return '#dbeafe';
+      case 'REVIEW':
+        return '#fef3c7';
+      case 'DONE':
+        return '#d1fae5';
+      default:
+        return '#f3f4f6';
+    }
+  }};
+  color: ${props => {
+    switch (props.status) {
+      case 'TODO':
+        return '#6b7280';
+      case 'IN_PROGRESS':
+        return '#3b82f6';
+      case 'REVIEW':
+        return '#d97706';
+      case 'DONE':
+        return '#10b981';
+      default:
+        return '#6b7280';
+    }
+  }};
+  border: 1px solid ${props => {
+    switch (props.status) {
+      case 'TODO':
+        return '#e5e7eb';
+      case 'IN_PROGRESS':
+        return '#93c5fd';
+      case 'REVIEW':
+        return '#fbbf24';
+      case 'DONE':
+        return '#34d399';
+      default:
+        return '#e5e7eb';
+    }
+  }};
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
   flex-shrink: 0;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.025em;
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
   transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  
-  background: ${props => {
-    switch (props.status) {
-      case 'TODO':
-        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
-      case 'IN_PROGRESS':
-        return 'linear-gradient(135deg, #4834d4 0%, #686de0 100%)';
-      case 'REVIEW':
-        return 'linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%)';
-      case 'DONE':
-        return 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%)';
-      default:
-        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
-    }
-  }};
+  white-space: nowrap;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.4s;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
-
-  &::after {
-    content: ${props => {
-      switch (props.status) {
-        case 'TODO':
-          return "'📋'";
-        case 'IN_PROGRESS':
-          return "'⚡'";
-        case 'REVIEW':
-          return "'👀'";
-        case 'DONE':
-          return "'✅'";
-        default:
-          return "'📋'";
-      }
-    }};
-    font-size: 0.5rem;
     opacity: 0.8;
   }
 `;
@@ -561,71 +549,59 @@ const TaskStatusComponent = styled.span<{ status: TaskStatus }>`
   background: ${props => {
     switch (props.status) {
       case 'TODO':
-        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
+        return '#f3f4f6';
       case 'IN_PROGRESS':
-        return 'linear-gradient(135deg, #4834d4 0%, #686de0 100%)';
+        return '#dbeafe';
       case 'REVIEW':
-        return 'linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%)';
+        return '#fef3c7';
       case 'DONE':
-        return 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%)';
+        return '#d1fae5';
       default:
-        return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
+        return '#f3f4f6';
     }
   }};
-  color: white;
+  color: ${props => {
+    switch (props.status) {
+      case 'TODO':
+        return '#6b7280';
+      case 'IN_PROGRESS':
+        return '#3b82f6';
+      case 'REVIEW':
+        return '#d97706';
+      case 'DONE':
+        return '#10b981';
+      default:
+        return '#6b7280';
+    }
+  }};
+  border: 1px solid ${props => {
+    switch (props.status) {
+      case 'TODO':
+        return '#e5e7eb';
+      case 'IN_PROGRESS':
+        return '#93c5fd';
+      case 'REVIEW':
+        return '#fbbf24';
+      case 'DONE':
+        return '#34d399';
+      default:
+        return '#e5e7eb';
+    }
+  }};
   font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.3rem 0.6rem;
-  border-radius: 15px;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
   text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  letter-spacing: 0.5px;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+  letter-spacing: 0.025em;
 
   &:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.6s;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
-
-  &::after {
-    content: ${props => {
-      switch (props.status) {
-        case 'TODO':
-          return "'📋'";
-        case 'IN_PROGRESS':
-          return "'⚡'";
-        case 'REVIEW':
-          return "'👀'";
-        case 'DONE':
-          return "'✅'";
-        default:
-          return "'📋'";
-      }
-    }};
-    font-size: 0.7rem;
-    opacity: 0.9;
+    opacity: 0.8;
   }
 `;
 
@@ -1018,9 +994,6 @@ const TasksListComponent: React.FC<TasksListProps> = ({
         <TaskBadges>
           <TaskTypeContainer>
             <TaskTypeComponent type={hierarchicalTask.type}>{hierarchicalTask.type}</TaskTypeComponent>
-            {hierarchicalTask.subType && hierarchicalTask.subType !== hierarchicalTask.type && (
-              <TaskSubType>{hierarchicalTask.subType}</TaskSubType>
-            )}
           </TaskTypeContainer>
           <TaskStatusComponent status={hierarchicalTask.status}>
             {formatStatus(hierarchicalTask.status)}
