@@ -1387,7 +1387,7 @@ const LinkCard = styled.a`
     rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1) 0%, 
     rgba(var(--accent-secondary-rgb, 139, 92, 246), 0.05) 100%);
   border: 2px solid rgba(var(--accent-primary-rgb, 59, 130, 246), 0.2);
-  border-radius: 20px;
+  border-radius: 2px;
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   text-decoration: none;

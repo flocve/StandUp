@@ -60,8 +60,7 @@ const taskAppear = keyframes`
 const TasksContainer = styled.div`
   background: var(--card-background);
   border: 2px solid var(--border-primary);
-  border-radius: 20px;
-  padding: 0.75rem;
+  border-radius: 2px;
   margin: 0.25rem 0 0.5rem 0;
   backdrop-filter: blur(10px);
   position: relative;
@@ -223,6 +222,7 @@ const TasksList = styled.div<{ $visible?: boolean }>`
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
+    padding: 0 10px;
   }
 
   @media (max-width: 768px) {
@@ -254,7 +254,7 @@ const StatusColumnHeader = styled.div<{ $status: string }>`
   }};
   color: white;
   padding: 0.75rem 1rem;
-  border-radius: 12px;
+  border-radius: 2px;
   font-weight: 600;
   font-size: 0.9rem;
   text-align: center;
@@ -262,7 +262,7 @@ const StatusColumnHeader = styled.div<{ $status: string }>`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 50;
 `;
 
 const StatusColumnTasks = styled.div`
