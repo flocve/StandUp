@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getParticipantPhotoUrlWithTheme } from '../../../utils/animalPhotos';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { useAnimators } from '../../../hooks/useAnimators';
 import { supabase } from '../../../lib/supabase';
 import './styles.css';
 
@@ -11,7 +12,7 @@ interface TeamConfigModalProps {
   onRefresh?: () => void;
 }
 
-type TabType = 'participants' | 'passageCount';
+type TabType = 'participants' | 'passageCount' | 'weekAnimators';
 
 export const TeamConfigModal: React.FC<TeamConfigModalProps> = ({
   isOpen,
@@ -28,6 +29,18 @@ export const TeamConfigModal: React.FC<TeamConfigModalProps> = ({
   const [allParticipants, setAllParticipants] = useState<any[]>([]);
   const [participantsLoading, setParticipantsLoading] = useState(false);
 
+  // Hook pour gérer les animateurs
+  const {
+    getCurrentWeekAnimator,
+    getNextWeekAnimator,
+    animatorHistory
+  } = useAnimators(allParticipants, repository);
+
+  // État pour les sélecteurs d'animateurs
+  const [selectedCurrentWeekAnimator, setSelectedCurrentWeekAnimator] = useState<string>('');
+  const [selectedNextWeekAnimator, setSelectedNextWeekAnimator] = useState<string>('');
+  const [isOverriding, setIsOverriding] = useState(false);
+
   const loadParticipants = async () => {
     setParticipantsLoading(true);
     try {
@@ -37,6 +50,46 @@ export const TeamConfigModal: React.FC<TeamConfigModalProps> = ({
       console.error('Erreur lors du chargement des participants:', error);
     } finally {
       setParticipantsLoading(false);
+    }
+  };
+
+  // Fonction pour gérer la surcharge de l'animateur de la semaine courante
+  const handleOverrideCurrentWeekAnimator = async () => {
+    if (!selectedCurrentWeekAnimator) return;
+    
+    setIsOverriding(true);
+    try {
+      const currentWeekMonday = repository.getCurrentWeekMonday();
+      await repository.overrideWeekAnimator(selectedCurrentWeekAnimator, currentWeekMonday);
+      
+      // Recharger les données
+      await loadParticipants();
+      if (onRefresh) onRefresh();
+      
+    } catch (error) {
+      console.error('Erreur lors de la surcharge de l\'animateur courant:', error);
+    } finally {
+      setIsOverriding(false);
+    }
+  };
+
+  // Fonction pour gérer la surcharge de l'animateur de la semaine prochaine
+  const handleOverrideNextWeekAnimator = async () => {
+    if (!selectedNextWeekAnimator) return;
+    
+    setIsOverriding(true);
+    try {
+      const nextWeekMonday = repository.getNextWeekMonday();
+      await repository.overrideWeekAnimator(selectedNextWeekAnimator, nextWeekMonday);
+      
+      // Recharger les données
+      await loadParticipants();
+      if (onRefresh) onRefresh();
+      
+    } catch (error) {
+      console.error('Erreur lors de la surcharge de l\'animateur suivant:', error);
+    } finally {
+      setIsOverriding(false);
     }
   };
 
@@ -283,6 +336,12 @@ export const TeamConfigModal: React.FC<TeamConfigModalProps> = ({
           >
             👑 Animateurs
           </button>
+          <button
+            className={`tab-button ${activeTab === 'weekAnimators' ? 'active' : ''}`}
+            onClick={() => setActiveTab('weekAnimators')}
+          >
+            📅 Animateurs de la semaine
+          </button>
         </div>
 
         <div className="team-config-content">
@@ -462,6 +521,141 @@ export const TeamConfigModal: React.FC<TeamConfigModalProps> = ({
                           </div>
                         );
                       })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'weekAnimators' && (
+            <div className="week-animators-tab">
+              <div className="week-animators-info">
+                <h3>Surcharge des Animateurs</h3>
+                <p>Définissez manuellement qui sera l'animateur de la semaine courante et de la semaine prochaine.</p>
+                
+                <div className="week-animators-section">
+                  {/* Animateur de la semaine courante */}
+                  <div className="week-animator-override">
+                    <h4>🗓️ Animateur de cette semaine</h4>
+                    <div className="current-animator-display">
+                      {(() => {
+                        const currentAnimator = getCurrentWeekAnimator();
+                        if (currentAnimator) {
+                          const participantName = getNameString(currentAnimator.participant);
+                          const avatarColor = getAvatarColor(participantName);
+                          return (
+                            <div className="current-animator-info">
+                              <div className="current-animator-avatar">
+                                <img
+                                  src={getPhotoUrl(currentAnimator.participant)}
+                                  alt={participantName}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      target.style.display = 'none';
+                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                      parent.innerHTML = `<div class="avatar-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <span className="current-animator-name">{participantName}</span>
+                            </div>
+                          );
+                        } else {
+                          return <div className="no-animator">Aucun animateur défini</div>;
+                        }
+                      })()}
+                    </div>
+                    
+                    <div className="animator-override-controls">
+                      <select 
+                        value={selectedCurrentWeekAnimator} 
+                        onChange={(e) => setSelectedCurrentWeekAnimator(e.target.value)}
+                        className="animator-selector"
+                      >
+                        <option value="">Sélectionner un animateur</option>
+                        {allParticipants.map((participant) => {
+                          const participantName = getNameString(participant);
+                          const participantId = participant.id?.value || participant.id;
+                          return (
+                            <option key={participantId} value={participantId}>
+                              {participantName}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <button
+                        onClick={handleOverrideCurrentWeekAnimator}
+                        disabled={!selectedCurrentWeekAnimator || isOverriding}
+                        className="override-button"
+                      >
+                        {isOverriding ? '⏳' : '✅'} Définir
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Animateur de la semaine prochaine */}
+                  <div className="week-animator-override">
+                    <h4>📅 Animateur de la semaine prochaine</h4>
+                    <div className="next-animator-display">
+                      {(() => {
+                        const nextAnimator = getNextWeekAnimator();
+                        if (nextAnimator) {
+                          const participantName = getNameString(nextAnimator.participant);
+                          const avatarColor = getAvatarColor(participantName);
+                          return (
+                            <div className="next-animator-info">
+                              <div className="next-animator-avatar">
+                                <img
+                                  src={getPhotoUrl(nextAnimator.participant)}
+                                  alt={participantName}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      target.style.display = 'none';
+                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                      parent.innerHTML = `<div class="avatar-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <span className="next-animator-name">{participantName}</span>
+                            </div>
+                          );
+                        } else {
+                          return <div className="no-animator">Aucun animateur défini</div>;
+                        }
+                      })()}
+                    </div>
+                    
+                    <div className="animator-override-controls">
+                      <select 
+                        value={selectedNextWeekAnimator} 
+                        onChange={(e) => setSelectedNextWeekAnimator(e.target.value)}
+                        className="animator-selector"
+                      >
+                        <option value="">Sélectionner un animateur</option>
+                        {allParticipants.map((participant) => {
+                          const participantName = getNameString(participant);
+                          const participantId = participant.id?.value || participant.id;
+                          return (
+                            <option key={participantId} value={participantId}>
+                              {participantName}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <button
+                        onClick={handleOverrideNextWeekAnimator}
+                        disabled={!selectedNextWeekAnimator || isOverriding}
+                        className="override-button"
+                      >
+                        {isOverriding ? '⏳' : '✅'} Définir
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

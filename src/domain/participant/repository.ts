@@ -10,4 +10,5 @@ export interface ParticipantRepository {
   getParticipantById(id: ParticipantId): Promise<Participant | null>;
   updateChancePercentage(participantId: string, newValue: number): Promise<void>;
   addToAnimatorHistory(participantId: string, date?: Date): Promise<void>;
+  overrideWeekAnimator(participantId: string, weekDate: Date): Promise<void>;
 } 

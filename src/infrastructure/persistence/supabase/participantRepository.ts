@@ -259,6 +259,55 @@ export class SupabaseParticipantRepository implements ParticipantRepository {
     }
   }
 
+  // Nouvelle méthode pour surcharger l'animateur d'une semaine spécifique
+  async overrideWeekAnimator(participantId: string, weekDate: Date): Promise<void> {
+    // Calculer le lundi de la semaine ciblée
+    const mondayOfWeek = this.getMondayOfWeek(weekDate);
+    
+    // Supprimer l'éventuelle entrée existante pour cette semaine
+    await supabase
+      .from('animator_history')
+      .delete()
+      .gte('date', mondayOfWeek.toISOString())
+      .lt('date', new Date(mondayOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString());
+
+    // Ajouter la nouvelle entrée sans incrémenter les compteurs (surcharge manuelle)
+    const { error } = await supabase
+      .from('animator_history')
+      .insert({
+        participant_id: participantId,
+        date: mondayOfWeek.toISOString()
+      });
+
+    if (error) {
+      console.error('Erreur lors de la surcharge de l\'animateur:', error);
+      throw error;
+    }
+  }
+
+  // Fonction pour obtenir le lundi d'une semaine donnée
+  private getMondayOfWeek(date: Date): Date {
+    const day = new Date(date);
+    const dayOfWeek = day.getDay(); // 0 = dimanche, 1 = lundi, ..., 6 = samedi
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Calculer les jours jusqu'au lundi
+    
+    day.setDate(day.getDate() + diff);
+    day.setHours(0, 0, 0, 0);
+    
+    return day;
+  }
+
+  // Fonction pour obtenir le lundi de la semaine courante
+  getCurrentWeekMonday(): Date {
+    return this.getMondayOfWeek(new Date());
+  }
+
+  // Fonction pour obtenir le lundi de la semaine prochaine
+  getNextWeekMonday(): Date {
+    const currentMonday = this.getCurrentWeekMonday();
+    return new Date(currentMonday.getTime() + 7 * 24 * 60 * 60 * 1000);
+  }
+
   // Fonction pour calculer le prochain lundi
   private getNextMonday(): Date {
     const today = new Date();
