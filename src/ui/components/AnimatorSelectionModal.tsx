@@ -40,6 +40,10 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
   const [currentShuffleIndex, setCurrentShuffleIndex] = useState(0);
   const [winnerName, setWinnerName] = useState<string>('');
   
+  // États pour la sélection des participants
+  const [currentStep, setCurrentStep] = useState<'selection' | 'battle'>('selection');
+  const [selectedParticipants, setSelectedParticipants] = useState<any[]>([]);
+  
   // Utiliser le hook useAnimators pour les vraies données
   const { animatorHistory, addAnimator, getParticipantChancePercentage } = useAnimators(
     participants, 
@@ -65,6 +69,32 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
     }, 0);
     
     return colors[Math.abs(hash) % colors.length];
+  };
+
+  // Initialiser tous les participants comme sélectionnés par défaut
+  useEffect(() => {
+    if (isOpen && participants.length > 0) {
+      setSelectedParticipants([...participants]);
+      setCurrentStep('selection');
+    }
+  }, [isOpen, participants]);
+
+  // Gérer la sélection/désélection d'un participant
+  const toggleParticipantSelection = (participant: any) => {
+    setSelectedParticipants(prev => {
+      const isSelected = prev.some(p => (p.id?.value || p.id) === (participant.id?.value || participant.id));
+      if (isSelected) {
+        return prev.filter(p => (p.id?.value || p.id) !== (participant.id?.value || participant.id));
+      } else {
+        return [...prev, participant];
+      }
+    });
+  };
+
+  // Lancer le battle royal avec les participants sélectionnés
+  const handleStartBattle = () => {
+    if (selectedParticipants.length === 0) return;
+    setCurrentStep('battle');
   };
 
   // Fonction pour déterminer la classe CSS selon la longueur du nom
@@ -135,8 +165,8 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
       setIsSelecting(true);
       const finalWinnerName = String(participant.name?.value || participant.name || 'Animateur');
       
-      // Préparer le battle royal avec tous les participants
-      setRemainingParticipants([...participants]);
+      // Préparer le battle royal avec les participants sélectionnés
+      setRemainingParticipants([...selectedParticipants]);
       setEliminatedParticipants([]);
       setCurrentElimination(null);
       setBattlePhase('battle-royal');
@@ -145,7 +175,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
       // Afficher l'overlay d'animation
       setShowSelectionOverlay(true);
       
-      console.log('🥊 Battle Royal commencé avec', participants.length, 'participants');
+      console.log('🥊 Battle Royal commencé avec', selectedParticipants.length, 'participants');
       
       // Démarrer le battle royal
       setTimeout(() => startBattleRoyal(participant, finalWinnerName), 1000);
@@ -157,7 +187,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
   };
 
   const startBattleRoyal = (finalWinner: any, finalWinnerName: string) => {
-    let currentParticipants = [...participants];
+    let currentParticipants = [...selectedParticipants];
     
     const eliminateParticipant = () => {
       if (currentParticipants.length <= 2) {
@@ -279,487 +309,554 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
           </button>
         </div>
 
-        {/* Animateur Courant - En Haut */}
-        <div className="current-animator-section">
-          <div className={`current-animator-card ${!currentAnimator ? 'waiting-mode' : ''}`}>
-            {currentAnimator ? (
-              <>
-                <div className="animator-status">
-                  <span className="live-indicator"></span>
-                  <span>ANIMATEUR ACTUEL</span>
-                </div>
-                
-                <div className="animator-content">
-                  <div className="animator-left">
-                    {(() => {
-                      const animatorName = String(currentAnimator.name?.value || currentAnimator.name || 'Animateur');
-                      const avatarColor = getAvatarColor(animatorName);
-                      
-                      return (
-                        <>
-                          <div className="current-animator-avatar">
-                            <img 
-                              src={getPhotoUrl(currentAnimator)}
-                              alt={animatorName}
-                              className="current-animator-photo"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  target.style.display = 'none';
-                                  parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                  parent.innerHTML = `<div class="current-animator-fallback" style="color: ${avatarColor.text}">${animatorName.charAt(0).toUpperCase()}</div>`;
-                                }
-                              }}
-                            />
-                            <div className="animator-ring"></div>
-                          </div>
-                          
-                          <div className="current-animator-info">
-                            <h3>{animatorName}</h3>
-                            <p>Anime l'équipe cette semaine</p>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-
-                  {/* Bouton Sélection à droite */}
-                  <div className="animator-right">
-                    <button 
-                      className="selection-button-integrated"
-                      onClick={() => {
-                        // Sélection aléatoire pondérée
-                        const availableParticipants = participants.filter(p => 
-                          !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
-                        );
-                        if (availableParticipants.length > 0) {
-                          const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
-                          handleAnimatorSelect(randomParticipant);
-                        }
-                      }}
-                    >
-                      <div className="selection-icon">👑</div>
-                      <span>Selectionner le prochain</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="animator-status waiting">
-                  <span className="waiting-indicator"></span>
-                  <span>EN ATTENTE</span>
-                </div>
-                
-                <div className="animator-content">
-                  <div className="animator-left">
-                    <div className="current-animator-info">
-                      <h3>Aucun animateur sélectionné</h3>
-                      <p>Choisissez un animateur pour la semaine prochaine !</p>
-                    </div>
-                  </div>
-
-                  {/* Bouton Sélection à droite même en mode attente */}
-                  <div className="animator-right">
-                    <button 
-                      className="selection-button-integrated"
-                      onClick={() => {
-                        // Sélection aléatoire pondérée
-                        const availableParticipants = participants.filter(p => 
-                          !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
-                        );
-                        if (availableParticipants.length > 0) {
-                          const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
-                          handleAnimatorSelect(randomParticipant);
-                        }
-                      }}
-                    >
-                      <div className="selection-icon">👑</div>
-                      <span>Sélectionner</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-            
-            {/* Prochain animateur - toujours affiché s'il existe */}
-            {nextWeekAnimator && nextWeekAnimator.participant && (
-              <div className="next-animator-info">
-                <div className="next-animator-avatar">
-                  <img 
-                    src={getPhotoUrl(nextWeekAnimator.participant)}
-                    alt={String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur')}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      const parent = target.parentElement;
-                      if (parent) {
-                        const name = String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur');
-                        const avatarColor = getAvatarColor(name);
-                        target.style.display = 'none';
-                        parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                        parent.innerHTML = `<div style="color: ${avatarColor.text}; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${name.charAt(0).toUpperCase()}</div>`;
-                      }
-                    }}
-                  />
-                </div>
-                <div className="next-animator-text">
-                  <span className="next-label">Prochain animateur</span>
-                  <span className="next-name">{String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur')}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Contenu principal - 2 colonnes */}
-        <div className="modal-content">
-          {/* Colonne Gauche - Participants Disponibles */}
-          <div className="available-section">
-            <div className="section-header">
-              <div className="section-title">
-                <span className="section-icon">👑</span>
-                <h3>Candidats animateurs</h3>
-                <span className="available-count">{participants.length}</span>
-              </div>
+        {/* Étape de sélection des participants */}
+        {currentStep === 'selection' && (
+          <div className="selection-step">
+            <div className="step-header">
+              <h3>🎯 Qui peut être sélectionné ?</h3>
+              <p>Tous les participants sont inclus par défaut. Désélectionnez ceux qui ne peuvent pas être animateur.</p>
             </div>
-
-            <div className="available-grid">
-              {(() => {
-                // Calculer tous les pourcentages d'abord
-                const participantsWithChances = participants.map((participant) => {
-                  const chancePercentage = getParticipantChancePercentage ? 
-                    getParticipantChancePercentage(participant) : 
-                    Math.round(100 / Math.max(1, participant.getChancePercentage?.() || 1));
-                  return { participant, chancePercentage };
-                });
-                
-                // Trouver le pourcentage maximum
-                const maxChancePercentage = Math.max(...participantsWithChances.map(p => p.chancePercentage));
-                
-                return participantsWithChances.map(({ participant, chancePercentage }) => {
-                  const participantName = String(participant.name?.value || participant.name || 'Participant');
-                  const avatarColor = getAvatarColor(participantName);
-                  const isCurrentAnimator = currentAnimator && (
-                    (currentAnimator.id?.value || currentAnimator.id) === 
-                    (participant.id?.value || participant.id)
-                  );
-                  const isTopChance = chancePercentage === maxChancePercentage && maxChancePercentage > 0;
+            
+            <div className="participants-grid">
+              {participants.map((participant) => {
+                const participantName = String(participant.name?.value || participant.name || 'Participant');
+                const avatarColor = getAvatarColor(participantName);
+                const isSelected = selectedParticipants.some(p => 
+                  (p.id?.value || p.id) === (participant.id?.value || participant.id)
+                );
                 
                 return (
                   <div 
                     key={String(participant.id?.value || participant.id)}
-                    className={`available-card ${isCurrentAnimator ? 'current-animator' : ''} ${isTopChance ? 'top-chance' : ''}`}
+                    className={`participant-selection-card ${isSelected ? 'selected' : 'deselected'}`}
+                    onClick={() => toggleParticipantSelection(participant)}
                   >
-                    <div className="available-avatar">
-                      <img 
+                    <div className="participant-avatar">
+                      <img
                         src={getPhotoUrl(participant)}
                         alt={participantName}
-                        className="available-photo"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           const parent = target.parentElement;
                           if (parent) {
                             target.style.display = 'none';
                             parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                            parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                            parent.innerHTML = `<div style="color: ${avatarColor.text}; font-size: 1.5rem; font-weight: bold; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${participantName.charAt(0).toUpperCase()}</div>`;
                           }
                         }}
                       />
                     </div>
-                    
-                    <div className="available-name">
-                      {participantName}
+                    {isSelected && <div className="selection-indicator">✓</div>}
+                    <div className="participant-info">
+                      <span className="participant-name">{participantName}</span>
+                      <span className="participant-chance">{getParticipantChancePercentage(participant)}%</span>
                     </div>
-                    
-                    <div className="chance-percentage">
-                      {chancePercentage}%
-                    </div>
-                    
-                    {isCurrentAnimator && <div className="animator-crown">👑</div>}
                   </div>
                 );
-                });
-              })()}
-            </div>
-
-
-          </div>
-
-          {/* Zone historique */}
-          <div className="history-zone">
-            <div className="zone-header">
-              <h3>📈 Historique des animateurs</h3>
-              <div className="history-count">
-                {animatorHistory.length} entrées
-              </div>
+              })}
             </div>
             
-            <div className="history-container">
-              {animatorHistory.length > 0 ? (
-                <div className="history-list">
-                  {animatorHistory.slice(0, 10).map((entry, index) => {
-                    const participantName = String(entry.participant.name?.value || entry.participant.name || 'Animateur');
-                    const avatarColor = getAvatarColor(participantName);
-                    const hasPhoto = 'getPhotoUrl' in entry.participant && entry.participant.getPhotoUrl && entry.participant.getPhotoUrl();
-                    const isLatest = index === 0;
+            <div className="step-actions">
+              <div className="selected-count">
+                {selectedParticipants.length} participant{selectedParticipants.length > 1 ? 's' : ''} sélectionné{selectedParticipants.length > 1 ? 's' : ''}
+              </div>
+              <button 
+                className="start-battle-button"
+                onClick={handleStartBattle}
+                disabled={selectedParticipants.length === 0}
+              >
+                🎲 Lancer la sélection
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Contenu principal du battle royal */}
+        {currentStep === 'battle' && (
+          <>
+            {/* Animateur Courant - En Haut */}
+            <div className="current-animator-section">
+              <div className={`current-animator-card ${!currentAnimator ? 'waiting-mode' : ''}`}>
+                {currentAnimator ? (
+                  <>
+                    <div className="animator-status">
+                      <span className="live-indicator"></span>
+                      <span>ANIMATEUR ACTUEL</span>
+                    </div>
+                    
+                    <div className="animator-content">
+                      <div className="animator-left">
+                        {(() => {
+                          const animatorName = String(currentAnimator.name?.value || currentAnimator.name || 'Animateur');
+                          const avatarColor = getAvatarColor(animatorName);
+                          
+                          return (
+                            <>
+                              <div className="current-animator-avatar">
+                                <img 
+                                  src={getPhotoUrl(currentAnimator)}
+                                  alt={animatorName}
+                                  className="current-animator-photo"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      target.style.display = 'none';
+                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                      parent.innerHTML = `<div class="current-animator-fallback" style="color: ${avatarColor.text}">${animatorName.charAt(0).toUpperCase()}</div>`;
+                                    }
+                                  }}
+                                />
+                                <div className="animator-ring"></div>
+                              </div>
+                              
+                              <div className="current-animator-info">
+                                <h3>{animatorName}</h3>
+                                <p>Anime l'équipe cette semaine</p>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Bouton Sélection à droite */}
+                      <div className="animator-right">
+                        <button 
+                          className="selection-button-integrated"
+                          onClick={() => {
+                            // Sélection aléatoire pondérée parmi les participants sélectionnés
+                            const availableParticipants = selectedParticipants.filter(p => 
+                              !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
+                            );
+                            if (availableParticipants.length > 0) {
+                              const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
+                              handleAnimatorSelect(randomParticipant);
+                            }
+                          }}
+                        >
+                          <div className="selection-icon">👑</div>
+                          <span>Selectionner le prochain</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="animator-status waiting">
+                      <span className="waiting-indicator"></span>
+                      <span>EN ATTENTE</span>
+                    </div>
+                    
+                    <div className="animator-content">
+                      <div className="animator-left">
+                        <div className="current-animator-info">
+                          <h3>Aucun animateur sélectionné</h3>
+                          <p>Choisissez un animateur pour la semaine prochaine !</p>
+                        </div>
+                      </div>
+
+                      {/* Bouton Sélection à droite même en mode attente */}
+                      <div className="animator-right">
+                        <button 
+                          className="selection-button-integrated"
+                          onClick={() => {
+                            // Sélection aléatoire pondérée parmi les participants sélectionnés
+                            const availableParticipants = selectedParticipants.filter(p => 
+                              !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
+                            );
+                            if (availableParticipants.length > 0) {
+                              const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
+                              handleAnimatorSelect(randomParticipant);
+                            }
+                          }}
+                        >
+                          <div className="selection-icon">👑</div>
+                          <span>Sélectionner</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {/* Prochain animateur - toujours affiché s'il existe */}
+                {nextWeekAnimator && nextWeekAnimator.participant && (
+                  <div className="next-animator-info">
+                    <div className="next-animator-avatar">
+                      <img 
+                        src={getPhotoUrl(nextWeekAnimator.participant)}
+                        alt={String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur')}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          const parent = target.parentElement;
+                          if (parent) {
+                            const name = String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur');
+                            const avatarColor = getAvatarColor(name);
+                            target.style.display = 'none';
+                            parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                            parent.innerHTML = `<div style="color: ${avatarColor.text}; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${name.charAt(0).toUpperCase()}</div>`;
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="next-animator-text">
+                      <span className="next-label">Prochain animateur</span>
+                      <span className="next-name">{String(nextWeekAnimator.participant.name?.value || nextWeekAnimator.participant.name || 'Animateur')}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Contenu principal - 2 colonnes */}
+            <div className="modal-content">
+              {/* Colonne Gauche - Participants Disponibles */}
+              <div className="available-section">
+                <div className="section-header">
+                  <div className="section-title">
+                    <span className="section-icon">👑</span>
+                    <h3>Candidats animateurs</h3>
+                    <span className="available-count">{selectedParticipants.length}</span>
+                  </div>
+                </div>
+
+                <div className="available-grid">
+                  {(() => {
+                    // Calculer tous les pourcentages d'abord
+                    const participantsWithChances = selectedParticipants.map((participant) => {
+                      const chancePercentage = getParticipantChancePercentage ? 
+                        getParticipantChancePercentage(participant) : 
+                        Math.round(100 / Math.max(1, participant.getChancePercentage?.() || 1));
+                      return { participant, chancePercentage };
+                    });
+                    
+                    // Trouver le pourcentage maximum
+                    const maxChancePercentage = Math.max(...participantsWithChances.map(p => p.chancePercentage));
+                    
+                    return participantsWithChances.map(({ participant, chancePercentage }) => {
+                      const participantName = String(participant.name?.value || participant.name || 'Participant');
+                      const avatarColor = getAvatarColor(participantName);
+                      const isCurrentAnimator = currentAnimator && (
+                        (currentAnimator.id?.value || currentAnimator.id) === 
+                        (participant.id?.value || participant.id)
+                      );
+                      const isTopChance = chancePercentage === maxChancePercentage && maxChancePercentage > 0;
                     
                     return (
                       <div 
-                        key={`${String(entry.participant.id?.value || entry.participant.id)}-${entry.date.getTime()}`}
-                        className={`history-item ${isLatest ? 'latest' : ''}`}
+                        key={String(participant.id?.value || participant.id)}
+                        className={`available-card ${isCurrentAnimator ? 'current-animator' : ''} ${isTopChance ? 'top-chance' : ''}`}
                       >
-                        <div className="history-avatar">
-                          {hasPhoto ? (
-                            <img 
-                              src={entry.participant.getPhotoUrl!()}
-                              alt={participantName}
-                              className="history-photo"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  target.style.display = 'none';
-                                  parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                  parent.innerHTML = `<div class="history-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div 
-                              className="history-fallback"
-                              style={{
-                                background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
-                                color: avatarColor.text
-                              }}
-                            >
-                              {participantName.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                          {isLatest && <div className="latest-badge">👑</div>}
+                        <div className="available-avatar">
+                          <img 
+                            src={getPhotoUrl(participant)}
+                            alt={participantName}
+                            className="available-photo"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              const parent = target.parentElement;
+                              if (parent) {
+                                target.style.display = 'none';
+                                parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                parent.innerHTML = `<div class="available-fallback">${participantName.charAt(0).toUpperCase()}</div>`;
+                              }
+                            }}
+                          />
                         </div>
                         
-                        <div className="history-info">
-                          <h4>{participantName}</h4>
-                          <span className="history-date">
-                            {entry.date.toLocaleDateString('fr-FR', { 
-                              day: 'numeric', 
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </span>
+                        <div className="available-name">
+                          {participantName}
                         </div>
+                        
+                        <div className="chance-percentage">
+                          {chancePercentage}%
+                        </div>
+                        
+                        {isCurrentAnimator && <div className="animator-crown">👑</div>}
                       </div>
                     );
-                  })}
+                    });
+                  })()}
                 </div>
-              ) : (
-                <div className="no-history">
-                  <div className="no-history-icon">📈</div>
-                  <p>Aucun historique d'animateur</p>
-                  <p className="no-history-hint">L'historique apparaîtra après la première sélection</p>
+
+
+              </div>
+
+              {/* Zone historique */}
+              <div className="history-zone">
+                <div className="zone-header">
+                  <h3>📈 Historique des animateurs</h3>
+                  <div className="history-count">
+                    {animatorHistory.length} entrées
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer avec bouton retour */}
-        <div className="modal-footer">
-          <button 
-            className="back-button"
-            onClick={handleClose}
-          >
-            ← Retour au dashboard
-          </button>
-        </div>
-
-        {/* Overlay d'animation de sélection */}
-        {showSelectionOverlay && (
-          <div className={`selection-overlay ${battlePhase} ${isSelectionOverlayClosing ? 'closing' : ''}`}>
-            <div className="selection-animation-container">
-              {battlePhase === 'battle-royal' ? (
-                <>
-                  <div className="selection-title">
-                    <span className="selection-emoji">🥊</span>
-                    <h2>BATTLE ROYAL</h2>
-                    <p>Élimination en cours...</p>
-                  </div>
-                  
-                  <div className="battle-counter">
-                    <h3>Participants restants: {remainingParticipants.length}</h3>
-                    <p>Élimination progressive jusqu'au duel final</p>
-                  </div>
-                  
-                  <div className="battle-royal-arena">
-                    {participants.map((participant) => {
-                      const participantName = String(participant.name?.value || participant.name || 'Participant');
-                      const avatarColor = getAvatarColor(participantName);
-                      const isRemaining = remainingParticipants.some(p => p === participant);
-                      const isEliminating = currentElimination === participant;
-                      const isEliminated = eliminatedParticipants.some(p => p === participant);
-                      
-                      return (
-                        <div 
-                          key={String(participant.id?.value || participant.id)}
-                          className={`battle-participant ${
-                            isEliminating ? 'eliminating' : 
-                            isEliminated ? 'eliminated' : 
-                            isRemaining ? 'remaining' : ''
-                          }`}
-                        >
-                          <div className="battle-avatar">
-                            <img 
-                              src={getPhotoUrl(participant)}
-                              alt={participantName}
-                              className="battle-avatar-photo"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  target.style.display = 'none';
-                                  parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                  parent.innerHTML = `<div class="battle-avatar-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
-                                }
-                              }}
-                            />
+                
+                <div className="history-container">
+                  {animatorHistory.length > 0 ? (
+                    <div className="history-list">
+                      {animatorHistory.slice(0, 10).map((entry, index) => {
+                        const participantName = String(entry.participant.name?.value || entry.participant.name || 'Animateur');
+                        const avatarColor = getAvatarColor(participantName);
+                        const hasPhoto = 'getPhotoUrl' in entry.participant && entry.participant.getPhotoUrl && entry.participant.getPhotoUrl();
+                        const isLatest = index === 0;
+                        
+                        return (
+                          <div 
+                            key={`${String(entry.participant.id?.value || entry.participant.id)}-${entry.date.getTime()}`}
+                            className={`history-item ${isLatest ? 'latest' : ''}`}
+                          >
+                            <div className="history-avatar">
+                              {hasPhoto ? (
+                                <img 
+                                  src={entry.participant.getPhotoUrl!()}
+                                  alt={participantName}
+                                  className="history-photo"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      target.style.display = 'none';
+                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                      parent.innerHTML = `<div class="history-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <div 
+                                  className="history-fallback"
+                                  style={{
+                                    background: `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`,
+                                    color: avatarColor.text
+                                  }}
+                                >
+                                  {participantName.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              {isLatest && <div className="latest-badge">👑</div>}
+                            </div>
+                            
+                            <div className="history-info">
+                              <h4>{participantName}</h4>
+                              <span className="history-date">
+                                {entry.date.toLocaleDateString('fr-FR', { 
+                                  day: 'numeric', 
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </span>
+                            </div>
                           </div>
-                          <div className="battle-name">{participantName}</div>
-                          {isEliminating && <div className="elimination-effect">😅</div>}
-                          {isEliminated && <div className="elimination-effect">😌</div>}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : battlePhase === 'duel' ? (
-                <>
-                  <div className="card-duel-title">
-                    <span className="duel-emoji">🃏</span>
-                    <h2>QUI SERA L'ANIMATEUR SACRIFIÉ ?</h2>
-                    <p>Les deux derniers candidats s'affrontent dans un duel de cartes...</p>
-                  </div>
-                  
-                  <div className="card-battle-arena">
-                    <div className={`duel-card left ${currentShuffleIndex === 0 ? 'winner-card' : ''}`}>
-                      <div className="card-glow"></div>
-                      <div className="card-inner">
-                        <div className="card-header">
-                          <div className="card-title">CANDIDAT #1</div>
-                          <div className="card-stress">😰</div>
-                        </div>
-                        
-                        {(() => {
-                          const candidate = duelCandidates[0];
-                          if (!candidate) return null;
-                          
-                          const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
-                          const avatarColor = getAvatarColor(candidateName);
-                          
-                          return (
-                            <>
-                              <div className="card-avatar">
-                                <img 
-                                  src={getPhotoUrl(candidate)}
-                                  alt={candidateName}
-                                  className="card-photo"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    const parent = target.parentElement;
-                                    if (parent) {
-                                      target.style.display = 'none';
-                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                      parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
-                                    }
-                                  }}
-                                />
-                              </div>
-                              <div className="card-name">{candidateName}</div>
-                              <div className="card-fate">Risque d'être animateur...</div>
-                            </>
-                          );
-                        })()}
-                      </div>
+                        );
+                      })}
                     </div>
-                    
-                    <div className="battle-vs-section">
-                      <div className="vs-lightning">⚡</div>
-                      <div className="vs-text">VS</div>
-                      <div className="vs-fire">🔥</div>
+                  ) : (
+                    <div className="no-history">
+                      <div className="no-history-icon">📈</div>
+                      <p>Aucun historique d'animateur</p>
+                      <p className="no-history-hint">L'historique apparaîtra après la première sélection</p>
                     </div>
-                    
-                    <div className={`duel-card right ${currentShuffleIndex === 1 ? 'winner-card' : ''}`}>
-                      <div className="card-glow"></div>
-                      <div className="card-inner">
-                        <div className="card-header">
-                          <div className="card-title">CANDIDAT #2</div>
-                          <div className="card-stress">😰</div>
-                        </div>
-                        
-                        {(() => {
-                          const candidate = duelCandidates[1];
-                          if (!candidate) return null;
-                          
-                          const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
-                          const avatarColor = getAvatarColor(candidateName);
-                          
-                          return (
-                            <>
-                              <div className="card-avatar">
-                                <img 
-                                  src={getPhotoUrl(candidate)}
-                                  alt={candidateName}
-                                  className="card-photo"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    const parent = target.parentElement;
-                                    if (parent) {
-                                      target.style.display = 'none';
-                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
-                                      parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
-                                    }
-                                  }}
-                                />
-                              </div>
-                              <div className="card-name">{candidateName}</div>
-                              <div className="card-fate">Le prochain animateur est...</div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="duel-highlight">
-                    <div className="card-duel-spotlight">
-                      {String(duelCandidates[currentShuffleIndex]?.name?.value || duelCandidates[currentShuffleIndex]?.name || '')}
-                    </div>
-                  </div>
-                </>
-              ) : battlePhase === 'winner' ? (
-                <>
-                  <div className="winner-title">
-                    <span className="winner-emoji">😅</span>
-                    <h2>ANIMATEUR SACRIFIÉ !</h2>
-                    <p>Bonne chance pour animer la semaine prochaine...</p>
-                  </div>
-                  
-                  <div className="winner-name-display">
-                    <div className="winner-name">
-                      {winnerName}
-                    </div>
-                  </div>
-                  
-                  <div className="winner-celebration">
-                    <span>😂</span>
-                    <span>🎭</span>
-                    <span>💪</span>
-                  </div>
-                </>
-              ) : null}
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+
+            {/* Footer avec bouton retour */}
+            <div className="modal-footer">
+              <button 
+                className="back-button"
+                onClick={handleClose}
+              >
+                ← Retour au dashboard
+              </button>
+            </div>
+
+            {/* Overlay d'animation de sélection */}
+            {showSelectionOverlay && (
+              <div className={`selection-overlay ${battlePhase} ${isSelectionOverlayClosing ? 'closing' : ''}`}>
+                <div className="selection-animation-container">
+                  {battlePhase === 'battle-royal' ? (
+                    <>
+                      <div className="selection-title">
+                        <span className="selection-emoji">🥊</span>
+                        <h2>BATTLE ROYAL</h2>
+                        <p>Élimination en cours...</p>
+                      </div>
+                      
+                      <div className="battle-counter">
+                        <h3>Participants restants: {remainingParticipants.length}</h3>
+                        <p>Élimination progressive jusqu'au duel final</p>
+                      </div>
+                      
+                      <div className="battle-royal-arena">
+                        {selectedParticipants.map((participant) => {
+                          const participantName = String(participant.name?.value || participant.name || 'Participant');
+                          const avatarColor = getAvatarColor(participantName);
+                          const isRemaining = remainingParticipants.some(p => p === participant);
+                          const isEliminating = currentElimination === participant;
+                          const isEliminated = eliminatedParticipants.some(p => p === participant);
+                          
+                          return (
+                            <div 
+                              key={String(participant.id?.value || participant.id)}
+                              className={`battle-participant ${
+                                isEliminating ? 'eliminating' : 
+                                isEliminated ? 'eliminated' : 
+                                isRemaining ? 'remaining' : ''
+                              }`}
+                            >
+                              <div className="battle-avatar">
+                                <img 
+                                  src={getPhotoUrl(participant)}
+                                  alt={participantName}
+                                  className="battle-avatar-photo"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      target.style.display = 'none';
+                                      parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                      parent.innerHTML = `<div class="battle-avatar-fallback" style="color: ${avatarColor.text}">${participantName.charAt(0).toUpperCase()}</div>`;
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <div className="battle-name">{participantName}</div>
+                              {isEliminating && <div className="elimination-effect">😅</div>}
+                              {isEliminated && <div className="elimination-effect">😌</div>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : battlePhase === 'duel' ? (
+                    <>
+                      <div className="card-duel-title">
+                        <span className="duel-emoji">🃏</span>
+                        <h2>QUI SERA L'ANIMATEUR SACRIFIÉ ?</h2>
+                        <p>Les deux derniers candidats s'affrontent dans un duel de cartes...</p>
+                      </div>
+                      
+                      <div className="card-battle-arena">
+                        <div className={`duel-card left ${currentShuffleIndex === 0 ? 'winner-card' : ''}`}>
+                          <div className="card-glow"></div>
+                          <div className="card-inner">
+                            <div className="card-header">
+                              <div className="card-title">CANDIDAT #1</div>
+                              <div className="card-stress">😰</div>
+                            </div>
+                            
+                            {(() => {
+                              const candidate = duelCandidates[0];
+                              if (!candidate) return null;
+                              
+                              const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
+                              const avatarColor = getAvatarColor(candidateName);
+                              
+                              return (
+                                <>
+                                  <div className="card-avatar">
+                                    <img 
+                                      src={getPhotoUrl(candidate)}
+                                      alt={candidateName}
+                                      className="card-photo"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        const parent = target.parentElement;
+                                        if (parent) {
+                                          target.style.display = 'none';
+                                          parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                          parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="card-name">{candidateName}</div>
+                                  <div className="card-fate">Risque d'être animateur...</div>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                        
+                        <div className="battle-vs-section">
+                          <div className="vs-lightning">⚡</div>
+                          <div className="vs-text">VS</div>
+                          <div className="vs-fire">🔥</div>
+                        </div>
+                        
+                        <div className={`duel-card right ${currentShuffleIndex === 1 ? 'winner-card' : ''}`}>
+                          <div className="card-glow"></div>
+                          <div className="card-inner">
+                            <div className="card-header">
+                              <div className="card-title">CANDIDAT #2</div>
+                              <div className="card-stress">😰</div>
+                            </div>
+                            
+                            {(() => {
+                              const candidate = duelCandidates[1];
+                              if (!candidate) return null;
+                              
+                              const candidateName = String(candidate.name?.value || candidate.name || 'Candidat');
+                              const avatarColor = getAvatarColor(candidateName);
+                              
+                              return (
+                                <>
+                                  <div className="card-avatar">
+                                    <img 
+                                      src={getPhotoUrl(candidate)}
+                                      alt={candidateName}
+                                      className="card-photo"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        const parent = target.parentElement;
+                                        if (parent) {
+                                          target.style.display = 'none';
+                                          parent.style.background = `linear-gradient(135deg, ${avatarColor.bg}, ${avatarColor.bg}dd)`;
+                                          parent.innerHTML = `<div class="card-fallback" style="color: ${avatarColor.text}">${candidateName.charAt(0).toUpperCase()}</div>`;
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="card-name">{candidateName}</div>
+                                  <div className="card-fate">Le prochain animateur est...</div>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="duel-highlight">
+                        <div className="card-duel-spotlight">
+                          {String(duelCandidates[currentShuffleIndex]?.name?.value || duelCandidates[currentShuffleIndex]?.name || '')}
+                        </div>
+                      </div>
+                    </>
+                  ) : battlePhase === 'winner' ? (
+                    <>
+                      <div className="winner-title">
+                        <span className="winner-emoji">😅</span>
+                        <h2>ANIMATEUR SACRIFIÉ !</h2>
+                        <p>Bonne chance pour animer la semaine prochaine...</p>
+                      </div>
+                      
+                      <div className="winner-name-display">
+                        <div className="winner-name">
+                          {winnerName}
+                        </div>
+                      </div>
+                      
+                      <div className="winner-celebration">
+                        <span>😂</span>
+                        <span>🎭</span>
+                        <span>💪</span>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
