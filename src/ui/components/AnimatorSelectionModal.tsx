@@ -23,6 +23,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
   participants,
   onSelect,
   repository,
+  weeklyUseCases,
   currentAnimator,
   nextWeekAnimator,
   theme
@@ -158,12 +159,29 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
     }
   };
 
-  const handleAnimatorSelect = async (participant: any) => {
+  const handleAnimatorSelect = async (participant?: any) => {
     if (isSelecting) return;
     
     try {
       setIsSelecting(true);
-      const finalWinnerName = String(participant.name?.value || participant.name || 'Animateur');
+      
+      // Utiliser la sélection pondérée basée sur les % de chance
+      let finalWinner: any;
+      let finalWinnerName: string;
+      
+      if (participant) {
+        // Si un participant spécifique est fourni, l'utiliser directement
+        finalWinner = participant;
+        finalWinnerName = String(participant.name?.value || participant.name || 'Animateur');
+             } else {
+         // Sinon, faire une sélection pondérée avec le SelectionService
+         const { SelectionService } = await import('../../domain/selection/service');
+         const result = SelectionService.selectParticipant(selectedParticipants, 'weekly');
+         finalWinner = result.winner;
+         finalWinnerName = String(finalWinner.name?.value || finalWinner.name || 'Animateur');
+         
+         console.log('🎯 Sélection pondérée:', finalWinnerName, 'avec', getParticipantChancePercentage(finalWinner), '% de chance');
+       }
       
       // Préparer le battle royal avec les participants sélectionnés
       setRemainingParticipants([...selectedParticipants]);
@@ -176,9 +194,10 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
       setShowSelectionOverlay(true);
       
       console.log('🥊 Battle Royal commencé avec', selectedParticipants.length, 'participants');
+      console.log('🏆 Gagnant prédéterminé:', finalWinnerName);
       
-      // Démarrer le battle royal
-      setTimeout(() => startBattleRoyal(participant, finalWinnerName), 1000);
+      // Démarrer le battle royal avec le bon gagnant
+      setTimeout(() => startBattleRoyal(finalWinner, finalWinnerName), 1000);
       
     } catch (error) {
       console.error('Erreur lors de la sélection de l\'animateur:', error);
@@ -264,6 +283,7 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
         // Finaliser la sélection
         setTimeout(async () => {
           try {
+            console.log('💾 Sauvegarde de l\'animateur sélectionné:', finalWinnerName);
             await addAnimator(finalWinner);
             await onSelect(finalWinner);
             
@@ -424,13 +444,9 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                         <button 
                           className="selection-button-integrated"
                           onClick={() => {
-                            // Sélection aléatoire pondérée parmi les participants sélectionnés
-                            const availableParticipants = selectedParticipants.filter(p => 
-                              !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
-                            );
-                            if (availableParticipants.length > 0) {
-                              const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
-                              handleAnimatorSelect(randomParticipant);
+                            // Sélection pondérée basée sur les % de chance
+                            if (selectedParticipants.length > 0) {
+                              handleAnimatorSelect(); // Pas de participant spécifique = sélection pondérée
                             }
                           }}
                         >
@@ -460,13 +476,9 @@ export const AnimatorSelectionModal: React.FC<AnimatorSelectionModalProps> = ({
                         <button 
                           className="selection-button-integrated"
                           onClick={() => {
-                            // Sélection aléatoire pondérée parmi les participants sélectionnés
-                            const availableParticipants = selectedParticipants.filter(p => 
-                              !currentAnimator || (currentAnimator.id?.value || currentAnimator.id) !== (p.id?.value || p.id)
-                            );
-                            if (availableParticipants.length > 0) {
-                              const randomParticipant = availableParticipants[Math.floor(Math.random() * availableParticipants.length)];
-                              handleAnimatorSelect(randomParticipant);
+                            // Sélection pondérée basée sur les % de chance
+                            if (selectedParticipants.length > 0) {
+                              handleAnimatorSelect(); // Pas de participant spécifique = sélection pondérée
                             }
                           }}
                         >
