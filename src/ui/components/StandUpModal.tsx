@@ -569,6 +569,7 @@ const ParticipantPhoto = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
   transition: transform 0.3s ease;
   
   ${ParticipantCard}:hover & {
@@ -1086,6 +1087,7 @@ const NextParticipantPhoto = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 `;
 
 const NextParticipantName = styled.div`
