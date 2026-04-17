@@ -26,17 +26,26 @@ const getNextMonday = (): Date => {
 
 // Fonction pour calculer le pourcentage de chance basé sur le diviseur
 const calculateChancePercentage = (participants: Participant[], currentParticipant: Participant): number => {
-  // Calculer le poids de chaque participant selon le système de diviseur
+
+  // 1. Calculer les poids de TOUS les participants (Inverse du nombre de passages)
   const weights = participants.map(p => {
-    const divider = Math.max(1, p.getChancePercentage() || 1);
-    return Math.max(1, Math.floor(100 / divider));
+    const count = Math.max(1, p.getPassageCount()); // Utilise le nombre de passages ici
+    return 1 / count;
   });
+
+  // 2. Somme totale des poids pour la normalisation
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
   
-  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-  const currentDivider = Math.max(1, currentParticipant.getChancePercentage() || 1);
-  const currentWeight = Math.max(1, Math.floor(100 / currentDivider));
+  // 3. Calcul du poids du participant actuel
+  const currentCount = Math.max(1, currentParticipant.getPassageCount());
+  const currentWeight = 1 / currentCount;
   
-  return Math.round((currentWeight / totalWeight) * 100);
+  // 4. Calcul du pourcentage final
+  if (totalWeight === 0) return 0;
+  const percentage = (currentWeight / totalWeight) * 100;
+  
+  // On arrondit pour l'affichage (ex: 21.9%)
+  return Math.round(percentage * 10) / 10;
 };
 
 // Fonction utilitaire pour obtenir le numéro de semaine ISO
